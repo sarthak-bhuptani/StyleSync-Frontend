@@ -1,0 +1,549 @@
+openapi: 3.0.3
+info:
+  title: StyleSync — AI Personal Shopping Advisor API
+  description: >
+    Production REST API backend specification for StyleSync. Answers "Will this actually suit me?"
+    by evaluating clothes, shoes, eyewear, and accessories using multimodal Vision AI against
+    user face shapes, skin undertones, body silhouette, and capsule wardrobe items.
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000/api/v1
+    description: Local Development Server
+  - url: https://api.stylesync.app/api/v1
+    description: Production Server
+
+paths:
+  # ==================== AUTHENTICATION ====================
+  /auth/register:
+    post:
+      summary: Register a new user
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name: { type: string, example: "Sarthak Sharma" }
+                email: { type: string, format: email, example: "sarthak@example.com" }
+                password: { type: string, format: password, example: "Secret123!" }
+      responses:
+        201:
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /auth/login:
+    post:
+      summary: Authenticate user & get JWT token
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email, example: "sarthak@example.com" }
+                password: { type: string, format: password, example: "Secret123!" }
+      responses:
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /auth/me:
+    get:
+      summary: Get current authenticated user session
+      tags: [Auth]
+      security: [{ BearerAuth: [] }]
+      responses:
+        200:
+          description: User profile returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  # ==================== PROFILE & PHYSICAL SCAN ====================
+  /profile:
+    get:
+      summary: Get detailed user profile & styling rules
+      tags: [Profile]
+      security: [{ BearerAuth: [] }]
+      responses:
+        200:
+          description: Full profile data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+    put:
+      summary: Update user style rules, sizes & physical features
+      tags: [Profile]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfile'
+      responses:
+        200:
+          description: Updated profile object
+
+  /profile/onboarding:
+    post:
+      summary: Complete 6-step personalized onboarding setup
+      tags: [Profile]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnboardingData'
+      responses:
+        200:
+          description: Onboarding completed successfully
+
+  /profile/scan-face-body:
+    post:
+      summary: Upload user selfie/photo to run AI face shape & skin undertone analysis
+      tags: [Profile]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                photo: { type: string, format: binary }
+      responses:
+        200:
+          description: Face shape, skin tone & body silhouette analysis result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhysicalAnalysis'
+
+  # ==================== WARDROBE MANAGEMENT ====================
+  /wardrobe:
+    get:
+      summary: Get all capsule wardrobe items
+      tags: [Wardrobe]
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: query
+          name: category
+          schema: { type: string }
+          description: Filter by category (Tops, Bottoms, Shoes, etc.)
+      responses:
+        200:
+          description: List of wardrobe items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WardrobeItem'
+    post:
+      summary: Add new item to capsule wardrobe
+      tags: [Wardrobe]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WardrobeItemInput'
+      responses:
+        201:
+          description: Item added successfully
+
+  /wardrobe/{id}:
+    put:
+      summary: Update wardrobe item
+      tags: [Wardrobe]
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WardrobeItemInput'
+      responses:
+        200:
+          description: Item updated
+    delete:
+      summary: Delete item from wardrobe
+      tags: [Wardrobe]
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        200:
+          description: Item deleted
+
+  # ==================== PRODUCT ADVISOR & VISION AI ====================
+  /products/analyze:
+    post:
+      summary: Core Flagship AI Evaluation — Analyzes screenshot against user's face, body, color season & wardrobe
+      tags: [Product Advisor]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductAnalyzeInput'
+      responses:
+        200:
+          description: Complete neural suitability verdict (BUY / MAYBE / SKIP) with scores & pairings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductAnalysisResult'
+
+  /products:
+    get:
+      summary: Get history of all evaluated products
+      tags: [Product Advisor]
+      security: [{ BearerAuth: [] }]
+      responses:
+        200:
+          description: List of evaluated products
+
+  /products/{id}:
+    get:
+      summary: Get single product evaluation result by ID
+      tags: [Product Advisor]
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        200:
+          description: Product evaluation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductAnalysisResult'
+
+  # ==================== OUTFIT BUILDER ====================
+  /outfits:
+    get:
+      summary: Get user saved/generated outfits
+      tags: [Outfits]
+      security: [{ BearerAuth: [] }]
+      responses:
+        200:
+          description: List of outfits
+  /outfits/generate:
+    post:
+      summary: AI generative outfit pairing from user wardrobe
+      tags: [Outfits]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                occasion: { type: string, example: "Office / Work" }
+                weather: { type: string, example: "Mild / Indoor" }
+                style: { type: string, example: "Smart Casual" }
+      responses:
+        200:
+          description: AI generated ensemble with match score
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Outfit'
+
+  # ==================== PURCHASES & AI FEEDBACK ====================
+  /purchases:
+    get:
+      summary: Get purchase history
+      tags: [Purchases]
+      security: [{ BearerAuth: [] }]
+      responses:
+        200:
+          description: List of past purchases
+    post:
+      summary: Record new purchase
+      tags: [Purchases]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseInput'
+      responses:
+        201:
+          description: Purchase logged
+
+  /purchases/{id}/feedback:
+    patch:
+      summary: Record Good/Bad Buy feedback and 1-5 star rating to train AI preferences
+      tags: [Purchases]
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                feedback: { type: string, enum: [good, bad, null] }
+                rating: { type: integer, minimum: 1, maximum: 5 }
+      responses:
+        200:
+          description: Feedback updated
+
+  # ==================== BUDGET TRACKER ====================
+  /budget:
+    get:
+      summary: Get monthly shopping budget breakdown
+      tags: [Budget]
+      security: [{ BearerAuth: [] }]
+      responses:
+        200:
+          description: Budget stats and categories
+  /budget/limit:
+    patch:
+      summary: Update monthly spending limit ceiling
+      tags: [Budget]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [limit]
+              properties:
+                limit: { type: number, example: 12000 }
+      responses:
+        200:
+          description: Limit updated
+
+  # ==================== AI CHAT ASSISTANT ====================
+  /chat/message:
+    post:
+      summary: Ask StyleSync personal AI stylist
+      tags: [Assistant]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                message: { type: string, example: "Will minimal white sneakers work with my wardrobe?" }
+                productContext: { type: object }
+      responses:
+        200:
+          description: AI stylist advice response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reply: { type: string }
+                  timestamp: { type: string }
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AuthResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        token: { type: string, example: "eyJhbGciOiJIUzI1NiIsIn..." }
+        user: { $ref: '#/components/schemas/User' }
+
+    User:
+      type: object
+      properties:
+        id: { type: string, example: "usr_001" }
+        name: { type: string, example: "Sarthak Sharma" }
+        email: { type: string, example: "sarthak@example.com" }
+        avatar: { type: string }
+        profileCompleteness: { type: integer, example: 92 }
+
+    PhysicalAnalysis:
+      type: object
+      properties:
+        faceShape: { type: string, example: "Oval / Angular Jaw" }
+        skinTone: { type: string, example: "Warm Olive / Golden Medium" }
+        skinUndertone: { type: string, example: "Warm Golden" }
+        skinToneHex: { type: string, example: "#D2A374" }
+        colorSeason: { type: string, example: "Warm Autumn & Deep Earth" }
+        bodyType: { type: string, example: "Athletic V-Taper (Broad Shoulders, Slim Waist)" }
+        contrastLevel: { type: string, example: "Medium-High Contrast" }
+        eyewearSuitability: { type: string }
+        necklineSuitability: { type: string }
+        fitRecommendation: { type: string }
+
+    UserProfile:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        gender: { type: string }
+        ageRange: { type: string }
+        height: { type: string }
+        location: { type: string }
+        physicalAnalysis: { $ref: '#/components/schemas/PhysicalAnalysis' }
+        sizes:
+          type: object
+          properties:
+            shirt: { type: string }
+            tshirt: { type: string }
+            pants: { type: string }
+            shoes: { type: string }
+            preferredFit: { type: string }
+        stylePreferences: { type: array, items: { type: string } }
+        favoriteColors: { type: array, items: { type: string } }
+        avoidColors: { type: array, items: { type: string } }
+        favoriteBrands: { type: array, items: { type: string } }
+        preferredOccasions: { type: array, items: { type: string } }
+
+    OnboardingData:
+      type: object
+      properties:
+        name: { type: string }
+        gender: { type: string }
+        ageRange: { type: string }
+        height: { type: string }
+        sizes: { type: object }
+        stylePreferences: { type: array, items: { type: string } }
+        favoriteColors: { type: array, items: { type: string } }
+        avoidColors: { type: array, items: { type: string } }
+        budgetRanges: { type: object }
+        preferredOccasions: { type: array, items: { type: string } }
+
+    WardrobeItem:
+      type: object
+      properties:
+        id: { type: string, example: "wb_001" }
+        name: { type: string, example: "Relaxed Cotton Oxford Shirt" }
+        category: { type: string, example: "Tops" }
+        subCategory: { type: string, example: "Shirts" }
+        color: { type: string, example: "White" }
+        colorHex: { type: string, example: "#FFFFFF" }
+        style: { type: string, example: "Smart Casual / Minimal" }
+        brand: { type: string, example: "Uniqlo" }
+        price: { type: number, example: 2490 }
+        currency: { type: string, example: "₹" }
+        usageCount: { type: integer, example: 28 }
+        image: { type: string }
+        dateAdded: { type: string }
+
+    WardrobeItemInput:
+      type: object
+      required: [name, category, color]
+      properties:
+        name: { type: string }
+        category: { type: string }
+        brand: { type: string }
+        color: { type: string }
+        price: { type: number }
+        image: { type: string }
+
+    ProductAnalyzeInput:
+      type: object
+      required: [image]
+      properties:
+        name: { type: string, example: "Minimal White Leather Low-Tops" }
+        brand: { type: string, example: "Common Projects" }
+        category: { type: string, example: "Shoes" }
+        price: { type: number, example: 7499 }
+        color: { type: string, example: "White" }
+        image: { type: string, description: "Base64 data URL or HTTP image link" }
+        description: { type: string }
+
+    ProductAnalysisResult:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        brand: { type: string }
+        category: { type: string }
+        price: { type: number }
+        currency: { type: string, example: "₹" }
+        color: { type: string }
+        image: { type: string }
+        score: { type: integer, example: 88 }
+        decision: { type: string, enum: [BUY, MAYBE, SKIP], example: "BUY" }
+        confidence: { type: string, example: "95%" }
+        breakdown:
+          type: object
+          properties:
+            styleMatch: { type: object, properties: { score: { type: integer }, max: { type: integer, example: 25 } } }
+            colorMatch: { type: object, properties: { score: { type: integer }, max: { type: integer, example: 20 } } }
+            wardrobeMatch: { type: object, properties: { score: { type: integer }, max: { type: integer, example: 20 } } }
+            versatility: { type: object, properties: { score: { type: integer }, max: { type: integer, example: 15 } } }
+            budget: { type: object, properties: { score: { type: integer }, max: { type: integer, example: 10 } } }
+            occasion: { type: object, properties: { score: { type: integer }, max: { type: integer, example: 10 } } }
+        aiExplanation: { type: string }
+        strongMatches: { type: array, items: { type: string } }
+        considerations: { type: array, items: { type: string } }
+        compatibleWardrobeIds: { type: array, items: { type: string } }
+
+    Outfit:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        occasion: { type: string }
+        weather: { type: string }
+        style: { type: string }
+        matchScore: { type: integer, example: 94 }
+        items: { type: array, items: { type: object } }
+        notes: { type: string }
+
+    PurchaseInput:
+      type: object
+      required: [productName, price]
+      properties:
+        productName: { type: string }
+        category: { type: string }
+        price: { type: number }
+        buyWiseScore: { type: integer }
+        decision: { type: string }
+        notes: { type: string }
+        image: { type: string }
