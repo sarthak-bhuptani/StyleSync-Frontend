@@ -35,7 +35,7 @@ export const LandingPage = () => {
     { name: 'Accessories', icon: Gem, count: 'Belts, jewelry & hats', img: 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=400&q=80' }
   ];
 
-  const understandingPoints = [
+  const understandingItems = [
     { title: 'Your Face & Features', desc: 'Analyzes jawline, cheekbones, and face geometry to recommend the exact sunglasses and flattering necklines.', icon: User },
     { title: 'Your Complexion', desc: 'Detects skin undertone, contrast, and color season to steer you toward elevating palettes.', icon: Palette },
     { title: 'Your Closet', desc: 'Cross-checks items against your uploaded digital wardrobe to guarantee outfit synergy before purchase.', icon: Layers },
