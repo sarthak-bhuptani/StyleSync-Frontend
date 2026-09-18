@@ -16,10 +16,12 @@ import {
   Watch,
   Shirt,
   Briefcase,
-  Gem
+  Gem,
+  User
 } from 'lucide-react';
 import { RecommendationBadge } from '../components/common/RecommendationBadge';
 import { ScoreMeter } from '../components/common/ScoreMeter';
+import { BrandLogo } from '../components/common/BrandLogo';
 
 export const LandingPage = () => {
   const navigate = useNavigate();
