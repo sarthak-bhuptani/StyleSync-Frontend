@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const host = typeof window !== 'undefined' && window.location.hostname ? window.location.hostname : 'localhost';
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || `http://${host}:5000/api/v1`;
+const rawBase = (import.meta.env.VITE_API_BASE_URL || `http://${host}:5000/api/v1`).trim().replace(/\/+$/, '');
+const BASE_URL = rawBase.endsWith('/api/v1') ? rawBase : `${rawBase}/api/v1`;
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
