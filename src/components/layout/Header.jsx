@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Sparkles,
+  Compass,
   Search,
   Bell,
   Plus,
@@ -68,9 +68,9 @@ export const Header = ({ onOpenMobileMenu }) => {
         {location.pathname !== '/advisor' && (
           <button
             onClick={() => navigate('/advisor')}
-            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-subtle hover:shadow transition-all active:scale-95"
+            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-subtle hover:shadow transition-all active:scale-95 cursor-pointer"
           >
-            <Sparkles className="w-4 h-4 text-emerald-400" />
+            <Compass className="w-4 h-4 text-emerald-400" />
             <span>Analyze Product</span>
           </button>
         )}

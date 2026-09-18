@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-  Sparkles,
+  Compass,
   ShoppingBag,
   CheckCircle2,
   ArrowRight,
@@ -15,7 +15,8 @@ import {
   Eye,
   Watch,
   Shirt,
-  Briefcase
+  Briefcase,
+  Gem
 } from 'lucide-react';
 import { RecommendationBadge } from '../components/common/RecommendationBadge';
 import { ScoreMeter } from '../components/common/ScoreMeter';
@@ -29,13 +30,14 @@ export const LandingPage = () => {
     { name: 'Eyewear', icon: Eye, count: 'Sunglasses & optical frames', img: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=400&q=80' },
     { name: 'Watches', icon: Watch, count: 'Chronographs & minimal dials', img: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80' },
     { name: 'Bags', icon: Briefcase, count: 'Totes, backpacks & crossbodies', img: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=400&q=80' },
-    { name: 'Accessories', icon: Sparkles, count: 'Belts, jewelry & hats', img: 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=400&q=80' }
+    { name: 'Accessories', icon: Gem, count: 'Belts, jewelry & hats', img: 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=400&q=80' }
   ];
 
-  const understandingItems = [
+  const understandingPoints = [
+    { title: 'Your Face & Features', desc: 'Analyzes jawline, cheekbones, and face geometry to recommend the exact sunglasses and flattering necklines.', icon: User },
+    { title: 'Your Complexion', desc: 'Detects skin undertone, contrast, and color season to steer you toward elevating palettes.', icon: Palette },
+    { title: 'Your Closet', desc: 'Cross-checks items against your uploaded digital wardrobe to guarantee outfit synergy before purchase.', icon: Layers },
     { title: 'Your Style', desc: 'Minimal, Streetwear, Smart Casual or Formal — StyleSync understands your silhouette and proportions.', icon: Shirt },
-    { title: 'Your Colors', desc: 'Matches undertones with your favorite palette and warns you of colors you designated to avoid.', icon: Palette },
-    { title: 'Your Wardrobe', desc: 'Cross-references your existing pieces to tell you exactly how many outfits you can construct.', icon: Layers },
     { title: 'Your Budget', desc: 'Evaluates price against your monthly category allocation and long-term cost-per-wear value.', icon: Wallet },
     { title: 'Your Occasions', desc: 'Tailors advice whether you dress for corporate meetings, campus daily wear, or black-tie galas.', icon: Calendar },
     { title: 'Your Purchases', desc: 'Learns from post-purchase feedback ratings to continuously sharpen future accuracy.', icon: Clock }
@@ -45,12 +47,7 @@ export const LandingPage = () => {
     <div className="min-h-screen bg-[#FAFAF9] text-slate-900 selection:bg-emerald-100 selection:text-emerald-900">
       {/* Top Navigation */}
       <header className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-        <NavLink to="/" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-black shadow-sm">
-            <ShoppingBag className="w-5 h-5 text-emerald-400" />
-          </div>
-          <span className="font-extrabold text-xl tracking-tight text-slate-900">StyleSync</span>
-        </NavLink>
+        <BrandLogo size="md" to="/" />
 
         <div className="flex items-center gap-4">
           <NavLink
@@ -74,7 +71,7 @@ export const LandingPage = () => {
           {/* Left Hero Copy */}
           <div className="lg:col-span-6 space-y-6 text-left">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-bold">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+              <Compass className="w-3.5 h-3.5 text-emerald-600" />
               <span>AI-Powered Personal Shopping Advisor</span>
             </div>
 

@@ -77,14 +77,21 @@ export const productApi = {
     const name = productInput.name || 'Analyzed Item';
     const color = productInput.color || 'Neutral';
     
-    const nonApparelKeywords = ['cartoon', 'anime', 'meme', 'illustration', 'drawing', 'art', 'game', 'pokemon', 'character', 'wallpaper', 'random', 'car', 'dog', 'cat'];
-    const isNonApparel = nonApparelKeywords.some(kw => rawName.includes(kw));
+    let styleScore = 23;
+    let colorScore = 19;
+    let wardrobeScore = 19;
+    let versatilityScore = 14;
+    let budgetScore = price > 8000 ? 6 : (price > 4000 ? 8 : 10);
+    let occasionScore = 9;
 
-    let score = 85;
-    let decision = 'BUY';
-    let aiExplanation = `This ${name} (${color}) harmonizes with your personal traits and capsule wardrobe style.`;
-    let strongMatches = ['Compatible with your designated style preferences', 'Versatile neutral color tone'];
-    let considerations = ['Ensure size fits your specified measurements'];
+    let score = styleScore + colorScore + wardrobeScore + versatilityScore + budgetScore + occasionScore;
+    let decision = score >= 75 ? 'BUY' : (score >= 55 ? 'MAYBE' : 'SKIP');
+    let aiExplanation = `This ${name} (${color}) is a highly versatile capsule essential that pairs seamlessly across multiple casual, office, and smart-casual rotations with high color and silhouette synergy.`;
+    let strongMatches = [
+      'Versatile capsule staple that pairs easily with existing bottoms and footwear',
+      'Flattering neutral color harmony with high seasonal versatility'
+    ];
+    let considerations = ['Ensure fit matches your preferred silhouette (relaxed vs structured)'];
 
     if (isNonApparel) {
       score = 15;
@@ -92,6 +99,12 @@ export const productApi = {
       aiExplanation = `⚠️ Non-Apparel Detected: Please upload wearable clothing, footwear, eyewear, or accessories.`;
       strongMatches = [];
       considerations = ['Not a wearable fashion garment or accessory'];
+      styleScore = 3;
+      colorScore = 2;
+      wardrobeScore = 2;
+      versatilityScore = 3;
+      budgetScore = 3;
+      occasionScore = 2;
     }
 
     const newAnalyzedProduct = {
@@ -110,12 +123,12 @@ export const productApi = {
       decision,
       confidence: '94%',
       breakdown: {
-        styleMatch: { score: Math.round(score * 0.25), max: 25, label: 'Style Match' },
-        colorMatch: { score: Math.round(score * 0.20), max: 20, label: 'Color Match' },
-        wardrobeMatch: { score: Math.round(score * 0.20), max: 20, label: 'Wardrobe Match' },
-        versatility: { score: Math.round(score * 0.15), max: 15, label: 'Versatility' },
-        budget: { score: Math.round(score * 0.10), max: 10, label: 'Budget Fit' },
-        occasion: { score: Math.round(score * 0.10), max: 10, label: 'Occasion Fit' }
+        styleMatch: { score: styleScore, max: 25, label: 'Style Match' },
+        colorMatch: { score: colorScore, max: 20, label: 'Color Match' },
+        wardrobeMatch: { score: wardrobeScore, max: 20, label: 'Wardrobe Match' },
+        versatility: { score: versatilityScore, max: 15, label: 'Versatility' },
+        budget: { score: budgetScore, max: 10, label: 'Budget Fit' },
+        occasion: { score: occasionScore, max: 10, label: 'Occasion Fit' }
       },
       aiExplanation,
       strongMatches,
@@ -143,5 +156,17 @@ export const productApi = {
   completeTheLook: async (productId, productData) => {
     const response = await apiClient.post(`/products/${productId}/complete-the-look`, { productData });
     return response.data?.data || response.data;
+  },
+
+  deleteProduct: async (id) => {
+    try {
+      await apiClient.delete(`/products/${id}`);
+    } catch {
+      // Local fallback
+    }
+    const currentList = getStoredProducts();
+    const updated = currentList.filter(p => p.id !== id);
+    localStorage.setItem('stylesync_analyzed_products', JSON.stringify(updated));
+    return true;
   }
 };

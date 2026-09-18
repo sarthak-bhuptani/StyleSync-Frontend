@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, CheckCircle2, Loader2, ShieldCheck, ShoppingBag } from 'lucide-react';
+import { Compass, CheckCircle2, Loader2, ShieldCheck, ShoppingBag } from 'lucide-react';
 
 export const AnalysisLoadingState = ({ product }) => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -36,7 +36,7 @@ export const AnalysisLoadingState = ({ product }) => {
           )}
         </div>
         <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-slate-900 text-emerald-400 flex items-center justify-center shadow-md">
-          <Sparkles className="w-4 h-4 animate-spin text-emerald-400" />
+          <Compass className="w-4 h-4 animate-spin text-emerald-400" />
         </div>
       </div>
 
@@ -88,7 +88,7 @@ export const AnalysisLoadingState = ({ product }) => {
 
       <div className="mt-6 flex items-center justify-center gap-2 text-xs text-slate-400">
         <ShieldCheck className="w-4 h-4 text-emerald-600" />
-        <span>Synthesizing Gemini Vision evaluation results...</span>
+        <span>Synthesizing StyleSync AI evaluation results...</span>
       </div>
     </div>
   );

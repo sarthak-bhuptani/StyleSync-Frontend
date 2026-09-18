@@ -16,6 +16,8 @@ import { OnboardingPage } from './pages/OnboardingPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { WardrobePage } from './pages/WardrobePage';
+import { DailyStylistPage } from './pages/DailyStylistPage';
+import { WardrobeGapPage } from './pages/WardrobeGapPage';
 import { ProductAdvisorPage } from './pages/ProductAdvisorPage';
 import { ProductResultPage } from './pages/ProductResultPage';
 import { ComparePage } from './pages/ComparePage';
@@ -24,7 +26,6 @@ import { PurchaseHistoryPage } from './pages/PurchaseHistoryPage';
 import { BudgetPage } from './pages/BudgetPage';
 import { AssistantPage } from './pages/AssistantPage';
 import { SettingsPage } from './pages/SettingsPage';
-import { PaisaVasoolPage } from './pages/PaisaVasoolPage';
 
 // Protected Route Guard
 const ProtectedRoute = ({ children }) => {
@@ -58,11 +59,12 @@ export const App = () => {
             }
           >
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/daily-stylist" element={<DailyStylistPage />} />
+            <Route path="/wardrobe-gaps" element={<WardrobeGapPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/wardrobe" element={<WardrobePage />} />
             <Route path="/advisor" element={<ProductAdvisorPage />} />
             <Route path="/advisor/result/:id" element={<ProductResultPage />} />
-            <Route path="/paisa-vasool" element={<PaisaVasoolPage />} />
             <Route path="/compare" element={<ComparePage />} />
             <Route path="/outfits" element={<OutfitBuilderPage />} />
             <Route path="/purchases" element={<PurchaseHistoryPage />} />

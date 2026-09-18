@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Sparkles,
+  Compass,
   ArrowRight,
   ArrowLeft,
   CheckCircle2,
@@ -11,9 +11,9 @@ import {
   Wallet,
   Calendar,
   Check,
-  ShoppingBag
+  ShoppingBag,
+  Sparkles
 } from 'lucide-react';
-import { StyleTag } from '../components/common/StyleTag';
 import { useAuth } from '../context/AuthContext';
 import confetti from 'canvas-confetti';
 
@@ -23,46 +23,52 @@ export const OnboardingPage = () => {
   const [step, setStep] = useState(1);
   const totalSteps = 6;
 
-  // Onboarding Form State
+  // Onboarding Form State with simple, standard defaults
   const [formData, setFormData] = useState({
     name: user?.name || 'Sarthak Sharma',
-    gender: 'Men / Masc Styling',
+    gender: "Men's Clothing",
     ageRange: '25-34',
-    height: '5 ft 11 in (180 cm)',
-    location: 'New Delhi / Global',
+    height: '5 ft 10 in',
+    location: 'Mumbai, India',
     sizes: {
-      shirt: 'L (40-42)',
-      tshirt: 'L / Oversized XL',
-      pants: '32 / 32',
-      shoes: 'UK 9 / EU 43 / US 10',
-      preferredFit: 'Relaxed / Structured'
+      shirt: 'L (40)',
+      tshirt: 'L',
+      pants: '32',
+      shoes: 'UK 9',
+      preferredFit: 'Regular Fit'
     },
-    stylePreferences: ['Minimal', 'Smart Casual', 'Streetwear'],
-    favoriteColors: ['Black', 'White', 'Beige', 'Navy', 'Olive Green'],
-    avoidColors: ['Neon Yellow', 'Hot Pink', 'Bright Orange'],
+    stylePreferences: ['Casual', 'Smart Casual', 'Minimal'],
+    favoriteColors: ['Black', 'White', 'Navy', 'Olive Green'],
+    avoidColors: ['Neon Yellow', 'Hot Pink'],
     budgetRanges: {
-      clothing: { min: 1500, max: 8000, currency: '₹' },
-      shoes: { min: 3000, max: 14000, currency: '₹' },
-      accessories: { min: 800, max: 5000, currency: '₹' }
+      clothing: { min: 500, max: 3500 },
+      shoes: { min: 1500, max: 6000 },
+      accessories: { min: 500, max: 2500 }
     },
-    preferredOccasions: ['Daily', 'Office', 'Date', 'Travel']
+    preferredOccasions: ['Daily Wear', 'Office / Work', 'Dates & Cafes', 'Travel & Trips']
   });
 
   const styleOptions = [
-    'Casual', 'Minimal', 'Streetwear', 'Smart Casual',
-    'Formal', 'Sporty', 'Classic', 'Trendy'
+    { title: 'Casual', desc: 'Simple everyday tees, jeans, and comfortable clothes' },
+    { title: 'Smart Casual', desc: 'Collared polo shirts, chinos, and clean shoes' },
+    { title: 'Minimal', desc: 'Plain solid colors and neat, simple looks' },
+    { title: 'Streetwear', desc: 'Hoodies, loose fit tees, and sneakers' },
+    { title: 'Formal / Office', desc: 'Formal shirts, trousers, suits, and dress shoes' },
+    { title: 'Sporty / Gym', desc: 'Track pants, active tees, and running shoes' },
+    { title: 'Ethnic / Festive', desc: 'Kurtas, jackets, and traditional festive wear' },
+    { title: 'Party Wear', desc: 'Stylish evening outfits for dinners and clubs' }
   ];
 
   const colorOptions = [
-    'Black', 'White', 'Blue', 'Green', 'Brown', 'Beige', 'Grey', 'Navy', 'Olive Green', 'Earthy Tan'
+    'Black', 'White', 'Navy Blue', 'Olive Green', 'Beige / Cream', 'Grey', 'Brown', 'Sky Blue', 'Maroon', 'Dark Green'
   ];
 
   const avoidColorOptions = [
-    'Neon Yellow', 'Hot Pink', 'Bright Orange', 'Lime Green', 'Metallic Gold', 'Tie-Dye'
+    'Neon Yellow', 'Hot Pink', 'Bright Orange', 'Lime Green', 'Shiny Gold', 'Tie-Dye'
   ];
 
   const occasionOptions = [
-    'Daily', 'College', 'Office', 'Interview', 'Wedding', 'Party', 'Date', 'Travel'
+    'Daily Wear', 'Office / Work', 'College', 'Parties', 'Weddings & Festivals', 'Dates & Cafes', 'Gym / Sports', 'Travel & Trips'
   ];
 
   const toggleArrayItem = (field, value) => {
@@ -111,8 +117,8 @@ export const OnboardingPage = () => {
           <div className="mb-8">
             <div className="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
               <span className="flex items-center gap-1.5 text-slate-800">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                Personalize Your Advisor
+                <Compass className="w-3.5 h-3.5 text-emerald-600" />
+                Quick Style Setup
               </span>
               <span>Step {step} of {totalSteps}</span>
             </div>
@@ -129,68 +135,70 @@ export const OnboardingPage = () => {
         {step === 1 && (
           <div className="space-y-5 animate-fade-in">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Step 1 — Basic Information</h2>
-              <p className="text-xs text-slate-500 mt-0.5">Help StyleSync calibrate sizing, climate, and demographic fit.</p>
+              <h2 className="text-xl font-bold text-slate-900">Step 1 — Tell us about yourself</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Basic details to help StyleSync suggest clothes that fit you well.</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Your Name</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Your Full Name</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="e.g. Sarthak Sharma"
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Styling Preference / Category</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">I shop for</label>
                 <select
                   value={formData.gender}
                   onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
                 >
-                  <option value="Men / Masc Styling">Men / Masc Styling</option>
-                  <option value="Women / Fem Styling">Women / Fem Styling</option>
-                  <option value="Gender Neutral / Unisex">Gender Neutral / Unisex</option>
+                  <option value="Men's Clothing">Men's Clothing</option>
+                  <option value="Women's Clothing">Women's Clothing</option>
+                  <option value="Unisex / All">Unisex / All Styles</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Age Range</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Your Age Group</label>
                 <select
                   value={formData.ageRange}
                   onChange={(e) => setFormData({ ...formData, ageRange: e.target.value })}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
                 >
-                  <option value="18-24">18–24 (Gen Z / College)</option>
-                  <option value="25-34">25–34 (Young Professional)</option>
-                  <option value="35-44">35–44</option>
-                  <option value="45+">45+</option>
+                  <option value="18-24">18–24 years (College / Young)</option>
+                  <option value="25-34">25–34 years (Working Professional)</option>
+                  <option value="35-44">35–44 years</option>
+                  <option value="45+">45+ years</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Height (for proportions)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Your Height</label>
                 <input
                   type="text"
                   value={formData.height}
                   onChange={(e) => setFormData({ ...formData, height: e.target.value })}
-                  placeholder="e.g. 5 ft 10 in / 178 cm"
+                  placeholder="e.g. 5 ft 10 in or 178 cm"
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
                 />
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Primary Location / Climate</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Your City / Location</label>
                 <input
                   type="text"
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  placeholder="e.g. London / New Delhi / San Francisco"
+                  placeholder="e.g. Mumbai, Delhi, Bengaluru, Pune"
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
                 />
+                <p className="text-[11px] text-slate-400 mt-1">Helps suggest the right fabrics for your local weather.</p>
               </div>
             </div>
           </div>
@@ -200,8 +208,8 @@ export const OnboardingPage = () => {
         {step === 2 && (
           <div className="space-y-5 animate-fade-in">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Step 2 — Sizes & Fit</h2>
-              <p className="text-xs text-slate-500 mt-0.5">Let StyleSync evaluate if garments match your preferred proportions.</p>
+              <h2 className="text-xl font-bold text-slate-900">Step 2 — Your Clothing Sizes & Fit</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Tell us what sizes you normally wear so we know what fits you.</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -211,7 +219,7 @@ export const OnboardingPage = () => {
                   type="text"
                   value={formData.sizes.shirt}
                   onChange={(e) => setFormData({ ...formData, sizes: { ...formData.sizes, shirt: e.target.value } })}
-                  placeholder="e.g. L (40-42) or 16.5"
+                  placeholder="e.g. M (38) / L (40) / XL (42)"
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
                 />
               </div>
@@ -222,44 +230,44 @@ export const OnboardingPage = () => {
                   type="text"
                   value={formData.sizes.tshirt}
                   onChange={(e) => setFormData({ ...formData, sizes: { ...formData.sizes, tshirt: e.target.value } })}
-                  placeholder="e.g. L / Oversized XL"
+                  placeholder="e.g. S / M / L / XL / XXL"
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Pants / Waist Size</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Jeans / Pant Waist Size</label>
                 <input
                   type="text"
                   value={formData.sizes.pants}
                   onChange={(e) => setFormData({ ...formData, sizes: { ...formData.sizes, pants: e.target.value } })}
-                  placeholder="e.g. 32 / 32"
+                  placeholder="e.g. 30, 32, 34, 36"
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Shoe Size</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Shoe Size (UK / India)</label>
                 <input
                   type="text"
                   value={formData.sizes.shoes}
                   onChange={(e) => setFormData({ ...formData, sizes: { ...formData.sizes, shoes: e.target.value } })}
-                  placeholder="e.g. UK 9 / EU 43 / US 10"
+                  placeholder="e.g. UK 7, UK 8, UK 9, UK 10"
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
                 />
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Preferred Silhouette & Fit</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">How do you prefer your clothes to fit?</label>
                 <select
                   value={formData.sizes.preferredFit}
                   onChange={(e) => setFormData({ ...formData, sizes: { ...formData.sizes, preferredFit: e.target.value } })}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
                 >
-                  <option value="Relaxed / Structured">Relaxed / Structured (Contemporary Boxy)</option>
-                  <option value="Slim / Tailored">Slim / Tailored (Classic Sharp)</option>
-                  <option value="Oversized Streetwear">Oversized / Baggy (Streetwear)</option>
-                  <option value="Regular Classic">Regular / Classic Standard</option>
+                  <option value="Regular Fit">Regular Fit — Standard, comfortable everyday fit</option>
+                  <option value="Slim Fit">Slim Fit — Sharp, close-to-body look</option>
+                  <option value="Relaxed / Loose Fit">Relaxed Fit — Slightly roomy & modern boxy</option>
+                  <option value="Oversized">Oversized / Baggy — Trendy loose streetwear</option>
                 </select>
               </div>
             </div>
@@ -270,37 +278,30 @@ export const OnboardingPage = () => {
         {step === 3 && (
           <div className="space-y-5 animate-fade-in">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Step 3 — Style Direction</h2>
-              <p className="text-xs text-slate-500 mt-0.5">Select all aesthetics you feel comfortable and confident wearing.</p>
+              <h2 className="text-xl font-bold text-slate-900">Step 3 — What styles do you like?</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Select all the clothing styles you like wearing (choose 1 or more).</p>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-              {styleOptions.map((style) => {
-                const isSelected = formData.stylePreferences.includes(style);
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              {styleOptions.map((item) => {
+                const isSelected = formData.stylePreferences.includes(item.title);
                 return (
                   <button
-                    key={style}
+                    key={item.title}
                     type="button"
-                    onClick={() => toggleArrayItem('stylePreferences', style)}
-                    className={`p-4 rounded-2xl border text-left transition-all ${
+                    onClick={() => toggleArrayItem('stylePreferences', item.title)}
+                    className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
                         : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-bold">{style}</span>
-                      {isSelected && <Check className="w-4 h-4 text-emerald-400" />}
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-bold">{item.title}</span>
+                      {isSelected && <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />}
                     </div>
-                    <p className={`text-[10px] ${isSelected ? 'text-slate-300' : 'text-slate-400'}`}>
-                      {style === 'Minimal' && 'Clean silhouettes & neutrals'}
-                      {style === 'Smart Casual' && 'Blazers, chinos & clean knits'}
-                      {style === 'Streetwear' && 'Drop-shoulders & sneakers'}
-                      {style === 'Casual' && 'Effortless everyday pieces'}
-                      {style === 'Formal' && 'Tailored suits & oxfords'}
-                      {style === 'Sporty' && 'Athletic & techwear'}
-                      {style === 'Classic' && 'Heritage & timeless items'}
-                      {style === 'Trendy' && 'Current seasonal highlights'}
+                    <p className={`text-xs ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
+                      {item.desc}
                     </p>
                   </button>
                 );
@@ -313,13 +314,13 @@ export const OnboardingPage = () => {
         {step === 4 && (
           <div className="space-y-6 animate-fade-in">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Step 4 — Colors & Tone Palette</h2>
-              <p className="text-xs text-slate-500 mt-0.5">Which colors elevate you, and which should StyleSync warn you against?</p>
+              <h2 className="text-xl font-bold text-slate-900">Step 4 — Colors you love & avoid</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Help us know which colors look best on you and which ones you don't wear.</p>
             </div>
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-md w-fit mb-2.5">
-                ✓ Favorite Colors (Wear Frequently)
+                ✓ Colors you like wearing
               </label>
               <div className="flex flex-wrap gap-2">
                 {colorOptions.map((color) => {
@@ -329,7 +330,7 @@ export const OnboardingPage = () => {
                       key={color}
                       type="button"
                       onClick={() => toggleArrayItem('favoriteColors', color)}
-                      className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                      className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         isSelected
                           ? 'bg-emerald-800 text-white shadow-xs ring-2 ring-emerald-800'
                           : 'bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100'
@@ -342,9 +343,9 @@ export const OnboardingPage = () => {
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-100">
+            <div className="pt-3 border-t border-slate-100">
               <label className="block text-xs font-bold uppercase tracking-wider text-rose-800 bg-rose-50 px-2.5 py-1 rounded-md w-fit mb-2.5">
-                ✕ Colors to Avoid (Warn Me in Score)
+                ✕ Colors you avoid (We will warn you before buying)
               </label>
               <div className="flex flex-wrap gap-2">
                 {avoidColorOptions.map((color) => {
@@ -354,7 +355,7 @@ export const OnboardingPage = () => {
                       key={color}
                       type="button"
                       onClick={() => toggleArrayItem('avoidColors', color)}
-                      className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                      className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         isSelected
                           ? 'bg-rose-700 text-white shadow-xs ring-2 ring-rose-700'
                           : 'bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100'
@@ -373,64 +374,16 @@ export const OnboardingPage = () => {
         {step === 5 && (
           <div className="space-y-5 animate-fade-in">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Step 5 — Budget & Spending Limits</h2>
-              <p className="text-xs text-slate-500 mt-0.5">Set typical price ranges so StyleSync can flag over-priced impulses.</p>
+              <h2 className="text-xl font-bold text-slate-900">Step 5 — Your Normal Budget</h2>
+              <p className="text-xs text-slate-500 mt-0.5">What is the highest price you usually spend per item?</p>
             </div>
 
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-bold text-slate-800">Clothing (Shirts, Pants, Outerwear)</span>
-                  <span className="text-xs font-semibold text-slate-600">
-                    ₹{formData.budgetRanges.clothing.min.toLocaleString()} – ₹{formData.budgetRanges.clothing.max.toLocaleString()}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="1000"
-                  max="20000"
-                  step="500"
-                  value={formData.budgetRanges.clothing.max}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    budgetRanges: {
-                      ...formData.budgetRanges,
-                      clothing: { ...formData.budgetRanges.clothing, max: Number(e.target.value) }
-                    }
-                  })}
-                  className="w-full accent-slate-900"
-                />
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-bold text-slate-800">Footwear & Shoes</span>
-                  <span className="text-xs font-semibold text-slate-600">
-                    ₹{formData.budgetRanges.shoes.min.toLocaleString()} – ₹{formData.budgetRanges.shoes.max.toLocaleString()}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="2000"
-                  max="30000"
-                  step="1000"
-                  value={formData.budgetRanges.shoes.max}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    budgetRanges: {
-                      ...formData.budgetRanges,
-                      shoes: { ...formData.budgetRanges.shoes, max: Number(e.target.value) }
-                    }
-                  })}
-                  className="w-full accent-slate-900"
-                />
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-bold text-slate-800">Accessories, Bags & Eyewear</span>
-                  <span className="text-xs font-semibold text-slate-600">
-                    ₹{formData.budgetRanges.accessories.min.toLocaleString()} – ₹{formData.budgetRanges.accessories.max.toLocaleString()}
+                  <span className="text-xs font-bold text-slate-800">Clothes (Shirts, T-Shirts, Jeans, Jackets)</span>
+                  <span className="text-xs font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
+                    Up to ₹{(formData.budgetRanges?.clothing?.max || 3500).toLocaleString()}
                   </span>
                 </div>
                 <input
@@ -438,15 +391,63 @@ export const OnboardingPage = () => {
                   min="500"
                   max="15000"
                   step="500"
-                  value={formData.budgetRanges.accessories.max}
+                  value={formData.budgetRanges?.clothing?.max || 3500}
                   onChange={(e) => setFormData({
                     ...formData,
                     budgetRanges: {
                       ...formData.budgetRanges,
-                      accessories: { ...formData.budgetRanges.accessories, max: Number(e.target.value) }
+                      clothing: { ...formData.budgetRanges?.clothing, max: Number(e.target.value) }
                     }
                   })}
-                  className="w-full accent-slate-900"
+                  className="w-full accent-slate-900 cursor-pointer"
+                />
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-bold text-slate-800">Shoes & Footwear (Sneakers, Boots, Loafers)</span>
+                  <span className="text-xs font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
+                    Up to ₹{(formData.budgetRanges?.shoes?.max || 6000).toLocaleString()}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="1000"
+                  max="20000"
+                  step="500"
+                  value={formData.budgetRanges?.shoes?.max || 6000}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    budgetRanges: {
+                      ...formData.budgetRanges,
+                      shoes: { ...formData.budgetRanges?.shoes, max: Number(e.target.value) }
+                    }
+                  })}
+                  className="w-full accent-slate-900 cursor-pointer"
+                />
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-bold text-slate-800">Accessories (Sunglasses, Watches, Bags)</span>
+                  <span className="text-xs font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
+                    Up to ₹{(formData.budgetRanges?.accessories?.max || 2500).toLocaleString()}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="300"
+                  max="10000"
+                  step="200"
+                  value={formData.budgetRanges?.accessories?.max || 2500}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    budgetRanges: {
+                      ...formData.budgetRanges,
+                      accessories: { ...formData.budgetRanges?.accessories, max: Number(e.target.value) }
+                    }
+                  })}
+                  className="w-full accent-slate-900 cursor-pointer"
                 />
               </div>
             </div>
@@ -457,8 +458,8 @@ export const OnboardingPage = () => {
         {step === 6 && (
           <div className="space-y-5 animate-fade-in">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Step 6 — Occasions You Dress For</h2>
-              <p className="text-xs text-slate-500 mt-0.5">Where do you spend most of your waking hours?</p>
+              <h2 className="text-xl font-bold text-slate-900">Step 6 — Where do you wear clothes most?</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Choose the places you dress for in your daily life.</p>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
@@ -469,7 +470,7 @@ export const OnboardingPage = () => {
                     key={occ}
                     type="button"
                     onClick={() => toggleArrayItem('preferredOccasions', occ)}
-                    className={`p-3.5 rounded-2xl border text-center transition-all ${
+                    className={`p-3.5 rounded-2xl border text-center transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-slate-900 text-white border-slate-900 shadow-sm font-bold'
                         : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 font-medium'
@@ -491,19 +492,19 @@ export const OnboardingPage = () => {
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-              Your StyleSync profile is ready.
+              You're all set!
             </h2>
             <p className="text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
-              Your style rules, size profiles, and wardrobe constraints are active. You're ready to evaluate your first purchase.
+              Your style profile and size details are saved. You're ready to get daily outfit ideas and check new clothes before buying.
             </p>
 
             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 max-w-sm mx-auto text-xs text-left space-y-1.5 text-slate-600">
               <div className="flex justify-between">
-                <span>Profile Completeness:</span>
-                <strong className="text-emerald-700 font-bold">95% (Ready)</strong>
+                <span>Profile Status:</span>
+                <strong className="text-emerald-700 font-bold">100% Completed</strong>
               </div>
               <div className="flex justify-between">
-                <span>Style Focus:</span>
+                <span>Selected Styles:</span>
                 <strong className="text-slate-900 font-semibold">{formData.stylePreferences.join(', ')}</strong>
               </div>
             </div>
@@ -511,7 +512,7 @@ export const OnboardingPage = () => {
             <button
               type="button"
               onClick={() => navigate('/dashboard')}
-              className="px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-floating transition-all inline-flex items-center gap-2 active:scale-95"
+              className="px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-floating transition-all inline-flex items-center gap-2 active:scale-95 cursor-pointer"
             >
               <span>Go to My Dashboard</span>
               <ArrowRight className="w-4 h-4 text-emerald-400" />
@@ -526,7 +527,7 @@ export const OnboardingPage = () => {
               <button
                 type="button"
                 onClick={handleBack}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition-colors"
+                className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Back</span>
@@ -536,9 +537,9 @@ export const OnboardingPage = () => {
             <button
               type="button"
               onClick={handleNext}
-              className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm rounded-xl shadow-subtle hover:shadow transition-all flex items-center gap-2 active:scale-95 ml-auto"
+              className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm rounded-xl shadow-subtle hover:shadow transition-all flex items-center gap-2 active:scale-95 ml-auto cursor-pointer"
             >
-              <span>{step === totalSteps ? 'Complete Profile' : 'Next Step'}</span>
+              <span>{step === totalSteps ? 'Finish Setup' : 'Next Step'}</span>
               <ArrowRight className="w-4 h-4 text-emerald-400" />
             </button>
           </div>
@@ -547,3 +548,5 @@ export const OnboardingPage = () => {
     </div>
   );
 };
+
+export default OnboardingPage;

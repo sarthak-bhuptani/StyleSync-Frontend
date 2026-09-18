@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, CheckCircle2, RefreshCw } from 'lucide-react';
+import { Zap, CheckCircle2, RefreshCw } from 'lucide-react';
 
 export const OutfitCard = ({ outfit, onTryAnother, onSelect }) => {
   return (
@@ -18,7 +18,7 @@ export const OutfitCard = ({ outfit, onTryAnother, onSelect }) => {
         {/* Outfit Match Badge */}
         <div className="flex flex-col items-end">
           <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 font-extrabold text-sm rounded-full border border-emerald-200">
-            <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+            <Zap className="w-3.5 h-3.5 text-emerald-600 fill-emerald-600" />
             <span>{outfit.matchScore}% Match</span>
           </div>
           <span className="text-[10px] text-slate-400 font-medium mt-0.5">AI Proportions Fit</span>

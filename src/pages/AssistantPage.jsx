@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   MessageSquare,
-  Sparkles,
+  Compass,
   Send,
   Paperclip,
   Image as ImageIcon,
@@ -113,7 +113,7 @@ export const AssistantPage = () => {
       <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold shadow-sm">
-            <Sparkles className="w-5 h-5 text-emerald-400" />
+            <Bot className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
@@ -151,7 +151,7 @@ export const AssistantPage = () => {
                     : 'bg-emerald-600 text-white'
                 }`}
               >
-                {isAI ? <Sparkles className="w-4 h-4" /> : <User className="w-4 h-4" />}
+                {isAI ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
               </div>
 
               <div
@@ -183,7 +183,7 @@ export const AssistantPage = () => {
         {isTyping && (
           <div className="flex items-center gap-3 max-w-2xl">
             <div className="w-8 h-8 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 animate-spin" />
+              <Bot className="w-4 h-4 animate-bounce" />
             </div>
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-1.5 text-xs text-slate-500 font-medium">
               <span>StyleSync is analyzing your wardrobe rules</span>

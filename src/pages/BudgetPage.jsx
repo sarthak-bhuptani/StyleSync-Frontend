@@ -7,7 +7,6 @@ import {
   PieChart,
   Plus,
   ArrowUpRight,
-  Sparkles,
   Edit2
 } from 'lucide-react';
 import { INITIAL_BUDGET } from '../data/mockData';
@@ -24,10 +23,14 @@ export const BudgetPage = () => {
   });
 
   const [isEditLimitModalOpen, setIsEditLimitModalOpen] = useState(false);
-  const [newLimit, setNewLimit] = useState(budgetData.monthlyLimit);
+  const [newLimit, setNewLimit] = useState(budgetData.monthlyLimit || 10000);
 
-  const remaining = Math.max(0, budgetData.monthlyLimit - budgetData.spentThisMonth);
-  const percentSpent = Math.min(100, Math.round((budgetData.spentThisMonth / budgetData.monthlyLimit) * 100));
+  const monthlyLimit = budgetData.monthlyLimit || 10000;
+  const spentThisMonth = budgetData.spentThisMonth || 0;
+  const remaining = Math.max(0, monthlyLimit - spentThisMonth);
+  const percentSpent = Math.min(100, Math.round((spentThisMonth / monthlyLimit) * 100));
+  const categories = budgetData.categories || [];
+  const monthlyTrend = budgetData.monthlyTrend || [];
 
   const handleUpdateLimit = async (e) => {
     e.preventDefault();
@@ -54,7 +57,7 @@ export const BudgetPage = () => {
 
         <button
           onClick={() => setIsEditLimitModalOpen(true)}
-          className="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 self-start sm:self-auto"
+          className="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
         >
           <Edit2 className="w-3.5 h-3.5 text-slate-400" />
           <span>Adjust Monthly Limit</span>
@@ -67,7 +70,7 @@ export const BudgetPage = () => {
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Monthly Budget</span>
             <p className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
-              ₹{budgetData.monthlyLimit.toLocaleString()}
+              ₹{monthlyLimit.toLocaleString()}
             </p>
             <span className="text-[11px] text-slate-500">Period: {budgetData.period || 'Current Month'}</span>
           </div>
@@ -75,7 +78,7 @@ export const BudgetPage = () => {
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Spent This Month</span>
             <p className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
-              ₹{budgetData.spentThisMonth.toLocaleString()}
+              ₹{spentThisMonth.toLocaleString()}
             </p>
             <span className="text-[11px] text-slate-500">{percentSpent}% of allocation</span>
           </div>
@@ -92,9 +95,9 @@ export const BudgetPage = () => {
         {/* Global Progress Bar */}
         <ProgressBar
           label="Total Monthly Consumption"
-          value={budgetData.spentThisMonth}
-          max={budgetData.monthlyLimit}
-          displayValue={`₹${budgetData.spentThisMonth.toLocaleString()} / ₹${budgetData.monthlyLimit.toLocaleString()}`}
+          value={spentThisMonth}
+          max={monthlyLimit}
+          displayValue={`₹${spentThisMonth.toLocaleString()} / ₹${monthlyLimit.toLocaleString()}`}
           color={percentSpent > 90 ? 'rose' : percentSpent > 75 ? 'amber' : 'emerald'}
           size="lg"
         />
@@ -114,23 +117,23 @@ export const BudgetPage = () => {
         <div className="lg:col-span-6 bg-white rounded-3xl p-6 border border-slate-200/80 shadow-subtle space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <h3 className="text-base font-bold text-slate-900">Category Spending</h3>
-            <span className="text-xs text-slate-400 font-semibold">4 Active Buckets</span>
+            <span className="text-xs text-slate-400 font-semibold">{categories.length} Active Buckets</span>
           </div>
 
           <div className="space-y-4">
-            {budgetData.categories.map((cat, idx) => (
+            {categories.map((cat, idx) => (
               <div key={idx} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
                 <div className="flex justify-between text-xs font-bold">
                   <span className="text-slate-800">{cat.name}</span>
                   <span className="text-slate-900">
-                    ₹{cat.spent.toLocaleString()} / ₹{cat.allocated.toLocaleString()}
+                    ₹{(cat.spent || 0).toLocaleString()} / ₹{(cat.allocated || 0).toLocaleString()}
                   </span>
                 </div>
                 <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{
-                      width: `${Math.min(100, Math.round((cat.spent / cat.allocated) * 100))}%`,
+                      width: `${Math.min(100, Math.round(((cat.spent || 0) / Math.max(1, cat.allocated || 1)) * 100))}%`,
                       backgroundColor: cat.color || '#10B981'
                     }}
                   />
@@ -145,34 +148,39 @@ export const BudgetPage = () => {
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-6">
               <h3 className="text-base font-bold text-slate-900">Monthly Spending Trend</h3>
-              <span className="text-xs text-slate-400 font-semibold">Last 6 Months</span>
+              <span className="text-xs text-slate-400 font-semibold">Active Trend</span>
             </div>
 
-            {/* Visual Bar Chart */}
-            <div className="flex items-end justify-between gap-3 h-48 pt-4 px-2">
-              {budgetData.monthlyTrend.map((m, idx) => {
-                const heightPct = Math.round((m.spent / 14000) * 100);
-                return (
-                  <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
-                    <div className="text-[10px] font-bold text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                      ₹{m.spent / 1000}k
+            {monthlyTrend.length > 0 ? (
+              <div className="flex items-end justify-between gap-3 h-48 pt-4 px-2">
+                {monthlyTrend.map((m, idx) => {
+                  const heightPct = Math.round(((m.spent || 0) / 14000) * 100);
+                  return (
+                    <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
+                      <div className="text-[10px] font-bold text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                        ₹{(m.spent || 0) / 1000}k
+                      </div>
+                      <div className="w-full max-w-[36px] bg-slate-100 rounded-xl overflow-hidden flex flex-col justify-end h-full">
+                        <div
+                          className="w-full bg-slate-900 group-hover:bg-emerald-600 rounded-xl transition-all duration-500"
+                          style={{ height: `${heightPct}%` }}
+                        />
+                      </div>
+                      <span className="text-xs font-bold text-slate-600">{m.month}</span>
                     </div>
-                    <div className="w-full max-w-[36px] bg-slate-100 rounded-xl overflow-hidden flex flex-col justify-end h-full">
-                      <div
-                        className="w-full bg-slate-900 group-hover:bg-emerald-600 rounded-xl transition-all duration-500"
-                        style={{ height: `${heightPct}%` }}
-                      />
-                    </div>
-                    <span className="text-xs font-bold text-slate-600">{m.month}</span>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="py-12 text-center text-xs text-slate-400">
+                Log purchases each month to visualize spending trends over time.
+              </div>
+            )}
           </div>
 
           <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>Average monthly fashion spend:</span>
-            <strong className="text-slate-900 font-bold">₹8,779 / month</strong>
+            <span>Current month usage:</span>
+            <strong className="text-slate-900 font-bold">₹{spentThisMonth.toLocaleString()} spent</strong>
           </div>
         </div>
       </div>
@@ -202,13 +210,13 @@ export const BudgetPage = () => {
             <button
               type="button"
               onClick={() => setIsEditLimitModalOpen(false)}
-              className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+              className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl"
+              className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl cursor-pointer"
             >
               Save New Limit
             </button>
@@ -218,3 +226,5 @@ export const BudgetPage = () => {
     </div>
   );
 };
+
+export default BudgetPage;

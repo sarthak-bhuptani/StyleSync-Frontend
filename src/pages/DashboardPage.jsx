@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Sparkles,
   ShoppingBag,
   ArrowRight,
   TrendingUp,
@@ -13,7 +12,13 @@ import {
   Calendar,
   Wallet,
   Compass,
-  ArrowUpRight
+  ArrowUpRight,
+  Sun,
+  Zap,
+  Check,
+  PlusCircle,
+  Camera,
+  Plus
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useWardrobe } from '../context/WardrobeContext';
@@ -29,55 +34,198 @@ export const DashboardPage = () => {
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
 
   const handleProductUploadReady = async (productData) => {
-    // Navigate directly to advisor to run the analysis flow or execute
     navigate('/advisor', { state: { initialProduct: productData } });
   };
 
-  // Category counts
-  const categoryCounts = {
-    Tops: wardrobe.filter(w => w.category === 'Tops').length,
-    Bottoms: wardrobe.filter(w => w.category === 'Bottoms').length,
-    Shoes: wardrobe.filter(w => w.category === 'Shoes').length,
-    Outerwear: wardrobe.filter(w => w.category === 'Outerwear').length,
-    Accessories: wardrobe.filter(w => ['Watches', 'Eyewear', 'Bags', 'Accessories'].includes(w.category)).length,
-  };
+  // Featured items from user's actual wardrobe
+  const featuredTop = wardrobe.find(w => ['Tops', 'Top', 'Shirt', 'T-shirt'].includes(w.category));
+  const featuredBottom = wardrobe.find(w => ['Bottoms', 'Bottom', 'Pants', 'Jeans', 'Trousers', 'Shorts'].includes(w.category));
+  const featuredShoe = wardrobe.find(w => ['Shoes', 'Footwear', 'Sneakers', 'Boots'].includes(w.category));
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in max-w-7xl mx-auto pb-16">
       {/* Personalized Greeting Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-3xl p-6 sm:p-8 shadow-floating">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-floating">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-emerald-300 text-xs font-bold mb-3 border border-white/10">
-            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-            <span>AI Advisor Online & Calibrated</span>
+            <Compass className="w-3.5 h-3.5 text-emerald-400" />
+            <span>AI Personal Stylist Online</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Good morning, {user?.name?.split(' ')[0] || 'Sarthak'} 👋
+            Good morning, {user?.name?.split(' ')[0] || 'User'} 👋
           </h2>
-          <p className="text-slate-300 text-xs sm:text-sm mt-1 font-normal">
-            "Let's make your next purchase a smarter one."
+          <p className="text-slate-300 text-xs sm:text-sm mt-1 font-normal max-w-lg">
+            {wardrobe.length > 0
+              ? `Your wardrobe has ${wardrobe.length} verified pieces in rotation. Ready to style your look for today?`
+              : 'Welcome to StyleSync! Snap and upload your clothes to start generating daily outfits.'}
           </p>
         </div>
 
-        <button
-          onClick={() => navigate('/advisor')}
-          className="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs sm:text-sm rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95 flex-shrink-0"
-        >
-          <Sparkles className="w-4 h-4" />
-          <span>Analyze a Product</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            onClick={() => navigate('/daily-stylist')}
+            className="px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs sm:text-sm rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+          >
+            <Sun className="w-4 h-4 text-slate-950" />
+            <span>Today's Outfit</span>
+          </button>
+          <button
+            onClick={() => navigate('/wardrobe-gaps')}
+            className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm rounded-2xl border border-white/15 transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+          >
+            <PlusCircle className="w-4 h-4 text-emerald-400" />
+            <span>What to Buy</span>
+          </button>
+        </div>
       </div>
 
-      {/* Primary Action: Prominent Upload Area */}
+      {/* 2-Column Focus: Today's Look & Gap Alert */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Today's Look Highlight (7 Cols) */}
+        <div className="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200/80 shadow-subtle flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                  <Sun className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Today's Weather & Recommended Look</h3>
+                  <p className="text-xs text-slate-400">27°C Warm & Sunny · Mumbai, India</p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/daily-stylist')}
+                className="text-xs font-bold text-emerald-700 hover:text-emerald-800 cursor-pointer"
+              >
+                Full Lookbook →
+              </button>
+            </div>
+
+            {wardrobe.length > 0 && (featuredTop || featuredBottom || featuredShoe) ? (
+              <>
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  {featuredTop && (
+                    <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-center">
+                      <img
+                        src={featuredTop.image}
+                        alt={featuredTop.name}
+                        className="w-full aspect-square rounded-xl object-cover bg-white mb-2"
+                      />
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Top</span>
+                      <p className="text-xs font-bold text-slate-800 truncate">{featuredTop.name}</p>
+                    </div>
+                  )}
+
+                  {featuredBottom && (
+                    <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-center">
+                      <img
+                        src={featuredBottom.image}
+                        alt={featuredBottom.name}
+                        className="w-full aspect-square rounded-xl object-cover bg-white mb-2"
+                      />
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Bottom</span>
+                      <p className="text-xs font-bold text-slate-800 truncate">{featuredBottom.name}</p>
+                    </div>
+                  )}
+
+                  {featuredShoe && (
+                    <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-center">
+                      <img
+                        src={featuredShoe.image}
+                        alt={featuredShoe.name}
+                        className="w-full aspect-square rounded-xl object-cover bg-white mb-2"
+                      />
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Footwear</span>
+                      <p className="text-xs font-bold text-slate-800 truncate">{featuredShoe.name}</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-3 bg-emerald-50/70 border border-emerald-100 rounded-2xl text-xs text-emerald-900 flex items-center justify-between">
+                  <span>✨ <strong>98% Occasion Harmony:</strong> Perfect for Office & Smart Casual</span>
+                  <span className="font-extrabold text-emerald-700">Clean & Breathable</span>
+                </div>
+              </>
+            ) : (
+              <div className="p-8 text-center bg-slate-50/60 rounded-2xl border border-dashed border-slate-200">
+                <Shirt className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                <p className="text-xs font-bold text-slate-700">No clothes uploaded yet</p>
+                <p className="text-[11px] text-slate-400 mt-0.5 mb-3">Snap photos of your clothes to see daily combinations here.</p>
+                <button
+                  onClick={() => navigate('/wardrobe')}
+                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
+                >
+                  Snap & Add Clothes
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+            <span className="text-xs text-slate-400 font-medium">Auto-calibrated for today's weather & schedule</span>
+            <button
+              onClick={() => navigate('/daily-stylist')}
+              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>View Daily Lookbook</span>
+              <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
+            </button>
+          </div>
+        </div>
+
+        {/* AI "What You Need to Buy" Gap Spotlight (5 Cols) */}
+        <div className="lg:col-span-5 bg-white rounded-3xl p-6 border border-slate-200/80 shadow-subtle flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-emerald-600 fill-emerald-600" />
+                <h3 className="text-base font-bold text-slate-900">What to Buy Next</h3>
+              </div>
+              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60">
+                AI Gap Scanner
+              </span>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 mb-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center font-bold text-emerald-600 text-lg flex-shrink-0">
+                  ⚡
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Closet Multiplier</span>
+                  <p className="text-xs font-bold text-slate-900">Personalized Wardrobe Gap Analysis</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">Discovers missing staples to multiply outfits</p>
+                </div>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                "Find out which 2 or 3 missing items will unlock the most new outfit combinations with the clothes you already own."
+              </p>
+            </div>
+          </div>
+
+          <div className="pt-2">
+            <button
+              onClick={() => navigate('/wardrobe-gaps')}
+              className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>Explore Wardrobe Gaps & Shopping List</span>
+              <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Primary Action: Product Advisor Scanner */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-bold text-slate-900">Immediate Decision Check</h3>
+            <h3 className="text-base font-bold text-slate-900">Immediate Purchase Decision Check</h3>
             <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded">
-              Primary Action
+              AI Advisor
             </span>
           </div>
-          <span className="text-xs text-slate-400">Drag screenshot or pick a test preset</span>
+          <span className="text-xs text-slate-400">Evaluate any item from Myntra, Amazon, or Zara</span>
         </div>
         <UploadDropzone onProductReady={handleProductUploadReady} />
       </div>
@@ -91,7 +239,7 @@ export const DashboardPage = () => {
               <h3 className="text-base font-bold text-slate-900">Your Style Snapshot</h3>
               <button
                 onClick={() => navigate('/profile')}
-                className="text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+                className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 cursor-pointer"
               >
                 Edit Profile
               </button>
@@ -120,15 +268,8 @@ export const DashboardPage = () => {
               </div>
 
               <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                <span className="text-slate-500 font-medium">Typical Footwear Budget</span>
-                <span className="font-bold text-slate-900">
-                  ₹{user?.budgetRanges?.shoes?.min || 3000} – ₹{user?.budgetRanges?.shoes?.max || 14000}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                <span className="text-slate-500 font-medium">Most Worn Category</span>
-                <span className="font-bold text-emerald-700">Footwear & Tops (42 wear logs)</span>
+                <span className="text-slate-500 font-medium">Wardrobe Pieces</span>
+                <span className="font-bold text-emerald-700">{wardrobe.length} Uploaded Items</span>
               </div>
             </div>
           </div>
@@ -136,7 +277,7 @@ export const DashboardPage = () => {
           <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
             <button
               onClick={() => setIsScanModalOpen(true)}
-              className="inline-flex items-center gap-1.5 font-bold text-slate-900 hover:text-emerald-700 transition-colors"
+              className="inline-flex items-center gap-1.5 font-bold text-slate-900 hover:text-emerald-700 transition-colors cursor-pointer"
             >
               <Scan className="w-3.5 h-3.5 text-emerald-600" />
               <span>Calibrate Face & Body Scan</span>
@@ -150,12 +291,12 @@ export const DashboardPage = () => {
           <div>
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Recent AI Decisions</h3>
+                <h3 className="text-base font-bold text-slate-900">Recent AI Evaluations</h3>
                 <p className="text-xs text-slate-400">Products evaluated against your wardrobe</p>
               </div>
               <button
                 onClick={() => navigate('/advisor')}
-                className="text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+                className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 cursor-pointer"
               >
                 View All
               </button>
@@ -180,7 +321,7 @@ export const DashboardPage = () => {
                           {prod.name}
                         </p>
                         <p className="text-[11px] text-slate-500 font-medium">
-                          {prod.brand} · {prod.currency}{prod.price.toLocaleString()}
+                          {prod.brand} · {prod.currency}{prod.price?.toLocaleString()}
                         </p>
                       </div>
                     </div>
@@ -198,13 +339,13 @@ export const DashboardPage = () => {
               </div>
             ) : (
               <div className="text-center py-8 px-4 bg-slate-50/70 rounded-2xl border border-dashed border-slate-200">
-                <Sparkles className="w-7 h-7 text-slate-300 mx-auto mb-1.5" />
+                <Compass className="w-7 h-7 text-slate-300 mx-auto mb-1.5" />
                 <p className="text-xs font-bold text-slate-700">No evaluations yet</p>
                 <p className="text-[11px] text-slate-400 mt-0.5 mb-3">Upload your first clothes, shoes, or goggles to get personal styling advice.</p>
                 <button
                   type="button"
                   onClick={() => navigate('/advisor')}
-                  className="px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl shadow-xs hover:bg-slate-800 transition-all"
+                  className="px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl shadow-xs hover:bg-slate-800 transition-all cursor-pointer"
                 >
                   Analyze a Product
                 </button>
@@ -219,90 +360,6 @@ export const DashboardPage = () => {
         </div>
       </div>
 
-      {/* Wardrobe Health & AI Gap Suggestions */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Wardrobe Health */}
-        <div className="lg:col-span-6 bg-white rounded-3xl p-6 border border-slate-200/80 shadow-subtle">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-            <div>
-              <h3 className="text-base font-bold text-slate-900">Wardrobe Health</h3>
-              <p className="text-xs text-slate-400">{wardrobe.length} Verified Pieces in Active Rotation</p>
-            </div>
-            <button
-              onClick={() => navigate('/wardrobe')}
-              className="text-xs font-semibold text-emerald-700 hover:text-emerald-800"
-            >
-              Open Closet →
-            </button>
-          </div>
-
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5 text-center mb-4">
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
-              <span className="text-lg font-black text-slate-900 block">{categoryCounts.Tops}</span>
-              <span className="text-[11px] font-semibold text-slate-500">Tops</span>
-            </div>
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
-              <span className="text-lg font-black text-slate-900 block">{categoryCounts.Bottoms}</span>
-              <span className="text-[11px] font-semibold text-slate-500">Bottoms</span>
-            </div>
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
-              <span className="text-lg font-black text-slate-900 block">{categoryCounts.Shoes}</span>
-              <span className="text-[11px] font-semibold text-slate-500">Shoes</span>
-            </div>
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
-              <span className="text-lg font-black text-slate-900 block">{categoryCounts.Outerwear}</span>
-              <span className="text-[11px] font-semibold text-slate-500">Jackets</span>
-            </div>
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
-              <span className="text-lg font-black text-slate-900 block">{categoryCounts.Accessories}</span>
-              <span className="text-[11px] font-semibold text-slate-500">Accs</span>
-            </div>
-          </div>
-
-          <div className="p-3.5 bg-emerald-50/70 border border-emerald-100 rounded-2xl text-xs text-emerald-900 flex items-start gap-2.5">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-            <p className="leading-relaxed">
-              <strong>Capsule Balance Score: 88/100.</strong> High versatility across tops and bottoms. No deadstock clutter detected.
-            </p>
-          </div>
-        </div>
-
-        {/* AI "You Might Need" Gap Suggestions */}
-        <div className="lg:col-span-6 bg-white rounded-3xl p-6 border border-slate-200/80 shadow-subtle flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-emerald-600" />
-                <h3 className="text-base font-bold text-slate-900">You Might Need</h3>
-              </div>
-              <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/60">
-                1 Capsule Gap Detected
-              </span>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200/60 mb-4">
-              <p className="text-xs font-bold text-amber-900 mb-1">
-                Footwear Versatility Gap
-              </p>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                "You have many neutral tops and tailored bottoms, but very few versatile low-profile sneakers to bridge smart-casual and weekend styling."
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-2">
-            <span className="text-xs text-slate-400 font-medium">Recommendation: Minimal White Court Shoes</span>
-            <button
-              onClick={() => navigate('/advisor')}
-              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5"
-            >
-              <span>View Recommendations</span>
-              <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Face & Body Analysis Scan Modal */}
       <SelfAnalysisScanModal
         isOpen={isScanModalOpen}
@@ -311,3 +368,5 @@ export const DashboardPage = () => {
     </div>
   );
 };
+
+export default DashboardPage;

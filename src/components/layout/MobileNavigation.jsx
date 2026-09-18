@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
-  Sparkles,
+  Compass,
   Layers,
   Shirt,
   User,
@@ -12,7 +12,7 @@ import {
 export const MobileNavigation = () => {
   const navTabs = [
     { to: '/dashboard', label: 'Home', icon: LayoutDashboard },
-    { to: '/advisor', label: 'Advisor', icon: Sparkles, highlight: true },
+    { to: '/advisor', label: 'Advisor', icon: Compass, highlight: true },
     { to: '/wardrobe', label: 'Wardrobe', icon: Layers },
     { to: '/outfits', label: 'Outfits', icon: Shirt },
     { to: '/profile', label: 'Profile', icon: User },

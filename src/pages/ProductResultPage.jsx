@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, NavLink } from 'react-router-dom';
 import {
-  Sparkles,
+  Compass,
   ArrowLeft,
   CheckCircle2,
   AlertTriangle,
@@ -14,7 +14,8 @@ import {
   TrendingUp,
   Layers,
   ShieldCheck,
-  ChevronRight
+  ChevronRight,
+  Trash2
 } from 'lucide-react';
 import { useWardrobe } from '../context/WardrobeContext';
 import { productApi } from '../api/productApi';
@@ -25,7 +26,7 @@ import { ProgressBar } from '../components/common/ProgressBar';
 export const ProductResultPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { wardrobe, showToast } = useWardrobe();
+  const { wardrobe, showToast, deleteAnalyzedProduct } = useWardrobe();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
@@ -89,10 +90,17 @@ export const ProductResultPage = () => {
     showToast(saved ? 'Removed from saved items' : 'Saved to your evaluated wishlist', 'success');
   };
 
+  const handleDeleteProduct = () => {
+    if (window.confirm('Delete this product evaluation and remove it from history?')) {
+      deleteAnalyzedProduct(id);
+      navigate('/advisor');
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-fade-in pb-12">
       {/* Back to Advisor navigation */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <button
           onClick={() => navigate('/advisor')}
           className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors"
@@ -113,10 +121,18 @@ export const ProductResultPage = () => {
           </button>
           <button
             onClick={() => showToast('Report link copied to clipboard', 'info')}
-            className="p-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-slate-700 text-xs font-semibold flex items-center gap-1.5"
+            className="p-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-slate-700 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
           >
             <Share2 className="w-4 h-4" />
             <span>Share</span>
+          </button>
+          <button
+            onClick={handleDeleteProduct}
+            title="Delete this evaluation"
+            className="p-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span>Delete</span>
           </button>
         </div>
       </div>
@@ -296,7 +312,7 @@ export const ProductResultPage = () => {
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold">
-              <Sparkles className="w-4 h-4" />
+              <Compass className="w-4 h-4" />
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900">Your Face & Body Physical Match</h3>
@@ -350,7 +366,7 @@ export const ProductResultPage = () => {
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-subtle">
         <div className="flex items-center gap-2 mb-4">
           <div className="w-8 h-8 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold">
-            <Sparkles className="w-4 h-4" />
+            <Compass className="w-4 h-4" />
           </div>
           <h3 className="text-base sm:text-lg font-bold text-slate-900">
             Why StyleSync Says <span className="text-emerald-700">{product.decision}</span>
@@ -444,7 +460,7 @@ export const ProductResultPage = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold mb-1 border border-emerald-200/60">
-              <Sparkles className="w-3 h-3 text-emerald-600" />
+              <Compass className="w-3 h-3 text-emerald-600" />
               <span>AI Capsule Stylist</span>
             </div>
             <h3 className="text-base sm:text-lg font-bold text-slate-900">Complete the Look: 3 Styled Outfits</h3>

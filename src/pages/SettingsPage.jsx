@@ -4,7 +4,7 @@ import {
   Settings as SettingsIcon,
   ShieldCheck,
   Bell,
-  Sparkles,
+  Compass,
   Database,
   Moon,
   LogOut,
@@ -97,7 +97,7 @@ export const SettingsPage = () => {
       {/* 1. AI Styling Engine Preferences */}
       <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-subtle space-y-4">
         <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-          <Sparkles className="w-4 h-4 text-emerald-600" />
+          <Compass className="w-4 h-4 text-emerald-600" />
           <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900">AI Evaluation Behavior</h3>
         </div>
 

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { BrandLogo } from '../components/common/BrandLogo';
 
 export const LoginPage = () => {
   const { login, loading } = useAuth();
@@ -27,13 +28,8 @@ export const LoginPage = () => {
     <div className="min-h-screen bg-[#FAFAF9] flex flex-col justify-center items-center px-4 py-12">
       <div className="w-full max-w-md bg-white rounded-3xl p-8 sm:p-10 shadow-card border border-slate-200/80">
         {/* Brand Header */}
-        <div className="text-center mb-8">
-          <NavLink to="/" className="inline-flex items-center gap-2 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold shadow-sm">
-              <ShoppingBag className="w-5 h-5 text-emerald-400" />
-            </div>
-            <span className="font-extrabold text-2xl tracking-tight text-slate-900">StyleSync</span>
-          </NavLink>
+        <div className="text-center mb-8 flex flex-col items-center">
+          <BrandLogo size="lg" to="/" className="mb-4" />
           <h2 className="text-xl font-bold text-slate-900">Welcome Back</h2>
           <p className="text-xs text-slate-500 mt-1">Sign in to access your personal AI shopping advisor</p>
         </div>

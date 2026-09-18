@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Sparkles, Layers, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { Compass, Layers, ArrowLeft, ShieldCheck } from 'lucide-react';
 import { UploadDropzone } from '../components/advisor/UploadDropzone';
 import { AnalysisLoadingState } from '../components/advisor/AnalysisLoadingState';
 import { SelfAnalysisScanModal } from '../components/profile/SelfAnalysisScanModal';
@@ -52,8 +52,8 @@ export const ProductAdvisorPage = () => {
         <div className="space-y-4 mb-8">
           <div className="text-center max-w-xl mx-auto">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold mb-3 border border-emerald-200/60">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-              <span>AI Neural Suitability Engine</span>
+              <Compass className="w-3.5 h-3.5 text-emerald-600" />
+              <span>AI Suitability Engine</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               Will This Suit Me?

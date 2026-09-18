@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Shirt,
-  Sparkles,
+  Zap,
   CloudSun,
   Calendar,
   Layers,
@@ -152,7 +152,7 @@ export const OutfitBuilderPage = () => {
               </>
             ) : (
               <>
-                <Sparkles className="w-4 h-4 text-emerald-400" />
+                <Zap className="w-4 h-4 text-emerald-400 fill-emerald-400" />
                 <span>Generate {selectedOccasion} Outfit ({selectedStyle})</span>
               </>
             )}

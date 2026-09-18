@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trash2, Edit3, Eye, Sparkles } from 'lucide-react';
+import { Trash2, Edit3, Eye } from 'lucide-react';
 
 export const WardrobeCard = ({ item, onEdit, onDelete, onViewDetails }) => {
   return (
@@ -18,36 +18,59 @@ export const WardrobeCard = ({ item, onEdit, onDelete, onViewDetails }) => {
           {item.category}
         </span>
 
-        {/* Hover Action Bar */}
+        {/* Hover Action Bar & Quick Actions */}
         <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
           {onViewDetails && (
             <button
-              onClick={() => onViewDetails(item)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewDetails(item);
+              }}
               title="View Details"
-              className="p-2 bg-white text-slate-800 hover:text-slate-950 rounded-xl shadow hover:scale-110 transition-transform"
+              className="p-2 bg-white text-slate-800 hover:text-slate-950 rounded-xl shadow hover:scale-110 transition-transform cursor-pointer"
             >
               <Eye className="w-4 h-4" />
             </button>
           )}
           {onEdit && (
             <button
-              onClick={() => onEdit(item)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(item);
+              }}
               title="Edit Item"
-              className="p-2 bg-white text-slate-800 hover:text-slate-950 rounded-xl shadow hover:scale-110 transition-transform"
+              className="p-2 bg-white text-slate-800 hover:text-slate-950 rounded-xl shadow hover:scale-110 transition-transform cursor-pointer"
             >
               <Edit3 className="w-4 h-4" />
             </button>
           )}
           {onDelete && (
             <button
-              onClick={() => onDelete(item.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(item.id);
+              }}
               title="Delete Item"
-              className="p-2 bg-white text-rose-600 hover:text-rose-700 rounded-xl shadow hover:scale-110 transition-transform"
+              className="p-2 bg-white text-rose-600 hover:bg-rose-50 hover:text-rose-700 rounded-xl shadow hover:scale-110 transition-transform cursor-pointer"
             >
               <Trash2 className="w-4 h-4" />
             </button>
           )}
         </div>
+
+        {/* Top-Right Quick Delete Button for fast 1-click removal */}
+        {onDelete && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(item.id);
+            }}
+            title="Delete this item"
+            className="absolute top-2.5 right-2.5 p-1.5 bg-white/90 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg shadow-xs border border-white/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Item Details */}

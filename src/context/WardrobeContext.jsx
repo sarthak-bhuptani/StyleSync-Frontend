@@ -65,6 +65,12 @@ export const WardrobeProvider = ({ children }) => {
     return result;
   };
 
+  const deleteAnalyzedProduct = async (id) => {
+    await productApi.deleteProduct(id);
+    setAnalyzedProducts(prev => prev.filter(p => p.id !== id));
+    showToast('Analyzed product evaluation removed', 'info');
+  };
+
   return (
     <WardrobeContext.Provider
       value={{
@@ -76,6 +82,7 @@ export const WardrobeProvider = ({ children }) => {
         updateWardrobeItem,
         deleteWardrobeItem,
         analyzeNewProduct,
+        deleteAnalyzedProduct,
       }}
     >
       {children}

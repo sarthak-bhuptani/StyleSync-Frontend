@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { UploadCloud, Image as ImageIcon, Sparkles, Link, Check, AlertCircle, ShieldCheck, CheckCircle2, Loader2, Globe, ExternalLink, ArrowRight } from 'lucide-react';
+import { UploadCloud, Image as ImageIcon, Compass, Link, Check, AlertCircle, ShieldCheck, CheckCircle2, Loader2, Globe, ExternalLink, ArrowRight } from 'lucide-react';
 import { productApi } from '../../api/productApi';
 
 export const UploadDropzone = ({ onProductReady, initialProduct = null }) => {
@@ -248,9 +248,9 @@ export const UploadDropzone = ({ onProductReady, initialProduct = null }) => {
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  className="w-full mt-2 py-3.5 px-6 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 group active:scale-[0.99]"
+                  className="w-full mt-2 py-3.5 px-6 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 group active:scale-[0.99] cursor-pointer"
                 >
-                  <Sparkles className="w-5 h-5 text-emerald-400 group-hover:rotate-12 transition-transform" />
+                  <Compass className="w-5 h-5 text-emerald-400 group-hover:rotate-12 transition-transform" />
                   <span>Analyze with StyleSync AI</span>
                 </button>
               </div>
@@ -335,9 +335,9 @@ export const UploadDropzone = ({ onProductReady, initialProduct = null }) => {
                 <button
                   type="submit"
                   disabled={urlLoading || !urlInput.trim()}
-                  className="absolute right-2 top-2 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+                  className="absolute right-2 top-2 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 >
-                  {urlLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-emerald-400" />}
+                  {urlLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Compass className="w-3.5 h-3.5 text-emerald-400" />}
                   <span>{urlLoading ? 'Extracting...' : 'Fetch'}</span>
                 </button>
               </div>

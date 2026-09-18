@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   User,
-  Sparkles,
+  Compass,
   Edit3,
   Check,
   Ruler,
@@ -129,7 +129,7 @@ export const ProfilePage = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold">
-              <Sparkles className="w-4 h-4" />
+              <Compass className="w-4 h-4" />
             </div>
             <div>
               <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900">
@@ -146,7 +146,7 @@ export const ProfilePage = () => {
             onClick={() => setIsScanModalOpen(true)}
             className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
           >
-            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+            <Compass className="w-3.5 h-3.5 text-emerald-400" />
             <span>Recalibrate / Rescan My Photo</span>
           </button>
         </div>
