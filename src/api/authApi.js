@@ -55,7 +55,16 @@ export const authApi = {
   resetPassword: async (token, password) => {
     try {
       const response = await apiClient.post('/auth/reset-password', { token, password });
-      return response.data;
+      const resData = response.data;
+      const resToken = resData.token || resData.data?.token;
+      const user = resData.user || resData.data?.user;
+      if (resToken) {
+        localStorage.setItem('stylesync_token', resToken);
+      }
+      if (user) {
+        localStorage.setItem('stylesync_user', JSON.stringify(user));
+      }
+      return { success: true, ...resData };
     } catch (err) {
       return {
         success: false,

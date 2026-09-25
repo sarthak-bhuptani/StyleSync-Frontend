@@ -35,3 +35,18 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </QueryClientProvider>
   </React.StrictMode>,
 );
+
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((reg) => {
+        console.log('StyleSync PWA ServiceWorker registered with scope:', reg.scope);
+      })
+      .catch((err) => {
+        console.log('StyleSync PWA ServiceWorker registration failed:', err);
+      });
+  });
+}
+

@@ -31,6 +31,8 @@ export const WardrobePage = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedItemForView, setSelectedItemForView] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [isDeletingItem, setIsDeletingItem] = useState(false);
 
   const categories = ['All', 'Tops', 'Bottoms', 'Shoes', 'Outerwear', 'Eyewear', 'Accessories', 'Bags', 'Watches'];
 
@@ -50,134 +52,160 @@ export const WardrobePage = () => {
     setEditingItem(null);
   };
 
-  const handleDeleteItem = (id, itemName = 'this item') => {
-    if (window.confirm(`Are you sure you want to delete "${itemName}" from your wardrobe?`)) {
-      deleteWardrobeItem(id);
-      if (selectedItemForView?.id === id) setSelectedItemForView(null);
-      if (editingItem?.id === id) setEditingItem(null);
+  const handleRequestDelete = (item) => {
+    setItemToDelete(item);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!itemToDelete) return;
+    setIsDeletingItem(true);
+    try {
+      await deleteWardrobeItem(itemToDelete.id);
+      if (selectedItemForView?.id === itemToDelete.id) setSelectedItemForView(null);
+      if (editingItem?.id === itemToDelete.id) setEditingItem(null);
+      setItemToDelete(null);
+    } catch (err) {
+      console.warn('Failed to delete item:', err);
+      setItemToDelete(null);
+    } finally {
+      setIsDeletingItem(false);
     }
   };
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-7xl mx-auto pb-16">
-      {/* Top Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-4 animate-fade-in max-w-5xl mx-auto pb-16">
+      {/* Desktop Header Bar (hidden on mobile to prevent duplicate titles) */}
+      <div className="hidden lg:flex items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold mb-2 border border-emerald-200/60">
-            <Layers className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Digital Capsule Wardrobe</span>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              My Wardrobe
+            </h1>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+              {wardrobe.length} {wardrobe.length === 1 ? 'item' : 'items'}
+            </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">My Wardrobe</h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            {wardrobe.length} verified pieces in your personal styling rotation.
+          <p className="text-xs text-slate-500 mt-0.5">
+            Manage your clothes, view wear count, and generate personalized outfits.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <button
-            type="button"
-            onClick={() => navigate('/daily-stylist')}
-            className="px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
-          >
-            <Sun className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Wear Today</span>
-          </button>
+        <button
+          type="button"
+          onClick={() => setIsAddModalOpen(true)}
+          className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+        >
+          <Plus className="w-4 h-4 text-emerald-400" />
+          <span>Add New Item</span>
+        </button>
+      </div>
 
-          <button
-            type="button"
-            onClick={() => navigate('/wardrobe-gaps')}
-            className="px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
-          >
-            <Zap className="w-3.5 h-3.5 text-indigo-600" />
-            <span>What to Buy</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsAddModalOpen(true)}
-            className="px-4 sm:px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold rounded-xl shadow-subtle hover:shadow transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
-          >
-            <Plus className="w-4 h-4 text-emerald-400" />
-            <span>Snap & Add Clothes</span>
-          </button>
-        </div>
+      {/* Mobile Top Bar with Quick Action */}
+      <div className="flex lg:hidden items-center justify-between gap-2 px-0.5">
+        <span className="text-xs font-bold text-slate-500">
+          {wardrobe.length} {wardrobe.length === 1 ? 'piece' : 'pieces'} in closet
+        </span>
+        <button
+          type="button"
+          onClick={() => setIsAddModalOpen(true)}
+          className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+        >
+          <Plus className="w-3.5 h-3.5 text-emerald-400" />
+          <span>Add Item</span>
+        </button>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-subtle">
-        {/* Category Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
-          {categories.map((cat) => (
+      <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-2.5">
+        {/* Search Input */}
+        <div className="relative">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Search by name, brand, or color..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* Category Filter Chips - Balanced 3-column grid on mobile */}
+        <div className="grid grid-cols-3 sm:flex sm:flex-wrap gap-1.5">
+          {['All', 'Tops', 'Bottoms', 'Shoes', 'Outerwear', 'Accessories'].map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              className={`py-1.5 px-2.5 sm:px-3.5 rounded-xl text-xs font-bold transition-all text-center cursor-pointer border ${
                 activeCategory === cat
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                  : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
               {cat}
             </button>
           ))}
         </div>
-
-        {/* Search Input */}
-        <div className="relative min-w-[220px]">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-          <input
-            type="text"
-            placeholder="Search brand, color, name..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
       </div>
 
       {/* Wardrobe Grid */}
       {filteredItems.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
           {filteredItems.map((item) => (
             <WardrobeCard
               key={item.id}
               item={item}
               onViewDetails={(it) => setSelectedItemForView(it)}
               onEdit={(it) => setEditingItem(it)}
-              onDelete={(id) => handleDeleteItem(id, item.name)}
+              onDelete={(it) => handleRequestDelete(it)}
             />
           ))}
         </div>
       ) : (
-        <EmptyState
-          icon={ShoppingBag}
-          title={searchQuery ? 'No matching wardrobe items' : 'Your wardrobe is empty'}
-          description={
-            searchQuery
-              ? 'Try changing your search terms or category filter.'
-              : 'Upload photos of your clothes to get daily "Wear Today" outfit recommendations & discover what to buy next.'
-          }
-          actionLabel="Snap / Add First Item"
-          onAction={() => setIsAddModalOpen(true)}
-        />
+        <div className="bg-white rounded-2xl border border-slate-200/80 py-10 px-6 text-center space-y-3 shadow-xs">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 mx-auto">
+            <ShoppingBag className="w-6 h-6" />
+          </div>
+          <div className="max-w-xs mx-auto">
+            <h3 className="text-sm sm:text-base font-bold text-slate-900">
+              {searchQuery ? 'No matching items' : 'Your wardrobe is empty'}
+            </h3>
+            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+              {searchQuery
+                ? 'Try adjusting your search keywords or choosing another category.'
+                : 'Upload photos of your clothes to get daily weather-matched outfit recommendations.'}
+            </p>
+          </div>
+          {!searchQuery && (
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(true)}
+                className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer inline-flex items-center gap-1.5"
+              >
+                <Plus className="w-4 h-4 text-emerald-400" />
+                <span>Add Your First Item</span>
+              </button>
+            </div>
+          )}
+        </div>
       )}
 
-      {/* Add Wardrobe Item Modal */}
+      {/* Add Wardrobe Item Modal / Bottom Sheet */}
       <AddWardrobeItemModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAdd={addWardrobeItem}
       />
 
-      {/* View Item Details Modal */}
+      {/* View Item Details Bottom Sheet */}
       {selectedItemForView && (
         <Modal
           isOpen={!!selectedItemForView}
@@ -186,7 +214,7 @@ export const WardrobePage = () => {
           maxWidth="max-w-md"
         >
           <div className="space-y-4">
-            <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
+            <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 max-w-xs mx-auto">
               <img
                 src={selectedItemForView.image}
                 alt={selectedItemForView.name}
@@ -214,7 +242,7 @@ export const WardrobePage = () => {
             <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
               <button
                 type="button"
-                onClick={() => handleDeleteItem(selectedItemForView.id, selectedItemForView.name)}
+                onClick={() => handleRequestDelete(selectedItemForView)}
                 className="flex-1 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-rose-200"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -232,7 +260,7 @@ export const WardrobePage = () => {
         </Modal>
       )}
 
-      {/* Edit Item Modal */}
+      {/* Edit Item Bottom Sheet */}
       {editingItem && (
         <Modal
           isOpen={!!editingItem}
@@ -274,6 +302,7 @@ export const WardrobePage = () => {
               <label className="block text-xs font-semibold text-slate-700 mb-1">Wear Count</label>
               <input
                 type="number"
+                inputMode="numeric"
                 value={editingItem.usageCount || 0}
                 onChange={(e) => setEditingItem({ ...editingItem, usageCount: Number(e.target.value) })}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:bg-white focus:ring-2 focus:ring-slate-900"
@@ -282,7 +311,7 @@ export const WardrobePage = () => {
             <div className="flex items-center justify-between gap-2 pt-3 border-t border-slate-100">
               <button
                 type="button"
-                onClick={() => handleDeleteItem(editingItem.id, editingItem.name)}
+                onClick={() => handleRequestDelete(editingItem)}
                 className="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer border border-rose-200"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -307,6 +336,65 @@ export const WardrobePage = () => {
           </form>
         </Modal>
       )}
+
+      {/* Delete Wardrobe Item Confirmation Modal */}
+      <Modal
+        isOpen={!!itemToDelete}
+        onClose={() => !isDeletingItem && setItemToDelete(null)}
+        title="Remove Wardrobe Piece"
+        maxWidth="max-w-md"
+      >
+        {itemToDelete && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-rose-50/80 border border-rose-100">
+              <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center flex-shrink-0 font-bold">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-rose-950">Remove from Closet?</h4>
+                <p className="text-[11px] text-rose-700 mt-0.5 leading-snug">
+                  This piece will be permanently removed from your wardrobe and will no longer appear in outfit combinations.
+                </p>
+              </div>
+            </div>
+
+            {/* Product Preview Tile */}
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+              <div className="w-12 h-14 rounded-xl overflow-hidden bg-white border border-slate-200 flex-shrink-0">
+                <img src={itemToDelete.image} alt={itemToDelete.name} className="w-full h-full object-cover" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">
+                  {itemToDelete.category} · {itemToDelete.color}
+                </span>
+                <p className="text-xs font-extrabold text-slate-900 truncate">{itemToDelete.name}</p>
+                <p className="text-[11px] font-semibold text-slate-600 mt-0.5">{itemToDelete.brand || 'Essential'}</p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                disabled={isDeletingItem}
+                onClick={() => setItemToDelete(null)}
+                className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeletingItem}
+                onClick={handleConfirmDelete}
+                className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{isDeletingItem ? 'Deleting...' : 'Delete Piece'}</span>
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

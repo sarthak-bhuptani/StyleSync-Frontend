@@ -1,342 +1,268 @@
 import React, { useState, useRef } from 'react';
 import { Modal } from '../common/Modal';
 import {
+  Camera,
   UploadCloud,
   Check,
-  Camera,
-  Image as ImageIcon,
-  Zap,
-  Tag,
-  Palette,
-  Layers,
   X,
+  Sparkles,
+  Loader2,
   Trash2
 } from 'lucide-react';
 
+const CATEGORIES = ['Tops', 'Bottoms', 'Shoes', 'Outerwear', 'Accessories'];
+
 export const AddWardrobeItemModal = ({ isOpen, onClose, onAdd }) => {
   const fileInputRef = useRef(null);
-  const [isScanning, setIsScanning] = useState(false);
-  const [scanSuccessMessage, setScanSuccessMessage] = useState(null);
+  const cameraInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     name: '',
     category: 'Tops',
     brand: '',
-    color: 'White',
-    colorHex: '#FFFFFF',
-    style: 'Smart Casual / Minimal',
+    color: 'Navy Blue',
     price: '',
-    image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&q=80'
+    image: null
   });
 
-  const presetImages = [
-    { label: 'White Oxford Shirt', category: 'Tops', url: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&q=80', color: 'White', colorHex: '#FFFFFF', style: 'Smart Casual' },
-    { label: 'Black Slim Denim', category: 'Bottoms', url: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=600&q=80', color: 'Black', colorHex: '#111827', style: 'Classic Casual' },
-    { label: 'Beige Stretch Chinos', category: 'Bottoms', url: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=600&q=80', color: 'Beige', colorHex: '#D2B48C', style: 'Smart Casual' },
-    { label: 'Navy Worker Jacket', category: 'Outerwear', url: 'https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=600&q=80', color: 'Navy', colorHex: '#1B263B', style: 'Urban Minimal' },
-    { label: 'White Court Sneakers', category: 'Shoes', url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=600&q=80', color: 'White', colorHex: '#FAFAFA', style: 'Clean Minimal' },
-    { label: 'Khaki Trench Coat', category: 'Outerwear', url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=600&q=80', color: 'Camel Tan', colorHex: '#C19A6B', style: 'Elevated' },
-    { label: 'Suede Chelsea Boots', category: 'Shoes', url: 'https://images.unsplash.com/photo-1638247025967-b4e38f787b76?auto=format&fit=crop&w=600&q=80', color: 'Tobacco Brown', colorHex: '#704214', style: 'Smart Casual' },
-    { label: 'Steel Minimal Watch', category: 'Watches', url: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=600&q=80', color: 'Silver', colorHex: '#C0C0C0', style: 'Accessory' },
-  ];
+  const [isAnalyzingPhoto, setIsAnalyzingPhoto] = useState(false);
 
-  const handleCustomFileUpload = (e) => {
+  const handleImageFile = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       const reader = new FileReader();
+      
       reader.onload = (ev) => {
         const rawName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
         const cleanName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+        
+        setIsAnalyzingPhoto(true);
+        
+        // Auto-detect basic category from filename if present
+        let detectedCategory = 'Tops';
+        let detectedColor = 'Navy Blue';
+        const lower = cleanName.toLowerCase();
+        
+        if (lower.includes('pant') || lower.includes('jean') || lower.includes('trouser') || lower.includes('short') || lower.includes('chino')) {
+          detectedCategory = 'Bottoms';
+        } else if (lower.includes('shoe') || lower.includes('sneaker') || lower.includes('boot') || lower.includes('loafer')) {
+          detectedCategory = 'Shoes';
+        } else if (lower.includes('jacket') || lower.includes('coat') || lower.includes('blazer') || lower.includes('hoodie')) {
+          detectedCategory = 'Outerwear';
+        } else if (lower.includes('watch') || lower.includes('bag') || lower.includes('glass')) {
+          detectedCategory = 'Accessories';
+        }
 
-        setIsScanning(true);
-        setScanSuccessMessage(null);
+        if (lower.includes('black')) detectedColor = 'Black';
+        else if (lower.includes('white')) detectedColor = 'White';
+        else if (lower.includes('beige') || lower.includes('khaki')) detectedColor = 'Beige';
+        else if (lower.includes('olive') || lower.includes('green')) detectedColor = 'Olive Green';
 
-        // Simulate AI Vision scanner detecting item attributes
         setTimeout(() => {
-          let detectedCategory = 'Tops';
-          let detectedColor = 'Navy / Blue';
-          const lower = cleanName.toLowerCase();
-
-          if (lower.includes('pant') || lower.includes('jean') || lower.includes('trouser') || lower.includes('short') || lower.includes('chino')) {
-            detectedCategory = 'Bottoms';
-          } else if (lower.includes('shoe') || lower.includes('sneaker') || lower.includes('boot') || lower.includes('sandal') || lower.includes('loafer')) {
-            detectedCategory = 'Shoes';
-          } else if (lower.includes('jacket') || lower.includes('coat') || lower.includes('blazer') || lower.includes('hoodie') || lower.includes('sweater')) {
-            detectedCategory = 'Outerwear';
-          } else if (lower.includes('watch') || lower.includes('glass') || lower.includes('bag')) {
-            detectedCategory = 'Accessories';
-          }
-
-          if (lower.includes('black')) detectedColor = 'Black';
-          else if (lower.includes('white')) detectedColor = 'White';
-          else if (lower.includes('beige') || lower.includes('khaki') || lower.includes('tan')) detectedColor = 'Beige';
-          else if (lower.includes('green') || lower.includes('olive')) detectedColor = 'Olive Green';
-          else if (lower.includes('grey') || lower.includes('gray')) detectedColor = 'Grey';
-
-          setFormData({
+          setFormData((prev) => ({
+            ...prev,
             image: ev.target.result,
-            name: cleanName || 'Custom Wardrobe Piece',
+            name: prev.name || cleanName || 'New Wardrobe Item',
             category: detectedCategory,
-            color: detectedColor,
-            colorHex: '#334155',
-            brand: 'Personal Wardrobe',
-            style: 'Smart Casual',
-            price: 2499
-          });
-
-          setIsScanning(false);
-          setScanSuccessMessage(`AI Vision detected: ${detectedCategory} (${detectedColor})`);
-        }, 600);
+            color: detectedColor
+          }));
+          setIsAnalyzingPhoto(false);
+        }, 300);
       };
+
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSelectPreset = (p) => {
-    setFormData({
-      ...formData,
-      image: p.url,
-      name: p.label,
-      category: p.category,
-      color: p.color,
-      colorHex: p.colorHex,
-      style: p.style || 'Smart Casual'
-    });
-    setScanSuccessMessage(null);
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.name) return;
+    if (!formData.name.trim()) return;
+
     onAdd({
       ...formData,
+      image: formData.image || 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&q=80',
       price: Number(formData.price) || 2499,
       usageCount: 0
     });
-    onClose();
-    // Reset form
+
+    // Reset & close
     setFormData({
       name: '',
       category: 'Tops',
       brand: '',
-      color: 'White',
-      colorHex: '#FFFFFF',
-      style: 'Smart Casual / Minimal',
+      color: 'Navy Blue',
       price: '',
-      image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&q=80'
+      image: null
     });
-    setScanSuccessMessage(null);
+    onClose();
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add Item to Your Digital Wardrobe" maxWidth="max-w-2xl">
+    <Modal isOpen={isOpen} onClose={onClose} title="Add to Closet" maxWidth="max-w-md">
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Photo Upload & Presets Area */}
+        {/* Hidden File & Camera Inputs */}
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleImageFile}
+          className="hidden"
+        />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageFile}
+          className="hidden"
+        />
+
+        {/* 1. Photo Capture Box */}
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-              <Camera className="w-3.5 h-3.5 text-emerald-600" />
-              <span>1. Snap Photo or Upload Clothes</span>
-            </label>
-            <span className="text-[11px] text-slate-400">Click photo on hanger/bed or choose preset</span>
-          </div>
-
-          {/* Upload Button */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="p-4 bg-slate-50 hover:bg-slate-100/80 border-2 border-dashed border-slate-300 hover:border-slate-800 rounded-2xl cursor-pointer text-center transition-all flex flex-col items-center justify-center gap-2 group"
-            >
-              <div className="w-10 h-10 rounded-xl bg-white shadow-xs flex items-center justify-center text-slate-700 group-hover:scale-105 transition-transform">
-                <UploadCloud className="w-5 h-5 text-emerald-600" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-800">Upload Photo from Computer/Phone</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">Auto-categorizes & auto-tags color</p>
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleCustomFileUpload}
-                className="hidden"
+          {formData.image ? (
+            <div className="relative aspect-4/3 w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 group">
+              <img
+                src={formData.image}
+                alt="Selected clothing"
+                className="w-full h-full object-cover"
               />
+              <button
+                type="button"
+                onClick={() => setFormData((prev) => ({ ...prev, image: null }))}
+                className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-slate-900/80 text-white hover:bg-slate-900 shadow-md transition-all cursor-pointer"
+                title="Remove photo"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-
-            {/* Live Preview Card */}
-            <div className="p-3 bg-slate-900 text-white rounded-2xl flex items-center justify-between gap-3 relative overflow-hidden">
-              {isScanning && (
-                <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center gap-2 text-xs font-bold text-emerald-300 z-10">
-                  <Zap className="w-4 h-4 animate-spin text-emerald-400" />
-                  <span>AI Scanning item & colors...</span>
-                </div>
-              )}
-              <div className="flex items-center gap-3 min-w-0">
-                <img
-                  src={formData.image}
-                  alt="Selected"
-                  className="w-16 h-16 rounded-xl object-cover bg-white/10 border border-white/20 flex-shrink-0"
-                />
-                <div className="min-w-0">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block">Selected Piece</span>
-                  <p className="text-xs font-bold text-white truncate">{formData.name || 'Select or Upload'}</p>
-                  <p className="text-[11px] text-slate-300 truncate">{formData.category} · {formData.color}</p>
-                </div>
+          ) : (
+            <div className="border-2 border-dashed border-slate-200 hover:border-slate-300 rounded-2xl p-6 text-center bg-slate-50 transition-colors">
+              <div className="w-11 h-11 rounded-2xl bg-white text-slate-600 shadow-2xs border border-slate-200 flex items-center justify-center mx-auto mb-2.5">
+                {isAnalyzingPhoto ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
+                ) : (
+                  <Camera className="w-5 h-5" />
+                )}
               </div>
-              {formData.image && (
+              <p className="text-xs font-bold text-slate-800">Snap or Upload Clothing Photo</p>
+              <p className="text-[11px] text-slate-400 mt-0.5 mb-3.5">
+                Take a clean photo against a flat surface
+              </p>
+              <div className="flex items-center justify-center gap-2">
                 <button
                   type="button"
-                  onClick={() => {
-                    setFormData(prev => ({
-                      ...prev,
-                      name: '',
-                      image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&q=80',
-                      brand: '',
-                      color: 'White',
-                      price: ''
-                    }));
-                    setScanSuccessMessage(null);
-                    if (fileInputRef.current) fileInputRef.current.value = '';
-                  }}
-                  title="Remove / Clear Photo"
-                  className="p-2 text-slate-400 hover:text-rose-400 hover:bg-white/10 rounded-xl transition-all cursor-pointer flex-shrink-0"
+                  onClick={() => cameraInputRef.current?.click()}
+                  className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Camera className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Camera</span>
                 </button>
-              )}
-            </div>
-          </div>
-
-          {/* AI Scan feedback message */}
-          {scanSuccessMessage && (
-            <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-bold text-emerald-800 flex items-center gap-2 mb-3 animate-fade-in">
-              <Zap className="w-4 h-4 text-emerald-600" />
-              <span>{scanSuccessMessage}</span>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-3.5 py-2 bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <UploadCloud className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Photo Library</span>
+                </button>
+              </div>
             </div>
           )}
+        </div>
 
-          {/* Quick Presets Grid */}
-          <div>
-            <span className="text-[11px] font-semibold text-slate-400 block mb-1.5">Or Pick a Quick Capsule Preset:</span>
-            <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-              {presetImages.map((p, idx) => (
+        {/* 2. Item Name */}
+        <div>
+          <label className="block text-xs font-bold text-slate-700 mb-1">
+            Item Name <span className="text-rose-500">*</span>
+          </label>
+          <input
+            type="text"
+            required
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="e.g. Oxford Cotton Button-Down"
+            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-emerald-500"
+          />
+        </div>
+
+        {/* 3. Category Selector Chips */}
+        <div>
+          <label className="block text-xs font-bold text-slate-700 mb-1.5">
+            Category
+          </label>
+          <div className="flex flex-wrap gap-1.5">
+            {CATEGORIES.map((cat) => {
+              const isSelected = formData.category === cat;
+              return (
                 <button
-                  key={idx}
+                  key={cat}
                   type="button"
-                  onClick={() => handleSelectPreset(p)}
-                  title={p.label}
-                  className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
-                    formData.image === p.url
-                      ? 'border-slate-900 ring-2 ring-slate-900 ring-offset-1'
-                      : 'border-slate-200 opacity-70 hover:opacity-100 hover:border-slate-400'
+                  onClick={() => setFormData({ ...formData, category: cat })}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'
                   }`}
                 >
-                  <img src={p.url} alt={p.label} className="w-full h-full object-cover" />
-                  {formData.image === p.url && (
-                    <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center">
-                      <Check className="w-4 h-4 text-white" />
-                    </div>
-                  )}
+                  {cat}
                 </button>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Item Details Fields */}
-        <div className="pt-2 border-t border-slate-100 space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Item Name *
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Linen Blend Resort Shirt"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Category *
-              </label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer"
-              >
-                <option value="Tops">Tops / Shirts</option>
-                <option value="Bottoms">Bottoms / Trousers / Jeans</option>
-                <option value="Outerwear">Outerwear / Jackets</option>
-                <option value="Shoes">Shoes / Sneakers / Footwear</option>
-                <option value="Eyewear">Eyewear / Sunglasses</option>
-                <option value="Bags">Bags / Backpacks</option>
-                <option value="Watches">Watches</option>
-                <option value="Accessories">Accessories</option>
-              </select>
-            </div>
+        {/* 4. Brand & Color (2 Columns) */}
+        <div className="grid grid-cols-2 gap-2.5">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Brand (Optional)
+            </label>
+            <input
+              type="text"
+              value={formData.brand}
+              onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+              placeholder="e.g. Uniqlo, Zara"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-emerald-500"
+            />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Color Name
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Olive Green"
-                value={formData.color}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Brand (Optional)
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Uniqlo / Zara"
-                value={formData.brand}
-                onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Approx. Price (₹)
-              </label>
-              <input
-                type="number"
-                placeholder="2499"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
-              />
-            </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Color
+            </label>
+            <input
+              type="text"
+              value={formData.color}
+              onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+              placeholder="e.g. White, Navy"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-emerald-500"
+            />
           </div>
         </div>
 
-        {/* Modal Actions */}
-        <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
-          >
-            Cancel
-          </button>
+        {/* 5. Price (Optional) */}
+        <div>
+          <label className="block text-xs font-bold text-slate-700 mb-1">
+            Price / Value (₹)
+          </label>
+          <input
+            type="number"
+            value={formData.price}
+            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+            placeholder="e.g. 2499"
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-emerald-500"
+          />
+        </div>
+
+        {/* Submit Button */}
+        <div className="pt-2">
           <button
             type="submit"
-            className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all cursor-pointer active:scale-95"
+            disabled={!formData.name.trim()}
+            className="w-full py-3 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white text-xs sm:text-sm font-bold rounded-2xl shadow-floating transition-all active:scale-98 cursor-pointer flex items-center justify-center gap-2"
           >
-            Save to Wardrobe
+            <Check className="w-4 h-4 text-emerald-400" />
+            <span>Add Item to Wardrobe</span>
           </button>
         </div>
       </form>

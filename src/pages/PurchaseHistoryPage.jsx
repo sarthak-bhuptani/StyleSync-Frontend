@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Clock,
   ThumbsUp,
@@ -9,7 +9,6 @@ import {
   TrendingUp,
   CheckCircle2
 } from 'lucide-react';
-import { INITIAL_PURCHASES } from '../data/mockData';
 import { purchaseApi } from '../api/purchaseApi';
 import { RecommendationBadge } from '../components/common/RecommendationBadge';
 import { Modal } from '../components/common/Modal';
@@ -20,9 +19,24 @@ export const PurchaseHistoryPage = () => {
   const { showToast } = useWardrobe();
   const [purchases, setPurchases] = useState(() => {
     const saved = localStorage.getItem('stylesync_purchases');
-    return saved ? JSON.parse(saved) : INITIAL_PURCHASES;
+    return saved ? JSON.parse(saved) : [];
   });
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  useEffect(() => {
+    const loadPurchases = async () => {
+      try {
+        const list = await purchaseApi.getPurchases();
+        if (Array.isArray(list)) {
+          setPurchases(list);
+        }
+      } catch (err) {
+        console.warn('Could not fetch purchases:', err);
+      }
+    };
+    loadPurchases();
+  }, []);
+
   const [newPurchase, setNewPurchase] = useState({
     productName: '',
     category: 'Shoes',

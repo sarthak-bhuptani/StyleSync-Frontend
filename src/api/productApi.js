@@ -91,7 +91,8 @@ export const productApi = {
       'Versatile capsule staple that pairs easily with existing bottoms and footwear',
       'Flattering neutral color harmony with high seasonal versatility'
     ];
-    let considerations = ['Ensure fit matches your preferred silhouette (relaxed vs structured)'];
+    const nonApparelKeywords = ['car', 'phone', 'laptop', 'dog', 'food', 'cat', 'furniture', 'building'];
+    const isNonApparel = nonApparelKeywords.some(kw => rawName.includes(kw));
 
     if (isNonApparel) {
       score = 15;
@@ -143,30 +144,47 @@ export const productApi = {
     return newAnalyzedProduct;
   },
 
+  // 1. Scrape image/price/title from store URL
   parseProductUrl: async (url) => {
-    const response = await apiClient.post('/products/parse-url', { url });
-    return response.data?.data || response.data;
+    const res = await apiClient.post('/products/parse-url', { url });
+    return res.data?.data || res.data;
   },
 
-  compareProducts: async (itemA, itemB) => {
-    const response = await apiClient.post('/products/compare', { itemA, itemB });
-    return response.data?.data || response.data;
-  },
-
-  completeTheLook: async (productId, productData) => {
-    const response = await apiClient.post(`/products/${productId}/complete-the-look`, { productData });
-    return response.data?.data || response.data;
-  },
-
-  deleteProduct: async (id) => {
-    try {
-      await apiClient.delete(`/products/${id}`);
-    } catch {
-      // Local fallback
+  // 2. AI Compare prospective items
+  compareProducts: async (productIdsOrItemA, itemB) => {
+    let payload;
+    if (Array.isArray(productIdsOrItemA)) {
+      payload = { productIds: productIdsOrItemA };
+    } else if (itemB) {
+      payload = { itemA: productIdsOrItemA, itemB };
+    } else if (typeof productIdsOrItemA === 'object' && productIdsOrItemA.productIds) {
+      payload = productIdsOrItemA;
+    } else {
+      payload = { productIds: [productIdsOrItemA] };
     }
-    const currentList = getStoredProducts();
-    const updated = currentList.filter(p => p.id !== id);
-    localStorage.setItem('stylesync_analyzed_products', JSON.stringify(updated));
-    return true;
+    const res = await apiClient.post('/products/compare', payload);
+    return res.data?.data || res.data;
+  },
+
+  // 3. Complete the Look for a specific product
+  completeTheLook: async (productId, productData) => {
+    const res = await apiClient.post(`/products/${productId}/complete-the-look`, { productData });
+    return res.data?.data || res.data;
+  },
+
+  // 4. Delete analyzed product
+  deleteProduct: async (productId) => {
+    try {
+      const res = await apiClient.delete(`/products/${productId}`);
+      const currentList = getStoredProducts();
+      const updated = currentList.filter(p => p.id !== productId && p._id !== productId);
+      localStorage.setItem('stylesync_analyzed_products', JSON.stringify(updated));
+      return res.data;
+    } catch (err) {
+      const currentList = getStoredProducts();
+      const updated = currentList.filter(p => p.id !== productId && p._id !== productId);
+      localStorage.setItem('stylesync_analyzed_products', JSON.stringify(updated));
+      return { success: true };
+    }
   }
 };

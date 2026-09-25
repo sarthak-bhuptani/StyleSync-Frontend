@@ -61,7 +61,7 @@ export const RegisterPage = () => {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Sarthak Sharma"
+              placeholder="e.g. Alex Johnson"
               className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
             />
           </div>
@@ -75,7 +75,7 @@ export const RegisterPage = () => {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="sarthak@example.com"
+              placeholder="name@example.com"
               className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
             />
           </div>

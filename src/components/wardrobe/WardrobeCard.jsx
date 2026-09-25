@@ -48,7 +48,7 @@ export const WardrobeCard = ({ item, onEdit, onDelete, onViewDetails }) => {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onDelete(item.id);
+                onDelete(item);
               }}
               title="Delete Item"
               className="p-2 bg-white text-rose-600 hover:bg-rose-50 hover:text-rose-700 rounded-xl shadow hover:scale-110 transition-transform cursor-pointer"
@@ -63,7 +63,7 @@ export const WardrobeCard = ({ item, onEdit, onDelete, onViewDetails }) => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onDelete(item.id);
+              onDelete(item);
             }}
             title="Delete this item"
             className="absolute top-2.5 right-2.5 p-1.5 bg-white/90 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg shadow-xs border border-white/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10"

@@ -1,5 +1,4 @@
 import { apiClient, simulateNetworkDelay } from './client';
-import { INITIAL_USER } from '../data/mockData';
 
 export const profileApi = {
   getProfile: async () => {
@@ -13,7 +12,7 @@ export const profileApi = {
     } catch {
       await simulateNetworkDelay(250);
       const saved = localStorage.getItem('stylesync_user');
-      return saved ? JSON.parse(saved) : INITIAL_USER;
+      return saved ? JSON.parse(saved) : null;
     }
   },
 
@@ -27,7 +26,7 @@ export const profileApi = {
       return user;
     } catch {
       await simulateNetworkDelay(400);
-      const current = JSON.parse(localStorage.getItem('stylesync_user')) || INITIAL_USER;
+      const current = JSON.parse(localStorage.getItem('stylesync_user')) || {};
       const merged = { ...current, ...updatedData };
       localStorage.setItem('stylesync_user', JSON.stringify(merged));
       return merged;
@@ -44,7 +43,7 @@ export const profileApi = {
       return user;
     } catch {
       await simulateNetworkDelay(600);
-      const current = JSON.parse(localStorage.getItem('stylesync_user')) || INITIAL_USER;
+      const current = JSON.parse(localStorage.getItem('stylesync_user')) || {};
       const updated = {
         ...current,
         ...onboardingData,

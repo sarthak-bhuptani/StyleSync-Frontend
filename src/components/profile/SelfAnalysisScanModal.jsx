@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import {
   Camera,
-  UploadCloud,
   CheckCircle2,
-  Scan,
   User,
   Palette,
   Eye,
   Ruler,
   Check,
   RefreshCw,
-  Sliders,
-  AlertCircle
+  AlertCircle,
+  ArrowRight,
+  Sliders
 } from 'lucide-react';
 import { Modal } from '../common/Modal';
 import { useAuth } from '../../context/AuthContext';
@@ -31,39 +30,24 @@ export const SelfAnalysisScanModal = ({ isOpen, onClose }) => {
     skinTone: user?.physicalTraits?.skinUndertone || user?.physicalAnalysis?.skinTone || 'Warm Golden',
     skinUndertone: user?.physicalTraits?.skinUndertone || 'Warm Golden',
     skinToneHex: user?.physicalAnalysis?.skinToneHex || '#D2A374',
-    colorSeason: user?.physicalTraits?.colorSeason || user?.physicalAnalysis?.colorSeason || 'Deep Autumn',
-    bodyType: user?.physicalTraits?.bodySilhouette || user?.physicalAnalysis?.bodyType || 'Athletic V-Taper',
-    contrastLevel: user?.physicalAnalysis?.contrastLevel || 'Medium-High Contrast',
-    eyewearSuitability: user?.physicalTraits?.calibrationNotes || 'Square, Hexagonal, Wayfarer, Aviator frames balance your proportions',
-    necklineSuitability: 'Camp collars, classic crew necks, and open cuban plackets complement jawline',
-    fitRecommendation: 'Relaxed drop-shoulder tops with tapered bottoms create balanced vertical lines'
+    colorSeason: user?.physicalTraits?.colorSeason || user?.physicalAnalysis?.colorSeason || 'Warm Autumn',
+    bodyType: user?.physicalTraits?.bodySilhouette || user?.physicalAnalysis?.bodyType || 'Athletic',
+    eyewearSuitability: user?.physicalTraits?.calibrationNotes || 'Square, Hexagonal, and Aviator frames balance your proportions',
+    necklineSuitability: 'Camp collars and open plackets complement jawline',
+    fitRecommendation: 'Relaxed drop-shoulder tops with tapered bottoms create balanced lines'
   });
 
-  const faceShapes = [
-    { name: 'Oval', desc: 'Balanced proportions; suits almost all eyewear and collars.' },
-    { name: 'Square', desc: 'Strong jawline; suits round/oval eyewear & softer collar lines.' },
-    { name: 'Round', desc: 'Softer curves; suits angular, rectangular, and structured eyewear.' },
-    { name: 'Heart', desc: 'Broader forehead; suits bottom-heavy frames & open necklines.' },
-    { name: 'Diamond', desc: 'Prominent cheekbones; suits rimless and cat-eye/oval styles.' },
-    { name: 'Oblong', desc: 'Longer vertical proportions; suits wide horizontal frames.' }
-  ];
+  const faceShapes = ['Oval', 'Square', 'Round', 'Heart', 'Diamond', 'Oblong'];
 
   const skinUndertones = [
-    { name: 'Warm Golden', hex: '#D2A374', season: 'Warm Autumn (Olive, Tan, Earthy tones)' },
-    { name: 'Cool Rosy', hex: '#F3C5B5', season: 'Cool Winter / Summer (Navy, Slate, Charcoal)' },
-    { name: 'Neutral', hex: '#E7B69E', season: 'Neutral All-Season (Black, White, Cream)' },
-    { name: 'Olive', hex: '#BCA882', season: 'Warm Olive (Earthy Brown, Terracotta, Forest)' },
-    { name: 'Deep Warm', hex: '#8D5524', season: 'Deep Autumn (Burgundy, Forest Green, Gold)' }
+    { name: 'Warm Golden', hex: '#D2A374', season: 'Warm Autumn' },
+    { name: 'Cool Rosy', hex: '#F3C5B5', season: 'Cool Winter' },
+    { name: 'Warm Olive', hex: '#BCA882', season: 'Deep Autumn' },
+    { name: 'Deep Warm', hex: '#8D5524', season: 'Warm Autumn' },
+    { name: 'Neutral', hex: '#E7B69E', season: 'Universal' }
   ];
 
-  const bodyTypes = [
-    { name: 'Athletic V-Taper', desc: 'Broad chest/shoulders, slim waist. Best in relaxed structured fits.' },
-    { name: 'Lean Rectangle', desc: 'Even shoulder-to-hip width. Best in layered outerwear & textured fabrics.' },
-    { name: 'Hourglass', desc: 'Balanced chest & hips with defined waistline.' },
-    { name: 'Pear/Triangle', desc: 'Wider hips and thighs. Best in structured shoulders & darker bottoms.' },
-    { name: 'Inverted Triangle', desc: 'Broad shoulders tapering sharply to hips.' },
-    { name: 'Oval/Apple', desc: 'Fuller midsection. Best in vertical lines and fluid tailoring.' }
-  ];
+  const bodyTypes = ['Athletic', 'Lean', 'Classic', 'Structured', 'Relaxed'];
 
   const handleFileUpload = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -71,21 +55,42 @@ export const SelfAnalysisScanModal = ({ isOpen, onClose }) => {
       reader.onload = (ev) => {
         setPhotoPreview(ev.target.result);
         setScanError(null);
-        startScan(ev.target.result);
       };
       reader.readAsDataURL(e.target.files[0]);
     }
   };
 
+  const [scanProgress, setScanProgress] = useState(15);
+  const [scanPhaseText, setScanPhaseText] = useState('Reading complexion & undertone temperature...');
+
   const startScan = async (img = photoPreview) => {
     if (!img) {
-      setScanError('Please select or upload a selfie photo first.');
+      setScanError('Please select or upload a portrait photo first.');
       return;
     }
     setScanStep('scanning');
     setScanError(null);
+    setScanProgress(20);
+    setScanPhaseText('Reading complexion & undertone temperature...');
+
     try {
-      const liveResult = await profileApi.scanFaceBody(img);
+      // Step 1: Trigger scan API
+      const apiPromise = profileApi.scanFaceBody(img);
+
+      // Smooth step-by-step progress timer sequence
+      await new Promise(r => setTimeout(r, 650));
+      setScanProgress(55);
+      setScanPhaseText('Mapping facial symmetry & jawline structure...');
+
+      await new Promise(r => setTimeout(r, 750));
+      setScanProgress(85);
+      setScanPhaseText('Curating flattering seasonal color palette...');
+
+      const liveResult = await apiPromise;
+      
+      await new Promise(r => setTimeout(r, 500));
+      setScanProgress(100);
+
       if (liveResult) {
         const traits = liveResult.physicalTraits || liveResult.detectedAnalysis || liveResult;
         const analysis = liveResult.detectedAnalysis || traits;
@@ -111,10 +116,10 @@ export const SelfAnalysisScanModal = ({ isOpen, onClose }) => {
         }
 
         setScanStep('results');
-        showToast('Face, Complexion & Silhouette calibrated with AI Vision!', 'success');
+        showToast('Color palette & traits analyzed!', 'success');
       }
     } catch (err) {
-      const msg = err.message || 'No human face detected. Please upload a clear selfie photo.';
+      const msg = err.message || 'Could not analyze photo. Please upload a clear portrait.';
       setScanError(msg);
       setScanStep('idle');
       showToast(msg, 'error');
@@ -137,234 +142,240 @@ export const SelfAnalysisScanModal = ({ isOpen, onClose }) => {
         ...physicalData
       }
     });
-    showToast('Your calibrated Face, Complexion & Silhouette are saved!', 'success');
+    showToast('Personal style profile saved!', 'success');
     onClose();
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="AI Face, Complexion & Body Calibration" maxWidth="max-w-2xl">
-      <div className="space-y-6">
-        {/* Intro */}
-        <div>
-          <p className="text-xs text-slate-500 leading-relaxed">
-            StyleSync analyzes your <strong>Face Shape</strong>, <strong>Skin Undertone</strong>, and <strong>Silhouette</strong> to determine whether clothes, shoes, goggles, and colors will genuinely flatter you before purchasing.
-          </p>
-        </div>
-
+    <Modal isOpen={isOpen} onClose={onClose} title="Personal Color & Style Profile" maxWidth="max-w-lg">
+      <div className="space-y-4 animate-fade-in text-slate-800">
+        
         {scanError && (
-          <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 flex items-start gap-2.5 animate-fade-in">
-            <AlertCircle className="w-4 h-4 text-rose-600 mt-0.5 flex-shrink-0" />
+          <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
             <span>{scanError}</span>
           </div>
         )}
 
-        {/* Step 1: Upload or Scan Photo */}
+        {/* Step 1: Upload / Ready */}
         {scanStep === 'idle' && (
-          <div className="space-y-5 animate-fade-in">
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
-              <div className="sm:col-span-5 relative group">
-                <div className="aspect-[4/5] rounded-3xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm relative flex items-center justify-center">
-                  {photoPreview ? (
-                    <img src={photoPreview} alt="Selfie" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="text-center p-6 text-slate-400">
-                      <Camera className="w-10 h-10 mx-auto mb-2 text-slate-300" />
-                      <p className="text-xs font-semibold">No photo selected</p>
-                      <p className="text-[10px] text-slate-400">Upload a selfie below</p>
-                    </div>
-                  )}
-                  {photoPreview && (
-                    <div className="absolute inset-0 bg-slate-900/20 flex items-center justify-center">
-                      <span className="bg-slate-900/80 text-white text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur-xs">
-                        Ready to Calibrate
-                      </span>
-                    </div>
-                  )}
-                </div>
+          <div className="text-center space-y-4 py-1">
+            
+            {/* Compact Circular Preview */}
+            <div className="relative w-28 h-28 mx-auto">
+              <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-md ring-2 ring-slate-200 bg-slate-100 flex items-center justify-center">
+                {photoPreview ? (
+                  <img src={photoPreview} alt="Portrait preview" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="p-4 text-slate-400 text-center">
+                    <Camera className="w-8 h-8 mx-auto mb-1 text-slate-300" />
+                    <span className="text-[10px] font-semibold">No photo</span>
+                  </div>
+                )}
               </div>
-
-              <div className="sm:col-span-7 space-y-4">
-                <h4 className="text-sm font-bold text-slate-900">1. Provide a Selfie or Portrait Photo</h4>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Upload a well-lit photo showing your face and shoulders so StyleSync AI can calibrate your jawline geometry and natural undertone palette.
-                </p>
-
-                <label className="flex items-center justify-center gap-2 p-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 border-dashed rounded-2xl cursor-pointer text-xs font-bold text-slate-700 transition-colors">
-                  <UploadCloud className="w-4 h-4 text-emerald-600" />
-                  <span>Upload Your Photo / Selfie</span>
-                  <input type="file" accept="image/png, image/jpeg, image/webp" onChange={handleFileUpload} className="hidden" />
-                </label>
-
-                <button
-                  type="button"
-                  disabled={!photoPreview}
-                  onClick={() => startScan()}
-                  className={`w-full py-3 text-white text-xs font-bold rounded-xl shadow-subtle flex items-center justify-center gap-2 transition-all ${
-                    photoPreview ? 'bg-slate-900 hover:bg-slate-800 cursor-pointer active:scale-[0.99]' : 'bg-slate-300 cursor-not-allowed'
-                  }`}
-                >
-                  <Scan className="w-4 h-4 text-emerald-400" />
-                  <span>Run AI Body & Face Calibration</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: Scanning Animation */}
-        {scanStep === 'scanning' && (
-          <div className="py-12 text-center space-y-6 animate-fade-in">
-            <div className="relative w-32 h-32 mx-auto rounded-3xl overflow-hidden border-2 border-emerald-500 shadow-card bg-slate-100 flex items-center justify-center">
-              {photoPreview && <img src={photoPreview} alt="Scanning" className="w-full h-full object-cover" />}
-              <div className="absolute inset-0 bg-emerald-500/15 animate-pulse" />
-              <div className="absolute left-0 right-0 h-1 bg-emerald-400 shadow-[0_0_8px_#10B981] animate-bounce" />
+              <label className="absolute bottom-0 right-0 p-2 bg-slate-900 hover:bg-slate-800 text-white rounded-full shadow-md cursor-pointer transition-transform hover:scale-105 active:scale-95">
+                <Camera className="w-3.5 h-3.5" />
+                <input type="file" accept="image/png, image/jpeg, image/webp" onChange={handleFileUpload} className="hidden" />
+              </label>
             </div>
 
-            <div>
-              <h4 className="text-base font-bold text-slate-900">AI Vision Engine Calibrating...</h4>
-              <p className="text-xs text-slate-500 mt-1">
-                Checking face geometry, skin undertone spectrum, and silhouette proportions.
+            <div className="space-y-1">
+              <h4 className="text-sm font-extrabold text-slate-900">Personal Color & Proportions</h4>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+                Add a portrait photo to find your flattering season colors, undertone warmth, and frame pairings.
               </p>
             </div>
 
-            <div className="flex justify-center gap-2 text-[11px] font-semibold text-emerald-700">
-              <span className="bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/60 animate-pulse">
-                Analyzing undertone
-              </span>
-              <span className="bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/60 animate-pulse">
-                Classifying season
-              </span>
+            <div className="pt-2 flex flex-col gap-2">
+              <button
+                type="button"
+                disabled={!photoPreview}
+                onClick={() => startScan()}
+                className={`w-full py-2.5 text-white text-xs font-bold rounded-2xl shadow-xs flex items-center justify-center gap-2 transition-all ${
+                  photoPreview ? 'bg-slate-900 hover:bg-slate-800 cursor-pointer active:scale-98' : 'bg-slate-300 cursor-not-allowed'
+                }`}
+              >
+                <Palette className="w-3.5 h-3.5 text-amber-400" />
+                <span>Find My Best Colors</span>
+              </button>
+
+              <label className="text-xs font-semibold text-slate-600 hover:text-slate-900 py-1 cursor-pointer text-center transition-colors">
+                <span>Upload a different photo</span>
+                <input type="file" accept="image/png, image/jpeg, image/webp" onChange={handleFileUpload} className="hidden" />
+              </label>
             </div>
           </div>
         )}
 
-        {/* Step 3: Calibrated Results */}
+        {/* Step 2: Styling in Progress */}
+        {scanStep === 'scanning' && (
+          <div className="py-6 text-center space-y-4 animate-fade-in">
+            
+            {/* Viewfinder Circle with Scanner Laser Sweep */}
+            <div className="relative w-28 h-28 mx-auto">
+              {/* Corner brackets */}
+              <div className="absolute -inset-1.5 border border-dashed border-slate-300 rounded-full animate-spin [animation-duration:12s]" />
+              
+              <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-slate-900 shadow-md relative bg-slate-100 flex items-center justify-center">
+                {photoPreview && <img src={photoPreview} alt="Analyzing" className="w-full h-full object-cover" />}
+                
+                {/* Gentle scanning laser line */}
+                <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent shadow-[0_0_8px_rgba(251,191,36,0.8)] animate-scan-sweep pointer-events-none" />
+                <div className="absolute inset-0 bg-amber-500/5 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Title & Live Status */}
+            <div className="space-y-1.5 max-w-xs mx-auto">
+              <h4 className="text-sm font-extrabold text-slate-900">Analyzing Your Personal Palette</h4>
+              <p className="text-xs text-amber-700 font-medium animate-pulse min-h-[18px]">
+                {scanPhaseText}
+              </p>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="max-w-xs mx-auto space-y-1.5">
+              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200">
+                <div
+                  className="h-full bg-slate-900 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${scanProgress}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-[10px] font-semibold text-slate-400 px-0.5">
+                <span>Skin & Undertone</span>
+                <span>Proportions</span>
+                <span>Palette</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Calibrated Results Summary */}
         {scanStep === 'results' && (
-          <div className="space-y-6 animate-fade-in">
-            <div className="p-4 bg-emerald-50/70 border border-emerald-200/70 rounded-2xl flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-              <div className="text-xs text-emerald-950">
-                <span className="font-bold block mb-0.5">Physical Calibration Complete</span>
-                <span>
-                  Our AI Vision Engine has identified your facial proportions and natural undertone. You can review or manually adjust the detected traits below.
-                </span>
+          <div className="space-y-3.5 animate-fade-in text-xs">
+            
+            {/* Header pill */}
+            <div className="p-3 bg-amber-50/60 border border-amber-200/70 rounded-2xl flex items-center gap-2.5">
+              <CheckCircle2 className="w-4 h-4 text-amber-700 shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-slate-900 text-xs">Calibration Complete</p>
+                <p className="text-[11px] text-slate-600">Review or fine-tune your detected physical traits below.</p>
               </div>
             </div>
 
             {/* Trait 1: Face Shape */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-slate-500" />
-                <span>Detected Face Shape</span>
+            <div className="space-y-1.5">
+              <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-slate-400" />
+                <span>Face Shape</span>
               </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {faceShapes.map((shape) => (
-                  <button
-                    key={shape.name}
-                    type="button"
-                    onClick={() => setPhysicalData({ ...physicalData, faceShape: shape.name })}
-                    className={`p-3 rounded-xl border text-left transition-all ${
-                      physicalData.faceShape.toLowerCase().includes(shape.name.toLowerCase())
-                        ? 'border-emerald-600 bg-emerald-50/40 ring-1 ring-emerald-600'
-                        : 'border-slate-200 hover:border-slate-300 bg-white'
-                    }`}
-                  >
-                    <p className="text-xs font-bold text-slate-900">{shape.name}</p>
-                    <p className="text-[10px] text-slate-500 mt-1 leading-snug">{shape.desc}</p>
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-1.5">
+                {faceShapes.map((shape) => {
+                  const isSelected = physicalData.faceShape.toLowerCase() === shape.toLowerCase();
+                  return (
+                    <button
+                      key={shape}
+                      type="button"
+                      onClick={() => setPhysicalData({ ...physicalData, faceShape: shape })}
+                      className={`px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
+                          : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                      }`}
+                    >
+                      {shape}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* Trait 2: Skin Undertone */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <Palette className="w-3.5 h-3.5 text-slate-500" />
-                <span>Skin Undertone & Color Season</span>
+            <div className="space-y-1.5 pt-1">
+              <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                <Palette className="w-3.5 h-3.5 text-slate-400" />
+                <span>Skin Undertone & Season</span>
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {skinUndertones.map((tone) => (
-                  <button
-                    key={tone.name}
-                    type="button"
-                    onClick={() =>
-                      setPhysicalData({
-                        ...physicalData,
-                        skinUndertone: tone.name,
-                        skinTone: tone.name,
-                        skinToneHex: tone.hex
-                      })
-                    }
-                    className={`p-3 rounded-xl border flex items-center gap-3 text-left transition-all ${
-                      physicalData.skinUndertone.toLowerCase().includes(tone.name.toLowerCase())
-                        ? 'border-emerald-600 bg-emerald-50/40 ring-1 ring-emerald-600'
-                        : 'border-slate-200 hover:border-slate-300 bg-white'
-                    }`}
-                  >
-                    <span
-                      className="w-5 h-5 rounded-full border border-slate-300 flex-shrink-0 shadow-xs"
-                      style={{ backgroundColor: tone.hex }}
-                    />
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-slate-900">{tone.name}</p>
-                      <p className="text-[10px] text-slate-500 truncate">{tone.season}</p>
-                    </div>
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-1.5">
+                {skinUndertones.map((tone) => {
+                  const isSelected = physicalData.skinUndertone.toLowerCase() === tone.name.toLowerCase();
+                  return (
+                    <button
+                      key={tone.name}
+                      type="button"
+                      onClick={() =>
+                        setPhysicalData({
+                          ...physicalData,
+                          skinUndertone: tone.name,
+                          skinTone: tone.name,
+                          skinToneHex: tone.hex,
+                          colorSeason: tone.season
+                        })
+                      }
+                      className={`px-2.5 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
+                          : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                      }`}
+                    >
+                      <span className="w-3 h-3 rounded-full shrink-0 shadow-2xs" style={{ backgroundColor: tone.hex }} />
+                      <span>{tone.name}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Trait 3: Body Silhouette */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <Ruler className="w-3.5 h-3.5 text-slate-500" />
-                <span>Body Silhouette / Build</span>
+            {/* Trait 3: Silhouette */}
+            <div className="space-y-1.5 pt-1">
+              <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                <Ruler className="w-3.5 h-3.5 text-slate-400" />
+                <span>Body Build</span>
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {bodyTypes.map((type) => (
-                  <button
-                    key={type.name}
-                    type="button"
-                    onClick={() => setPhysicalData({ ...physicalData, bodyType: type.name })}
-                    className={`p-3 rounded-xl border text-left transition-all ${
-                      physicalData.bodyType.toLowerCase().includes(type.name.toLowerCase().replace('/', ' '))
-                        ? 'border-emerald-600 bg-emerald-50/40 ring-1 ring-emerald-600'
-                        : 'border-slate-200 hover:border-slate-300 bg-white'
-                    }`}
-                  >
-                    <p className="text-xs font-bold text-slate-900">{type.name}</p>
-                    <p className="text-[10px] text-slate-500 mt-0.5 leading-snug">{type.desc}</p>
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-1.5">
+                {bodyTypes.map((type) => {
+                  const isSelected = physicalData.bodyType.toLowerCase() === type.toLowerCase();
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setPhysicalData({ ...physicalData, bodyType: type })}
+                      className={`px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
+                          : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* AI Notes */}
-            {physicalData.eyewearSuitability && (
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-xs text-slate-600">
-                <span className="font-bold text-slate-800 block mb-0.5">AI Styling Recommendation:</span>
-                <span>{physicalData.eyewearSuitability}</span>
-              </div>
-            )}
+            {/* Stylist Recommendation Tip */}
+            <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-slate-600 text-[11px] leading-relaxed">
+              <strong className="text-slate-900">Styling Guidance:</strong> {physicalData.eyewearSuitability}
+            </div>
 
-            {/* Actions */}
-            <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+            {/* Action Buttons */}
+            <div className="flex items-center justify-between pt-2 border-t border-slate-100 gap-2">
               <button
                 type="button"
                 onClick={() => setScanStep('idle')}
-                className="text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-1"
+                className="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 cursor-pointer py-1"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                <span>Rescan with Another Photo</span>
+                <span>Rescan</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleSaveScan}
-                className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5"
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
-                <Check className="w-4 h-4 text-emerald-400" />
-                <span>Save & Activate Traits</span>
+                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Save to Style Profile</span>
               </button>
             </div>
           </div>
@@ -373,3 +384,5 @@ export const SelfAnalysisScanModal = ({ isOpen, onClose }) => {
     </Modal>
   );
 };
+
+export default SelfAnalysisScanModal;

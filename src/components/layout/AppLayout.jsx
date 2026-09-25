@@ -1,130 +1,43 @@
-import React, { useState } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { MobileNavigation } from './MobileNavigation';
-import { BrandLogo } from '../common/BrandLogo';
+import { FloatingAIChatWidget } from '../common/FloatingAIChatWidget';
 import { Toast } from '../common/Toast';
+import { InstallPrompt } from '../common/InstallPrompt';
 import { useWardrobe } from '../../context/WardrobeContext';
-import { useAuth } from '../../context/AuthContext';
-import {
-  X,
-  ShoppingBag,
-  Compass,
-  LayoutDashboard,
-  Layers,
-  ArrowLeftRight,
-  Shirt,
-  Clock,
-  Wallet,
-  MessageSquare,
-  User,
-  Settings,
-  LogOut,
-  Sun,
-  PlusCircle
-} from 'lucide-react';
 
 export const AppLayout = () => {
   const { toastMessage } = useWardrobe();
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const handleMobileLogout = async () => {
-    await logout();
-    setMobileMenuOpen(false);
-    navigate('/login');
-  };
-
-  const navItems = [
-    { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { to: '/daily-stylist', label: 'Wear Today', icon: Sun },
-    { to: '/wardrobe-gaps', label: 'What to Buy', icon: PlusCircle },
-    { to: '/advisor', label: 'Product Advisor', icon: Compass },
-    { to: '/wardrobe', label: 'My Wardrobe', icon: Layers },
-    { to: '/outfits', label: 'Outfit Builder', icon: Shirt },
-    { to: '/compare', label: 'Product Comparison', icon: ArrowLeftRight },
-    { to: '/purchases', label: 'Purchase History', icon: Clock },
-    { to: '/budget', label: 'Budget Tracker', icon: Wallet },
-    { to: '/assistant', label: 'AI Assistant', icon: MessageSquare },
-    { to: '/profile', label: 'My Profile', icon: User },
-    { to: '/settings', label: 'Settings', icon: Settings },
-  ];
 
   return (
     <div className="flex min-h-screen bg-[#FAFAF9] text-slate-800 font-sans antialiased">
       {/* Desktop Sidebar */}
       <Sidebar />
 
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex">
-          <div
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-          <div className="relative w-4/5 max-w-xs bg-white h-full shadow-2xl flex flex-col z-10 p-6 overflow-y-auto">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <BrandLogo size="sm" to="/dashboard" />
-              <button
-                onClick={() => setMobileMenuOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="py-4 space-y-1 flex-1">
-              {navItems.map(item => {
-                const Icon = item.icon;
-                return (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                        isActive
-                          ? 'bg-slate-900 text-white font-semibold'
-                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                      }`
-                    }
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{item.label}</span>
-                  </NavLink>
-                );
-              })}
-            </div>
-
-            <div className="pt-4 border-t border-slate-100">
-              <button
-                onClick={handleMobileLogout}
-                className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-rose-600 hover:bg-rose-50"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Log Out</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 pb-20 lg:pb-8">
-        <Header onOpenMobileMenu={() => setMobileMenuOpen(true)} />
+      <div className="flex-1 flex flex-col min-w-0 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:pb-8">
+        <Header />
         
-        <main className="flex-1 p-4 sm:p-8 max-w-7xl w-full mx-auto animate-fade-in">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto animate-fade-in">
           <Outlet />
         </main>
       </div>
 
-      {/* Mobile Bottom Navigation Bar */}
+      {/* Floating Corner AI Chat Trigger */}
+      <FloatingAIChatWidget />
+
+      {/* 5-Tab Mobile Bottom Navigation Bar with Integrated Center Action Button */}
       <MobileNavigation />
+
+      {/* PWA Home Screen Install Banner */}
+      <InstallPrompt />
 
       {/* Global Toast */}
       {toastMessage && <Toast message={toastMessage.message} type={toastMessage.type} />}
     </div>
   );
 };
+
+export default AppLayout;

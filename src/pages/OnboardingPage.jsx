@@ -23,29 +23,29 @@ export const OnboardingPage = () => {
   const [step, setStep] = useState(1);
   const totalSteps = 6;
 
-  // Onboarding Form State with simple, standard defaults
+  // Onboarding Form State initialized from user state with clean fallbacks
   const [formData, setFormData] = useState({
-    name: user?.name || 'Sarthak Sharma',
-    gender: "Men's Clothing",
-    ageRange: '25-34',
-    height: '5 ft 10 in',
-    location: 'Mumbai, India',
+    name: user?.name || '',
+    gender: user?.gender || '',
+    ageRange: '',
+    height: user?.height || '',
+    location: user?.location || '',
     sizes: {
-      shirt: 'L (40)',
-      tshirt: 'L',
-      pants: '32',
-      shoes: 'UK 9',
-      preferredFit: 'Regular Fit'
+      shirt: user?.sizes?.shirt || '',
+      tshirt: user?.sizes?.tshirt || '',
+      pants: user?.sizes?.pants || '',
+      shoes: user?.sizes?.shoes || '',
+      preferredFit: user?.sizes?.preferredFit || 'Regular Fit'
     },
-    stylePreferences: ['Casual', 'Smart Casual', 'Minimal'],
-    favoriteColors: ['Black', 'White', 'Navy', 'Olive Green'],
-    avoidColors: ['Neon Yellow', 'Hot Pink'],
+    stylePreferences: user?.preferences?.favoriteStyles || user?.stylePreferences || [],
+    favoriteColors: user?.preferences?.favoriteColors || user?.favoriteColors || [],
+    avoidColors: user?.preferences?.avoidColors || user?.avoidColors || [],
     budgetRanges: {
-      clothing: { min: 500, max: 3500 },
-      shoes: { min: 1500, max: 6000 },
-      accessories: { min: 500, max: 2500 }
+      clothing: { min: 500, max: 5000 },
+      shoes: { min: 1000, max: 8000 },
+      accessories: { min: 500, max: 3000 }
     },
-    preferredOccasions: ['Daily Wear', 'Office / Work', 'Dates & Cafes', 'Travel & Trips']
+    preferredOccasions: user?.preferredOccasions || []
   });
 
   const styleOptions = [

@@ -14,8 +14,12 @@ export const WardrobeProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : [];
   });
   const [toastMessage, setToastMessage] = useState(null);
+  const hasLoadedRef = React.useRef(false);
 
   useEffect(() => {
+    if (hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
+
     const loadUserData = async () => {
       const token = localStorage.getItem('stylesync_token');
       if (token) {
@@ -86,14 +90,6 @@ export const WardrobeProvider = ({ children }) => {
       }}
     >
       {children}
-      {toastMessage && (
-        <div className="fixed bottom-5 right-5 z-50 animate-slide-up">
-          <div className="px-4 py-2.5 bg-slate-900 text-white rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2 border border-slate-700">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>{toastMessage.message}</span>
-          </div>
-        </div>
-      )}
     </WardrobeContext.Provider>
   );
 };

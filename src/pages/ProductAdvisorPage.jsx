@@ -47,48 +47,28 @@ export const ProductAdvisorPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      {/* Title Header */}
+      {/* Clean Compact Style Profile Banner */}
       {!analyzing && (
-        <div className="space-y-4 mb-8">
-          <div className="text-center max-w-xl mx-auto">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold mb-3 border border-emerald-200/60">
-              <Compass className="w-3.5 h-3.5 text-emerald-600" />
-              <span>AI Suitability Engine</span>
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-3 sm:p-4 shadow-2xs flex items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-stone-100 flex items-center justify-center shrink-0 text-slate-700">
+              <Compass className="w-4 h-4 text-slate-800" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Will This Suit Me?
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1.5 leading-relaxed">
-              Upload a product screenshot and StyleSync will analyze it against your <strong>Face Shape</strong>, <strong>Skin Undertone</strong>, <strong>Body Build</strong>, wardrobe items, and budget.
-            </p>
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Style Calibration</p>
+              <p className="text-xs font-bold text-slate-800 truncate">
+                {faceShape ? `${faceShape} Face · ${skinTone || 'Warm Golden'} · ${silhouette || 'Athletic Build'}` : 'Profile uncalibrated'}
+              </p>
+            </div>
           </div>
 
-          {/* User Face & Body Calibration Mini Banner */}
-          <div className="p-3.5 bg-white rounded-2xl border border-slate-200/80 shadow-subtle flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-3">
-              <span className={`w-2.5 h-2.5 rounded-full ${faceShape ? 'bg-emerald-500' : 'bg-amber-400'}`} />
-              <span className="text-slate-600">
-                Calibrated to:{' '}
-                {faceShape ? (
-                  <>
-                    <strong className="text-slate-900">{faceShape} Face</strong> ·{' '}
-                    <strong className="text-slate-900">{skinTone || 'Neutral'} Skin</strong> ·{' '}
-                    <strong className="text-slate-900">{silhouette || 'Athletic Build'}</strong>
-                  </>
-                ) : (
-                  <span className="text-amber-700 font-semibold">Not calibrated yet (Selfie calibration recommended)</span>
-                )}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsScanModalOpen(true)}
-              className="font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 cursor-pointer"
-            >
-              <span>{faceShape ? 'Recalibrate Face & Body' : 'Calibrate with Selfie'}</span>
-              <span>→</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setIsScanModalOpen(true)}
+            className="text-[11px] font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-xl shrink-0 transition-colors cursor-pointer"
+          >
+            {faceShape ? 'Edit' : 'Calibrate'}
+          </button>
         </div>
       )}
 

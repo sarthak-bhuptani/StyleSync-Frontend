@@ -44,7 +44,7 @@ export const AnalysisLoadingState = ({ product }) => {
         Evaluating "{product?.name || 'Product'}"
       </h3>
       <p className="text-xs text-slate-500 mb-8 font-medium">
-        Running StyleSync neural evaluation against your physical traits, wardrobe & budget...
+        Consulting your personal style profile, color season, and wardrobe rotation...
       </p>
 
       {/* Steps List */}
@@ -88,7 +88,7 @@ export const AnalysisLoadingState = ({ product }) => {
 
       <div className="mt-6 flex items-center justify-center gap-2 text-xs text-slate-400">
         <ShieldCheck className="w-4 h-4 text-emerald-600" />
-        <span>Synthesizing StyleSync AI evaluation results...</span>
+        <span>Finalizing personal stylist verdict & pairing breakdown...</span>
       </div>
     </div>
   );

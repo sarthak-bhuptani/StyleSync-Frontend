@@ -4,16 +4,46 @@
 
 @layer base {
   body {
-    @apply bg-[#FAFAF9] text-slate-900 font-sans;
+    @apply bg-[#FAFAF9] text-slate-900 font-sans min-h-screen;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  html, body {
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
-/* Custom Scrollbar for clean aesthetics */
+/* Safe Area Inset Support for Mobile Notches & Bottom Navigation */
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.mb-safe {
+  margin-bottom: env(safe-area-inset-bottom, 0px);
+}
+.bottom-safe {
+  bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Hide scrollbars for clean horizontal pill scrolling on mobile */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Custom Scrollbar for clean desktop aesthetics */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -40,6 +70,21 @@
 }
 
 /* Animations */
+@keyframes slide-up-mobile {
+  from {
+    transform: translateY(100%);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up-mobile {
+  animation: slide-up-mobile 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 @keyframes pulse-subtle {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.85; transform: scale(1.02); }
@@ -59,3 +104,38 @@
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
+
+@keyframes scan-sweep {
+  0% {
+    top: 0%;
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    top: 96%;
+    opacity: 0.2;
+  }
+}
+
+.animate-scan-sweep {
+  animation: scan-sweep 2s ease-in-out infinite alternate;
+}
+
+@keyframes toast-slide-down {
+  0% {
+    transform: translate(-50%, -120%);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+.animate-toast-slide-down {
+  animation: toast-slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+

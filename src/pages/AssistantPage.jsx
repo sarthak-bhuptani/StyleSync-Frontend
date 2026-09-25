@@ -5,14 +5,13 @@ import {
   Send,
   Paperclip,
   Image as ImageIcon,
-  Bot,
   User,
   ShoppingBag,
   ArrowRight,
   CheckCircle2,
-  RefreshCw
+  RefreshCw,
+  Sparkles
 } from 'lucide-react';
-import { INITIAL_CHAT_MESSAGES } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
 import { useWardrobe } from '../context/WardrobeContext';
 import { chatApi } from '../api/chatApi';
@@ -20,7 +19,14 @@ import { chatApi } from '../api/chatApi';
 export const AssistantPage = () => {
   const { user } = useAuth();
   const { wardrobe } = useWardrobe();
-  const [messages, setMessages] = useState(INITIAL_CHAT_MESSAGES);
+  const [messages, setMessages] = useState(() => [
+    {
+      id: 'msg_welcome',
+      sender: 'ai',
+      text: `Hello ${user?.name ? user.name.split(' ')[0] : 'there'}! I'm your StyleSync AI Personal Stylist. Before you purchase any clothes, shoes, or accessories, ask me anything about suitability, color harmony, or wardrobe versatility!`,
+      timestamp: 'Just now'
+    }
+  ]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef(null);
@@ -113,14 +119,14 @@ export const AssistantPage = () => {
       <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold shadow-sm">
-            <Bot className="w-5 h-5 text-emerald-400" />
+            <MessageSquare className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h2 className="text-sm sm:text-base font-bold text-slate-900">Ask StyleSync</h2>
+              <h2 className="text-sm sm:text-base font-bold text-slate-900">Your Personal Stylist</h2>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             </div>
-            <p className="text-[11px] text-slate-500 font-medium">Personal AI Stylist & Shopping Advisor</p>
+            <p className="text-[11px] text-slate-500 font-medium">Wardrobe Consultation & Buying Advice</p>
           </div>
         </div>
 
@@ -151,7 +157,7 @@ export const AssistantPage = () => {
                     : 'bg-emerald-600 text-white'
                 }`}
               >
-                {isAI ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
+                {isAI ? <MessageSquare className="w-4 h-4" /> : <User className="w-4 h-4" />}
               </div>
 
               <div
@@ -183,10 +189,10 @@ export const AssistantPage = () => {
         {isTyping && (
           <div className="flex items-center gap-3 max-w-2xl">
             <div className="w-8 h-8 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center">
-              <Bot className="w-4 h-4 animate-bounce" />
+              <MessageSquare className="w-4 h-4 animate-pulse" />
             </div>
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-              <span>StyleSync is analyzing your wardrobe rules</span>
+              <span>Stylist is reviewing your wardrobe pieces...</span>
               <span className="flex gap-1 ml-1">
                 <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
                 <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-100" />
@@ -234,7 +240,7 @@ export const AssistantPage = () => {
         <button
           type="submit"
           disabled={!inputText.trim()}
-          className="p-3 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white rounded-xl shadow-xs transition-all active:scale-95"
+          className="p-3 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer"
         >
           <Send className="w-4 h-4 text-emerald-400" />
         </button>
@@ -242,3 +248,5 @@ export const AssistantPage = () => {
     </div>
   );
 };
+
+export default AssistantPage;

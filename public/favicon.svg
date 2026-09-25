@@ -1,7 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
-  <rect width="48" height="48" rx="14" fill="#0f172a"/>
-  <path d="M14 16L10 22V36C10 37.1046 10.8954 38 12 38H36C37.1046 38 38 37.1046 38 36V22L34 16H14Z" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M10 22H38" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M30 26C30 29.3137 27.3137 32 24 32C20.6863 32 18 29.3137 18 26" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="34" cy="14" r="3" fill="#10b981"/>
+  <defs>
+    <linearGradient id="favBg" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A" />
+      <stop offset="1" stop-color="#065F46" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#10B981" flood-opacity="0.3" />
+    </filter>
+  </defs>
+  
+  <!-- Base App Badge -->
+  <rect width="48" height="48" rx="14" fill="url(#favBg)" />
+  <rect x="1" y="1" width="46" height="46" rx="13" stroke="#34D399" stroke-opacity="0.2" stroke-width="1.5" />
+  
+  <!-- Minimalist Coat Hanger Emblem -->
+  <path
+    d="M24 13C26.2 13 28 14.8 28 17C28 18.8 26.8 20.3 25.1 20.8L35.5 28.5C36.6 29.3 36.8 30.8 36 31.9C35.2 33 33.7 33.2 32.6 32.4L24 25.8L15.4 32.4C14.3 33.2 12.8 33 12 31.9C11.2 30.8 11.4 29.3 12.5 28.5L22.9 20.8C21.2 20.3 20 18.8 20 17C20 14.8 21.8 13 24 13Z"
+    fill="#FFFFFF"
+    filter="url(#glow)"
+  />
+  
+  <!-- Emerald Core Sensor Dot -->
+  <circle cx="24" cy="17" r="1.8" fill="#34D399" />
+  
+  <!-- Wardrobe Foundation Bar -->
+  <rect x="14" y="34.5" width="20" height="3" rx="1.5" fill="#34D399" />
 </svg>

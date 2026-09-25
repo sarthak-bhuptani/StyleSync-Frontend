@@ -18,7 +18,6 @@ import {
   Compass
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-
 import { BrandLogo } from '../common/BrandLogo';
 
 export const Sidebar = () => {
@@ -31,20 +30,18 @@ export const Sidebar = () => {
   };
 
   const navItems = [
-    { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { to: '/daily-stylist', label: 'Wear Today', icon: Sun, badge: 'Daily' },
-    { to: '/wardrobe-gaps', label: 'What to Buy', icon: PlusCircle, badge: 'AI Gap' },
-    { to: '/advisor', label: 'Product Advisor', icon: Compass, badge: 'AI' },
+    { to: '/dashboard', label: 'Home', icon: LayoutDashboard },
+    { to: '/daily-stylist', label: 'Wear Today', icon: Sun },
     { to: '/wardrobe', label: 'My Wardrobe', icon: Layers },
-    { to: '/outfits', label: 'Outfit Builder', icon: Shirt },
-    { to: '/compare', label: 'Shopping Duel', icon: ArrowLeftRight, badge: 'VS' },
-    { to: '/purchases', label: 'Purchase History', icon: Clock },
-    { to: '/budget', label: 'Budget Tracker', icon: Wallet },
-    { to: '/assistant', label: 'AI Assistant', icon: MessageSquare },
+    { to: '/wardrobe-gaps', label: 'What to Buy Next', icon: PlusCircle },
+    { to: '/advisor', label: 'Product Advisor', icon: Compass },
+    { to: '/compare', label: 'Compare Products', icon: ArrowLeftRight },
+    { to: '/budget', label: 'Budget & Purchases', icon: Wallet },
+    { to: '/assistant', label: 'Style Assistant', icon: MessageSquare },
   ];
 
   const secondaryNavItems = [
-    { to: '/profile', label: 'My Profile', icon: User },
+    { to: '/profile', label: 'My Profile & Sizes', icon: User },
     { to: '/settings', label: 'Settings', icon: Settings },
   ];
 
@@ -140,15 +137,15 @@ export const Sidebar = () => {
       <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/50">
         <NavLink to="/profile" className="flex items-center gap-3 min-w-0 group">
           <img
-            src={user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
+            src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || user?.username || user?.email || 'User')}&background=0f172a&color=fff&size=100`}
             alt={user?.name || 'User'}
             className="w-9 h-9 rounded-full object-cover border border-slate-200"
           />
           <div className="min-w-0 flex-1">
             <p className="text-xs font-bold text-slate-800 truncate group-hover:text-emerald-700 transition-colors">
-              {user?.name || 'Sarthak Sharma'}
+              {user?.name || user?.username || 'My Profile'}
             </p>
-            <p className="text-[11px] text-slate-400 truncate">{user?.email || 'sarthak@example.com'}</p>
+            <p className="text-[11px] text-slate-400 truncate">{user?.email || 'StyleSync Member'}</p>
           </div>
         </NavLink>
 

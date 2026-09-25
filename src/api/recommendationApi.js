@@ -1,5 +1,4 @@
 import { apiClient, simulateNetworkDelay } from './client';
-import { SAMPLE_PRODUCTS } from '../data/mockData';
 
 export const recommendationApi = {
   getRecentRecommendations: async () => {
@@ -9,52 +8,66 @@ export const recommendationApi = {
     } catch {
       await simulateNetworkDelay(250);
       const saved = localStorage.getItem('stylesync_analyzed_products');
-      return saved ? JSON.parse(saved) : SAMPLE_PRODUCTS;
+      return saved ? JSON.parse(saved) : [];
     }
   },
 
-  getWardrobeGaps: async () => {
+  // Get AI-detected gaps in wardrobe and suggested additions
+  getCapsuleGaps: async () => {
     try {
-      const response = await apiClient.get('/recommendations/gaps');
-      return response.data;
+      const res = await apiClient.get('/recommendations/gaps');
+      return res.data?.data || res.data?.gaps || res.data;
     } catch {
-      await simulateNetworkDelay(300);
       return [
         {
           id: 'gap_1',
           title: 'Footwear Versatility Gap',
           description: 'You have 4 tailored neutral tops but only 1 pair of versatile minimal smart sneakers.',
-          suggestedCategory: 'Shoes',
+          category: 'Shoes',
           priority: 'High',
+          unlocksOutfitsCount: 14,
           suggestedProduct: 'Clean White Minimalist Low-Top Sneakers'
         },
         {
           id: 'gap_2',
           title: 'Mid-layer Knitwear',
           description: 'Your wardrobe is strong on light tees, but could benefit from a merino crewneck or zip polo for transitional weather.',
-          suggestedCategory: 'Outerwear',
+          category: 'Outerwear',
           priority: 'Medium',
+          unlocksOutfitsCount: 8,
           suggestedProduct: 'Charcoal Merino Wool Zip Polo'
         }
       ];
     }
   },
 
-  compareProducts: async (productIds) => {
+  getWardrobeGaps: async () => {
+    return recommendationApi.getCapsuleGaps();
+  },
+
+  compareProducts: async (payload) => {
     try {
-      const response = await apiClient.post('/recommendations/compare', { productIds });
-      return response.data;
+      const body = Array.isArray(payload) ? { productIds: payload } : (payload?.productIds ? payload : { productIds: payload });
+      const response = await apiClient.post('/products/compare', body);
+      return response.data?.data || response.data;
     } catch {
-      await simulateNetworkDelay(400);
-      const saved = localStorage.getItem('stylesync_analyzed_products');
-      const products = saved ? JSON.parse(saved) : SAMPLE_PRODUCTS;
-      const selected = products.filter(p => productIds.includes(p.id));
-      
-      return {
-        products: selected.length > 0 ? selected : products.slice(0, 2),
-        buyWisePickId: selected[0]?.score >= (selected[1]?.score || 0) ? selected[0]?.id : selected[1]?.id,
-        summary: 'Product 1 offers superior wardrobe compatibility (88% vs 78%) and higher daily versatility at a competitive cost per wear.'
-      };
+      try {
+        const altResponse = await apiClient.post('/recommendations/compare', payload);
+        return altResponse.data?.data || altResponse.data;
+      } catch {
+        await simulateNetworkDelay(400);
+        const productIds = Array.isArray(payload) ? payload : (payload?.productIds || []);
+        const saved = localStorage.getItem('stylesync_analyzed_products');
+        const products = saved ? JSON.parse(saved) : [];
+        const selected = products.filter(p => productIds.includes(p.id));
+        
+        return {
+          products: selected.length > 0 ? selected : products.slice(0, 2),
+          winnerId: selected[0]?.score >= (selected[1]?.score || 0) ? selected[0]?.id : selected[1]?.id,
+          winnerTitle: selected[0]?.name || 'Top Recommendation',
+          summary: 'Product offers strong wardrobe compatibility and versatile daily pairing.'
+        };
+      }
     }
   }
 };

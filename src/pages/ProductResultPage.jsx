@@ -1,27 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, NavLink } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Compass,
+  UserCheck,
   ArrowLeft,
   CheckCircle2,
-  AlertTriangle,
-  ShoppingBag,
   Shirt,
   Share2,
   Bookmark,
   Check,
-  ArrowRight,
+  Trash2,
+  User,
+  Smile,
+  Palette,
+  Ruler,
   TrendingUp,
-  Layers,
-  ShieldCheck,
-  ChevronRight,
-  Trash2
+  AlertTriangle
 } from 'lucide-react';
 import { useWardrobe } from '../context/WardrobeContext';
 import { productApi } from '../api/productApi';
 import { RecommendationBadge } from '../components/common/RecommendationBadge';
 import { ScoreMeter } from '../components/common/ScoreMeter';
-import { ProgressBar } from '../components/common/ProgressBar';
+import { Modal } from '../components/common/Modal';
 
 export const ProductResultPage = () => {
   const { id } = useParams();
@@ -31,14 +30,20 @@ export const ProductResultPage = () => {
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
   const [completeLook, setCompleteLook] = useState(null);
-  const [loadingLook, setLoadingLook] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const loadProduct = async () => {
       setLoading(true);
-      const data = await productApi.getProductById(id);
-      setProduct(data);
-      setLoading(false);
+      try {
+        const data = await productApi.getProductById(id);
+        setProduct(data);
+      } catch (err) {
+        console.error('Failed to load product:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     loadProduct();
   }, [id]);
@@ -46,29 +51,46 @@ export const ProductResultPage = () => {
   useEffect(() => {
     const fetchCompleteLook = async () => {
       if (!product) return;
-      setLoadingLook(true);
       try {
         const lookData = await productApi.completeTheLook(id, product);
         setCompleteLook(lookData);
       } catch (e) {
         console.error('Failed to load complete the look:', e);
-      } finally {
-        setLoadingLook(false);
       }
     };
     fetchCompleteLook();
   }, [product, id]);
 
-  if (loading || !product) {
+  if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <div className="w-10 h-10 border-3 border-slate-900 border-t-emerald-500 rounded-full animate-spin mb-4" />
-        <p className="text-xs font-bold text-slate-500">Loading evaluation report...</p>
+        <p className="text-xs font-bold text-slate-500">Loading evaluation...</p>
       </div>
     );
   }
 
-  // Find compatible items from user's actual wardrobe
+  if (!product) {
+    return (
+      <div className="max-w-md mx-auto py-20 text-center space-y-4 animate-fade-in">
+        <div className="w-14 h-14 mx-auto rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold border border-slate-200 shadow-xs">
+          <AlertTriangle className="w-6 h-6 text-amber-600" />
+        </div>
+        <h2 className="text-lg font-bold text-slate-900">Product Not Found</h2>
+        <p className="text-xs text-slate-500 max-w-xs mx-auto">
+          This evaluation is no longer in your history.
+        </p>
+        <button
+          onClick={() => navigate('/advisor')}
+          className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold shadow-xs hover:bg-slate-800 transition-all cursor-pointer"
+        >
+          Evaluate New Item
+        </button>
+      </div>
+    );
+  }
+
+  // Compatible items from actual wardrobe
   const compatibleItems = wardrobe.filter(w =>
     product.compatibleWardrobeIds?.includes(w.id) ||
     (product.category === 'Shoes' && ['Bottoms', 'Tops'].includes(w.category)) ||
@@ -76,73 +98,76 @@ export const ProductResultPage = () => {
     (product.category === 'Outerwear' && ['Tops', 'Bottoms'].includes(w.category))
   ).slice(0, 4);
 
-  const breakdown = product.breakdown || {
-    styleMatch: { score: 22, max: 25, label: 'Style Match' },
-    colorMatch: { score: 18, max: 20, label: 'Color Match' },
-    wardrobeMatch: { score: 18, max: 20, label: 'Wardrobe Match' },
-    versatility: { score: 13, max: 15, label: 'Versatility' },
-    budget: { score: 9, max: 10, label: 'Budget Fit' },
-    occasion: { score: 8, max: 10, label: 'Occasion Fit' }
-  };
-
   const handleSaveToWishlist = () => {
     setSaved(!saved);
-    showToast(saved ? 'Removed from saved items' : 'Saved to your evaluated wishlist', 'success');
+    showToast(saved ? 'Removed from saved items' : 'Saved to wishlist', 'success');
   };
 
-  const handleDeleteProduct = () => {
-    if (window.confirm('Delete this product evaluation and remove it from history?')) {
-      deleteAnalyzedProduct(id);
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteAnalyzedProduct(id);
+      setIsDeleteModalOpen(false);
       navigate('/advisor');
+    } catch (err) {
+      console.warn('Delete product warning:', err);
+      setIsDeleteModalOpen(false);
+      navigate('/advisor');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
+  const estimatedWears = completeLook?.costPerWear?.estimatedWears || 50;
+  const price = product.price || 0;
+  const costPerWear = Math.max(1, Math.round(price / estimatedWears));
+
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-fade-in pb-12">
-      {/* Back to Advisor navigation */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+    <div className="max-w-4xl mx-auto space-y-5 animate-fade-in pb-16">
+      {/* Top Header Actions */}
+      <div className="flex items-center justify-between flex-wrap gap-2.5">
         <button
           onClick={() => navigate('/advisor')}
-          className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Evaluate Another Product</span>
+          <span>Back to Evaluator</span>
         </button>
 
         <div className="flex items-center gap-2">
           <button
             onClick={handleSaveToWishlist}
-            className={`p-2 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all ${
-              saved ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+            className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              saved ? 'bg-slate-900 text-white border-slate-900 shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
             }`}
           >
-            <Bookmark className="w-4 h-4" />
+            <Bookmark className="w-3.5 h-3.5" />
             <span>{saved ? 'Saved' : 'Save'}</span>
           </button>
           <button
-            onClick={() => showToast('Report link copied to clipboard', 'info')}
-            className="p-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-slate-700 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+            onClick={() => showToast('Link copied to clipboard', 'info')}
+            className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-slate-700 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
           >
-            <Share2 className="w-4 h-4" />
+            <Share2 className="w-3.5 h-3.5" />
             <span>Share</span>
           </button>
           <button
-            onClick={handleDeleteProduct}
-            title="Delete this evaluation"
-            className="p-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+            onClick={() => setIsDeleteModalOpen(true)}
+            title="Delete evaluation"
+            className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl text-rose-700 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3.5 h-3.5" />
             <span>Delete</span>
           </button>
         </div>
       </div>
 
-      {/* Flagship Top Section: Hero Card with Score & Recommendation */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-floating">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+      {/* 1. Main Product & Verdict Card */}
+      <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200/80 shadow-subtle">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 sm:gap-7 items-center">
           {/* Product Image */}
-          <div className="md:col-span-4">
-            <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-subtle group">
+          <div className="md:col-span-5 flex justify-center">
+            <div className="relative w-full max-w-[220px] md:max-w-none aspect-[4/5] rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-xs group">
               {product.image ? (
                 <img
                   src={product.image}
@@ -154,49 +179,49 @@ export const ProductResultPage = () => {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-100">
-                  <Shirt className="w-12 h-12 text-slate-300 mb-2" />
-                  <span className="text-xs font-semibold">{product.category || 'Product'}</span>
+                <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-50 p-4 text-center">
+                  <Shirt className="w-10 h-10 text-slate-400 mb-2" />
+                  <span className="text-xs font-bold text-slate-700">{product.category || 'Product'}</span>
                 </div>
               )}
-              <span className="absolute top-3 left-3 px-2.5 py-1 bg-white/90 backdrop-blur-xs text-slate-800 text-[10px] font-bold rounded-lg shadow-xs border border-white/40">
+              <span className="absolute top-2.5 left-2.5 px-2.5 py-1 bg-white/95 backdrop-blur-xs text-slate-800 text-[10px] font-bold rounded-lg shadow-xs border border-white/60">
                 {product.category}
               </span>
             </div>
           </div>
 
-          {/* Product Meta & Verdict */}
-          <div className="md:col-span-8 flex flex-col justify-between space-y-6">
+          {/* Product Meta & Match Score */}
+          <div className="md:col-span-7 flex flex-col justify-between space-y-4">
             <div>
-              <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                   {product.brand} · {product.color}
                 </span>
-                <RecommendationBadge decision={product.decision} size="lg" />
+                <RecommendationBadge decision={product.decision} size="md" />
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-snug">
                 {product.name}
               </h1>
 
-              <div className="flex items-center gap-3 mt-2">
+              <div className="flex items-center gap-2 mt-2">
                 <span className="text-xl font-black text-slate-900">
-                  {product.currency || '₹'}{(product.price || 0).toLocaleString()}
+                  {product.currency || '₹'}{price.toLocaleString()}
                 </span>
-                <span className="text-xs text-slate-500 font-medium bg-slate-100 px-2.5 py-0.5 rounded-full">
-                  Verified Retail Price
+                <span className="text-[11px] text-slate-500 font-medium bg-slate-100 px-2 py-0.5 rounded-md">
+                  Retail Price
                 </span>
               </div>
             </div>
 
-            {/* Score Visualization Card */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-6">
+            {/* Score Box */}
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3">
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1">
-                  Overall Compatibility Score
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block mb-0.5">
+                  Compatibility Match
                 </span>
-                <p className="text-xs text-slate-600 font-normal leading-relaxed max-w-sm">
-                  Calculated against your 6 personal styling dimensions and 10 wardrobe assets.
+                <p className="text-xs text-slate-600 font-normal">
+                  Calculated against your styling profile and closet assets.
                 </p>
               </div>
 
@@ -204,21 +229,21 @@ export const ProductResultPage = () => {
                 <ScoreMeter
                   score={product.score}
                   max={100}
-                  size="lg"
+                  size="md"
                   decision={product.decision}
                 />
               </div>
             </div>
 
-            {/* Quick Summary Pill Banner */}
-            <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-              <span className="px-3 py-1 bg-emerald-50 text-emerald-800 font-semibold rounded-lg border border-emerald-200/60">
+            {/* Summary Micro Chips */}
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 font-bold rounded-lg border border-emerald-200/60 text-[11px]">
                 Confidence: {product.confidence || '95%'}
               </span>
-              <span className="px-3 py-1 bg-slate-100 text-slate-700 font-semibold rounded-lg">
+              <span className="px-2.5 py-1 bg-slate-100 text-slate-700 font-semibold rounded-lg text-[11px]">
                 Style Alignment: High
               </span>
-              <span className="px-3 py-1 bg-slate-100 text-slate-700 font-semibold rounded-lg">
+              <span className="px-2.5 py-1 bg-slate-100 text-slate-700 font-semibold rounded-lg text-[11px]">
                 Palette Harmony: 92%
               </span>
             </div>
@@ -226,403 +251,202 @@ export const ProductResultPage = () => {
         </div>
       </div>
 
-      {/* 6-Score Compatibility Breakdown */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-subtle">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
-          <div>
-            <h3 className="text-base sm:text-lg font-bold text-slate-900">Compatibility Breakdown</h3>
-            <p className="text-xs text-slate-500">Neural evaluation across six personal dimensions</p>
+      {/* 2. Stylist Summary & Why It Works */}
+      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-subtle space-y-3.5">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold">
+            <UserCheck className="w-4 h-4" />
           </div>
-          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/60">
-            6 Dimensions Analyzed
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-            <ProgressBar
-              label="Style Match"
-              value={breakdown.styleMatch.score}
-              max={breakdown.styleMatch.max}
-              displayValue={`${breakdown.styleMatch.score} / ${breakdown.styleMatch.max}`}
-              color="emerald"
-            />
-            <p className="text-[11px] text-slate-500 mt-2 font-medium">Fits Minimal & Smart Casual proportions.</p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-            <ProgressBar
-              label="Color Match"
-              value={breakdown.colorMatch.score}
-              max={breakdown.colorMatch.max}
-              displayValue={`${breakdown.colorMatch.score} / ${breakdown.colorMatch.max}`}
-              color="emerald"
-            />
-            <p className="text-[11px] text-slate-500 mt-2 font-medium">Neutral palette coordinates effortlessly.</p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-            <ProgressBar
-              label="Wardrobe Match"
-              value={breakdown.wardrobeMatch.score}
-              max={breakdown.wardrobeMatch.max}
-              displayValue={`${breakdown.wardrobeMatch.score} / ${breakdown.wardrobeMatch.max}`}
-              color="emerald"
-            />
-            <p className="text-[11px] text-slate-500 mt-2 font-medium">Pairs directly with 5 verified items.</p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-            <ProgressBar
-              label="Versatility"
-              value={breakdown.versatility.score}
-              max={breakdown.versatility.max}
-              displayValue={`${breakdown.versatility.score} / ${breakdown.versatility.max}`}
-              color="emerald"
-            />
-            <p className="text-[11px] text-slate-500 mt-2 font-medium">Suitable for office, daily & weekend wear.</p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-            <ProgressBar
-              label="Budget Fit"
-              value={breakdown.budget.score}
-              max={breakdown.budget.max}
-              displayValue={`${breakdown.budget.score} / ${breakdown.budget.max}`}
-              color="emerald"
-            />
-            <p className="text-[11px] text-slate-500 mt-2 font-medium">Comfortably within footwear budget range.</p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-            <ProgressBar
-              label="Occasion Fit"
-              value={breakdown.occasion.score}
-              max={breakdown.occasion.max}
-              displayValue={`${breakdown.occasion.score} / ${breakdown.occasion.max}`}
-              color="emerald"
-            />
-            <p className="text-[11px] text-slate-500 mt-2 font-medium">Matches 4 out of 5 designated occasions.</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Your Personal Physical Match: Face, Complexion & Body Silhouette */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-subtle space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold">
-              <Compass className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-slate-900">Your Face & Body Physical Match</h3>
-              <p className="text-xs text-slate-500">Evaluated against your scanned facial geometry, skin undertone, and body build</p>
-            </div>
-          </div>
-          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-            96% Physical Harmony
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-          {/* 1. Face Shape Harmony */}
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1.5">
-            <span className="font-bold text-slate-900 uppercase tracking-wider text-[10px] text-emerald-700 block">
-              👤 Face Shape Fit
-            </span>
-            <p className="font-extrabold text-slate-900">Oval / Angular Jawline</p>
-            <p className="text-slate-600 leading-relaxed">
-              {product.category === 'Eyewear'
-                ? 'This frame width balances your cheekbones without overpowering your jawline.'
-                : 'The collar and neckline geometry create a clean, elongating vertical line for your jaw.'}
-            </p>
-          </div>
-
-          {/* 2. Complexion & Undertone Harmony */}
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1.5">
-            <span className="font-bold text-slate-900 uppercase tracking-wider text-[10px] text-emerald-700 block">
-              🎨 Complexion & Undertone
-            </span>
-            <p className="font-extrabold text-slate-900">Warm Olive / Golden Medium</p>
-            <p className="text-slate-600 leading-relaxed">
-              The {product.color} colorway complements your warm undertone, preventing the washed-out effect caused by harsh neon or icy tones.
-            </p>
-          </div>
-
-          {/* 3. Body Silhouette Fit */}
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1.5">
-            <span className="font-bold text-slate-900 uppercase tracking-wider text-[10px] text-emerald-700 block">
-              📏 Body Silhouette Proportion
-            </span>
-            <p className="font-extrabold text-slate-900">Athletic V-Taper (5 ft 11 in)</p>
-            <p className="text-slate-600 leading-relaxed">
-              The relaxed silhouette sits naturally on your shoulders and pairs cleanly with tapered bottoms to maintain proportional balance.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Why StyleSync Says BUY / MAYBE / SKIP */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-subtle">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold">
-            <Compass className="w-4 h-4" />
-          </div>
-          <h3 className="text-base sm:text-lg font-bold text-slate-900">
-            Why StyleSync Says <span className="text-emerald-700">{product.decision}</span>
+          <h3 className="text-sm sm:text-base font-bold text-slate-900">
+            Stylist Take: <span className="text-emerald-700">{product.decision}</span>
           </h3>
         </div>
 
-        <p className="text-sm text-slate-700 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/70 leading-relaxed font-medium mb-6">
+        <p className="text-xs sm:text-sm text-slate-700 bg-slate-50 p-3.5 rounded-2xl border border-slate-200/70 leading-relaxed font-medium">
           "{product.aiExplanation}"
         </p>
 
-        {/* Strong Matches & Things to Consider 2-Col */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Strong Matches */}
-          <div className="p-5 rounded-2xl bg-emerald-50/50 border border-emerald-100">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-900 mb-3 flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span>Strong Matches</span>
-            </h4>
-            <ul className="space-y-2.5">
-              {(product.strongMatches || [
-                'Matches your preferred style guidelines',
-                'Works with multiple items in your wardrobe',
-                'Fits within your designated category budget',
-                'Highly suitable for daily and work wear'
-              ]).map((match, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-xs text-slate-700 font-medium">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                  <span>{match}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Things to Consider */}
-          <div className="p-5 rounded-2xl bg-amber-50/50 border border-amber-100">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-amber-900 mb-3 flex items-center gap-1.5">
-              <AlertTriangle className="w-4 h-4 text-amber-600" />
-              <span>Things to Consider</span>
-            </h4>
-            <ul className="space-y-2.5">
-              {(product.considerations || [
-                'Not ideal for formal black-tie events',
-                'Keep leather treated with water repellent in wet climates'
-              ]).map((item, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-xs text-slate-700 font-medium">
-                  <span className="w-3.5 h-3.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">!</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Compatible With Your Wardrobe */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-subtle">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 mb-6">
-          <div>
-            <h3 className="text-base sm:text-lg font-bold text-slate-900">Compatible With Your Wardrobe</h3>
-            <p className="text-xs text-slate-500">Actual pieces from your closet that pair seamlessly with this product</p>
-          </div>
-          <button
-            onClick={() => navigate('/outfits')}
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 self-start sm:self-auto"
-          >
-            <Shirt className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Build Outfit</span>
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {compatibleItems.map((wItem) => (
-            <div key={wItem.id} className="group bg-slate-50 rounded-2xl p-2.5 border border-slate-100 hover:border-slate-200 transition-all">
-              <div className="aspect-[4/5] rounded-xl overflow-hidden mb-2 bg-white">
-                <img
-                  src={wItem.image}
-                  alt={wItem.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{wItem.category}</span>
-              <p className="text-xs font-bold text-slate-900 truncate">{wItem.name}</p>
-              <p className="text-[11px] text-slate-500">{wItem.color}</p>
+        {/* 2 Crisp Key Highlights */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+          {(product.strongMatches?.slice(0, 2) || [
+            'Seamlessly pairs with multiple items in your wardrobe',
+            'Flattering color palette matching your natural undertone'
+          ]).map((match, idx) => (
+            <div key={idx} className="flex items-start gap-2 text-xs text-slate-700 font-medium p-2.5 rounded-xl bg-emerald-50/50 border border-emerald-100/80">
+              <Check className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5" />
+              <span>{match}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Flagship: Complete The Look (3 Head-to-Toe Outfits) */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-subtle space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold mb-1 border border-emerald-200/60">
-              <Compass className="w-3 h-3 text-emerald-600" />
-              <span>AI Capsule Stylist</span>
-            </div>
-            <h3 className="text-base sm:text-lg font-bold text-slate-900">Complete the Look: 3 Styled Outfits</h3>
-            <p className="text-xs text-slate-500">How to wear this exact piece across 3 different life occasions</p>
+      {/* 3. Personal Physical Harmony (Compact 1-Strip) */}
+      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-subtle space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <User className="w-4 h-4 text-emerald-700" />
+            <h3 className="text-sm font-bold text-slate-900">Personal Fit Match</h3>
           </div>
-          {loadingLook && (
-            <span className="text-xs text-slate-400 font-semibold flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Generating outfits...
-            </span>
-          )}
-        </div>
-
-        {completeLook?.outfits && completeLook.outfits.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {completeLook.outfits.map((outfit, idx) => (
-              <div
-                key={idx}
-                className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-slate-300 transition-all flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                      {outfit.occasion}
-                    </span>
-                    <span className="text-xs text-slate-400 font-bold">Look #{idx + 1}</span>
-                  </div>
-                  <h4 className="text-sm font-extrabold text-slate-900 mb-3">
-                    {outfit.headline}
-                  </h4>
-
-                  <div className="space-y-2 mb-4">
-                    {outfit.pieces?.map((piece, pIdx) => (
-                      <div
-                        key={pIdx}
-                        className={`p-2 rounded-xl text-xs flex items-center justify-between border ${
-                          pIdx === 0
-                            ? 'bg-white border-emerald-200 font-bold text-emerald-950 shadow-xs'
-                            : 'bg-white/70 border-slate-200/60 text-slate-700'
-                        }`}
-                      >
-                        <div className="min-w-0 pr-2">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider block leading-tight">
-                            {piece.category}
-                          </span>
-                          <span className="truncate block font-semibold">{piece.name}</span>
-                        </div>
-                        {piece.color && (
-                          <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">
-                            {piece.color}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-slate-200/60 text-[11px] text-slate-500 italic">
-                  💡 {outfit.stylingTip}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-100">
-            <p className="text-xs font-semibold text-slate-500">Pair this item with your tailored wardrobe for high-versatility daily styling.</p>
-          </div>
-        )}
-      </div>
-
-      {/* Flagship: Cost-Per-Wear & Regret Predictor */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-subtle space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-          <div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 inline-block mb-1">
-              Financial Intelligence
-            </span>
-            <h3 className="text-base sm:text-lg font-bold text-slate-900">Cost-Per-Wear & Regret Predictor</h3>
-            <p className="text-xs text-slate-500">Calculates true long-term value against your lifestyle and closet inventory</p>
-          </div>
-          <span className={`px-3 py-1 rounded-full text-xs font-extrabold border ${
-            completeLook?.costPerWear?.regretRisk === 'Low' || !completeLook
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-              : 'bg-amber-50 text-amber-800 border-amber-200'
-          }`}>
-            {completeLook?.costPerWear?.regretRisk || 'Low'} Regret Risk
+          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+            96% Harmony
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Retail Price</span>
-            <span className="text-xl font-extrabold text-slate-900">
-              ₹{(product.price || 0).toLocaleString()}
-            </span>
-            <p className="text-[11px] text-slate-500 mt-1">One-time purchase cost</p>
+        <div className="grid grid-cols-3 gap-2 text-center text-xs">
+          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
+            <Smile className="w-3.5 h-3.5 text-slate-400 mx-auto mb-1" />
+            <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">Face Shape</span>
+            <span className="text-xs font-bold text-slate-900 block mt-0.5">Oval / Angular</span>
+            <span className="text-[10px] text-emerald-700 font-medium block mt-0.5">✓ Balanced</span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Expected Annual Wears</span>
-            <span className="text-xl font-extrabold text-emerald-700">
-              {completeLook?.costPerWear?.estimatedWears || 36} wears/yr
-            </span>
-            <p className="text-[11px] text-slate-500 mt-1">Based on category & versatility</p>
+          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
+            <Palette className="w-3.5 h-3.5 text-slate-400 mx-auto mb-1" />
+            <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">Undertone</span>
+            <span className="text-xs font-bold text-slate-900 block mt-0.5">Warm Olive</span>
+            <span className="text-[10px] text-emerald-700 font-medium block mt-0.5">✓ Harmonious</span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-200/80">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block mb-1">Real Cost-Per-Wear</span>
-            <span className="text-xl font-extrabold text-emerald-900">
-              ₹{completeLook?.costPerWear?.costPerWear || Math.max(1, Math.round((product.price || 2999) / 36))}
-              <span className="text-xs font-normal text-emerald-700"> / wear</span>
-            </span>
-            <p className="text-[11px] text-emerald-700 mt-1 font-semibold">High Value & Versatility Index</p>
+          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
+            <Ruler className="w-3.5 h-3.5 text-slate-400 mx-auto mb-1" />
+            <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">Silhouette</span>
+            <span className="text-xs font-bold text-slate-900 block mt-0.5">Athletic (5'11")</span>
+            <span className="text-[10px] text-emerald-700 font-medium block mt-0.5">✓ Proportional</span>
           </div>
         </div>
-
-        <p className="text-xs text-slate-600 bg-slate-50 p-3.5 rounded-xl border border-slate-100 leading-relaxed">
-          {completeLook?.costPerWear?.regretExplanation ||
-            `Because this piece matches multiple items in your closet, it offers strong recurring utility with low impulse-regret risk.`}
-        </p>
       </div>
 
-      {/* Alternative Products */}
-      {product.alternatives && product.alternatives.length > 0 && (
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-subtle">
-          <div className="pb-4 border-b border-slate-100 mb-6">
-            <h3 className="text-base sm:text-lg font-bold text-slate-900">Alternative Options</h3>
-            <p className="text-xs text-slate-500">Similar silhouettes with verified high compatibility</p>
+      {/* 4. Pairs With Your Closet */}
+      {compatibleItems.length > 0 && (
+        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-subtle space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div>
+              <h3 className="text-sm sm:text-base font-bold text-slate-900">Pairs With Your Closet</h3>
+              <p className="text-[11px] text-slate-500">Matching items from your wardrobe</p>
+            </div>
+            <button
+              onClick={() => navigate('/outfits')}
+              className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <Shirt className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Outfit Builder</span>
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {product.alternatives.map((alt) => (
-              <div
-                key={alt.id}
-                className="group p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:border-slate-300 transition-all flex flex-col justify-between"
-              >
-                <div>
-                  <div className="aspect-square rounded-xl overflow-hidden mb-3 bg-white">
-                    <img
-                      src={alt.image}
-                      alt={alt.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{alt.brand}</span>
-                    <RecommendationBadge decision={alt.decision} size="sm" />
-                  </div>
-                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">{alt.name}</h4>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            {compatibleItems.map((wItem) => (
+              <div key={wItem.id} className="bg-slate-50 rounded-2xl p-2 border border-slate-100 hover:border-slate-200 transition-all">
+                <div className="aspect-[4/5] rounded-xl overflow-hidden mb-1.5 bg-white">
+                  <img
+                    src={wItem.image}
+                    alt={wItem.name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-
-                <div className="mt-3 pt-2.5 border-t border-slate-200/60 flex items-center justify-between text-xs">
-                  <span className="font-extrabold text-slate-900">{alt.currency || '₹'}{alt.price.toLocaleString()}</span>
-                  <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
-                    {alt.score}/100 Score
-                  </span>
-                </div>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">{wItem.category}</span>
+                <p className="text-xs font-bold text-slate-900 truncate">{wItem.name}</p>
+                <p className="text-[10px] text-slate-500">{wItem.color}</p>
               </div>
             ))}
           </div>
         </div>
       )}
+
+      {/* 5. Value Snapshot (Cost-Per-Wear) */}
+      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-subtle space-y-3">
+        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-emerald-700" />
+            <h3 className="text-sm font-bold text-slate-900">Value & Longevity</h3>
+          </div>
+          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            Low Regret Risk
+          </span>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 text-center text-xs">
+          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
+            <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">Retail Price</span>
+            <span className="text-sm sm:text-base font-black text-slate-900 block mt-0.5">₹{price.toLocaleString()}</span>
+            <span className="text-[9px] text-slate-500 block">Purchase</span>
+          </div>
+
+          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
+            <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">Est. Wears</span>
+            <span className="text-sm sm:text-base font-black text-emerald-700 block mt-0.5">{estimatedWears} /yr</span>
+            <span className="text-[9px] text-slate-500 block">Rotation</span>
+          </div>
+
+          <div className="p-3 rounded-2xl bg-emerald-50/50 border border-emerald-200/80">
+            <span className="text-[10px] text-emerald-800 font-semibold block uppercase tracking-wider">Cost / Wear</span>
+            <span className="text-sm sm:text-base font-black text-emerald-900 block mt-0.5">₹{costPerWear}</span>
+            <span className="text-[9px] text-emerald-700 font-semibold block">High Value</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Delete Confirmation Popup Modal */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => !isDeleting && setIsDeleteModalOpen(false)}
+        title="Delete Evaluation"
+        maxWidth="max-w-md"
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-rose-50/80 border border-rose-100">
+            <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center flex-shrink-0 font-bold">
+              <Trash2 className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-rose-950">Remove from History?</h4>
+              <p className="text-[11px] text-rose-700 mt-0.5 leading-snug">
+                This evaluation report will be permanently removed from your analysis list.
+              </p>
+            </div>
+          </div>
+
+          {/* Product Preview Tile */}
+          <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+            <div className="w-12 h-14 rounded-xl overflow-hidden bg-white border border-slate-200 flex-shrink-0">
+              {product.image ? (
+                <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-slate-400">
+                  <Shirt className="w-6 h-6" />
+                </div>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">
+                {product.brand} · {product.category}
+              </span>
+              <p className="text-xs font-extrabold text-slate-900 truncate">{product.name}</p>
+              <p className="text-[11px] font-bold text-slate-700 mt-0.5">₹{price.toLocaleString()}</p>
+            </div>
+          </div>
+
+          {/* Modal Actions */}
+          <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+            <button
+              type="button"
+              disabled={isDeleting}
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={isDeleting}
+              onClick={handleConfirmDelete}
+              className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>{isDeleting ? 'Deleting...' : 'Delete Report'}</span>
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

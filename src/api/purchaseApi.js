@@ -66,5 +66,17 @@ export const purchaseApi = {
       localStorage.setItem('stylesync_purchases', JSON.stringify(updated));
       return updated.find(i => i.id === id);
     }
+  },
+
+  deletePurchase: async (id) => {
+    try {
+      await apiClient.delete(`/purchases/${id}`);
+    } catch {
+      // Local fallback
+    }
+    const list = getStoredPurchases();
+    const updated = list.filter(p => p.id !== id && p._id !== id);
+    localStorage.setItem('stylesync_purchases', JSON.stringify(updated));
+    return { success: true, id };
   }
 };

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" fill="none">
+  <defs>
+    {/* 3D Ribbon Gradients */}
+    <linearGradient id="logoRibbonTop" x1="15" y1="25" x2="50" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2DD4BF" />
+      <stop offset="40%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="logoRibbonBottom" x1="15" y1="45" x2="55" y2="75" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="60%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#064E3B" />
+    </linearGradient>
+    <linearGradient id="logoRibbonHighlight" x1="18" y1="30" x2="30" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6EE7B7" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#10B981" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Emblem Icon (Scaled) -->
+  <g transform="translate(6, 4) scale(0.72)">
+    <!-- Coat Hanger -->
+    <g stroke="#0F172A" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path d="M43 27C43 21.5 47 17 52.5 17C58 17 62 21 62 26C62 31 57 34 50 37" />
+      <path d="M50 37L76 56C78 57.5 77.5 60.5 75 60.5H35" />
+      <path d="M50 37L36 47" />
+    </g>
+
+    <!-- Emerald 3D Silk Ribbon 'S' -->
+    <path
+      d="M26 56C26 56 36 63 46 66C56 69 62 76 58 84C54 92 40 94 30 89C23 85.5 20 78 24 67C25 64 26 59 26 56Z"
+      fill="url(#logoRibbonBottom)"
+    />
+    <path
+      d="M48 45C32 40 20 47 22 59C23.5 68 33 74 46 76C59 78 61 86 52 90C45 93 32 91 27 84C25 81 24 74 24 74C18 63 20 50 28 43C37 35 52 38 58 45C54 48 51 46 48 45Z"
+      fill="url(#logoRibbonTop)"
+    />
+    <path
+      d="M24 46C20 54 22 66 32 72C42 77 47 75 42 71C34 65 28 58 28 48C28 44 26 44 24 46Z"
+      fill="url(#logoRibbonHighlight)"
+    />
+  </g>
+
+  <!-- Brand Typography -->
+  <text x="82" y="48" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="34" font-weight="900" letter-spacing="-0.8" fill="#0F172A">
+    Style<tspan fill="#00B87C">Sync</tspan>
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="83" y="64" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" letter-spacing="2" fill="#94A3B8">PERSONAL STYLIST &amp; WARDROBE</text>
+</svg>

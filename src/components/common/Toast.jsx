@@ -4,21 +4,46 @@ import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 export const Toast = ({ message, type = 'success', onClose }) => {
   if (!message) return null;
 
-  const icons = {
-    success: <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />,
-    error: <AlertCircle className="w-5 h-5 text-rose-500 flex-shrink-0" />,
-    info: <Info className="w-5 h-5 text-blue-500 flex-shrink-0" />,
+  const typeConfig = {
+    success: {
+      icon: <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />,
+      border: 'border-slate-800/80',
+      badge: 'bg-emerald-500/20 text-emerald-400'
+    },
+    error: {
+      icon: <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />,
+      border: 'border-rose-900/50',
+      badge: 'bg-rose-500/20 text-rose-400'
+    },
+    info: {
+      icon: <Info className="w-4 h-4 text-amber-400 shrink-0" />,
+      border: 'border-slate-800/80',
+      badge: 'bg-amber-500/20 text-amber-400'
+    }
   };
 
+  const config = typeConfig[type] || typeConfig.success;
+
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-floating border border-slate-800 text-sm font-medium animate-slide-up max-w-md">
-      {icons[type] || icons.success}
-      <span className="flex-1">{message}</span>
-      {onClose && (
-        <button onClick={onClose} className="text-slate-400 hover:text-white p-0.5">
-          <X className="w-4 h-4" />
-        </button>
-      )}
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] pointer-events-auto max-w-sm w-[90vw] sm:w-auto animate-toast-slide-down">
+      <div className="flex items-center gap-2.5 bg-slate-900/95 backdrop-blur-md text-white px-3.5 py-2.5 rounded-2xl shadow-xl border border-slate-800/90 text-xs font-semibold">
+        <div className="p-1 rounded-full bg-slate-800/80 shrink-0">
+          {config.icon}
+        </div>
+        <span className="flex-1 tracking-tight text-slate-100 pr-1">{message}</span>
+        {onClose && (
+          <button
+            onClick={onClose}
+            type="button"
+            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800/60 transition-colors cursor-pointer"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
     </div>
   );
 };
+
+export default Toast;
+
