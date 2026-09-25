@@ -17,79 +17,91 @@ import {
   Shirt,
   Briefcase,
   Gem,
-  User
+  User,
+  Sparkles,
+  ChevronRight
 } from 'lucide-react';
 import { RecommendationBadge } from '../components/common/RecommendationBadge';
-import { ScoreMeter } from '../components/common/ScoreMeter';
 import { BrandLogo } from '../components/common/BrandLogo';
 
 export const LandingPage = () => {
   const navigate = useNavigate();
 
   const categories = [
-    { name: 'Clothing', icon: Shirt, count: 'Shirts, tees, pants & outerwear', img: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=400&q=80' },
-    { name: 'Shoes', icon: ShoppingBag, count: 'Sneakers, boots & loafers', img: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=400&q=80' },
-    { name: 'Eyewear', icon: Eye, count: 'Sunglasses & optical frames', img: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=400&q=80' },
-    { name: 'Watches', icon: Watch, count: 'Chronographs & minimal dials', img: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80' },
-    { name: 'Bags', icon: Briefcase, count: 'Totes, backpacks & crossbodies', img: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=400&q=80' },
-    { name: 'Accessories', icon: Gem, count: 'Belts, jewelry & hats', img: 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=400&q=80' }
+    { name: 'Apparel & Suits', count: 'Tailored blazers, overshirts & raw denim', img: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=400&q=80' },
+    { name: 'Footwear & Boots', count: 'Italian Chelsea boots, derbies & low-tops', img: 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?auto=format&fit=crop&w=400&q=80' },
+    { name: 'Eyewear & Optical', count: 'Classic wayfarers, aviators & acetate frames', img: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=400&q=80' },
+    { name: 'Timepieces', count: 'Automatic chronographs & steel dials', img: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80' },
+    { name: 'Leather Goods', count: 'Executive briefcases, weekenders & wallets', img: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=400&q=80' },
+    { name: 'Accessories', count: 'Full-grain leather belts, cuffs & rings', img: 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=400&q=80' }
   ];
 
   const understandingItems = [
-    { title: 'Your Face & Features', desc: 'Analyzes jawline, cheekbones, and face geometry to recommend the exact sunglasses and flattering necklines.', icon: User },
-    { title: 'Your Complexion', desc: 'Detects skin undertone, contrast, and color season to steer you toward elevating palettes.', icon: Palette },
-    { title: 'Your Closet', desc: 'Cross-checks items against your uploaded digital wardrobe to guarantee outfit synergy before purchase.', icon: Layers },
-    { title: 'Your Style', desc: 'Minimal, Streetwear, Smart Casual or Formal — StyleSync understands your silhouette and proportions.', icon: Shirt },
-    { title: 'Your Budget', desc: 'Evaluates price against your monthly category allocation and long-term cost-per-wear value.', icon: Wallet },
-    { title: 'Your Occasions', desc: 'Tailors advice whether you dress for corporate meetings, campus daily wear, or black-tie galas.', icon: Calendar },
-    { title: 'Your Purchases', desc: 'Learns from post-purchase feedback ratings to continuously sharpen future accuracy.', icon: Clock }
+    { title: 'Face Geometry & Necklines', desc: 'Analyzes jawline and face proportions to recommend the exact sunglasses, collars, and hats.', icon: User },
+    { title: 'Skin Undertone & Contrast', desc: 'Detects natural undertone and contrast levels to curate colors that elevate your natural complexion.', icon: Palette },
+    { title: 'Digital Wardrobe Sync', desc: 'Cross-checks every prospective buy against your closet to ensure instant pairing versatility.', icon: Layers },
+    { title: 'Personal Style Archetype', desc: 'Minimalist, Smart Casual, Streetwear, or Modern Tailoring — custom to your silhouette.', icon: Shirt },
+    { title: 'Cost-Per-Wear & Budget', desc: 'Evaluates material durability and long-term value against your monthly clothing allocation.', icon: Wallet },
+    { title: 'Occasions & Lifestyle', desc: 'Tailors advice whether dressing for client meetings, travel, gym, or weekend dates.', icon: Calendar }
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9] text-slate-900 selection:bg-emerald-100 selection:text-emerald-900">
-      {/* Top Navigation */}
-      <header className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-        <BrandLogo size="md" to="/" />
+    <div className="min-h-screen bg-[#FAFAF9] text-slate-900 selection:bg-emerald-100 selection:text-emerald-900 overflow-x-hidden">
+      {/* 1. Top Navigation Bar */}
+      <header className="sticky top-0 z-40 bg-[#FAFAF9]/95 backdrop-blur-md border-b border-slate-200/70 px-4 sm:px-8 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center">
+            {/* Mobile: Compact single-line logo */}
+            <div className="sm:hidden">
+              <BrandLogo size="sm" showSubtitle={false} to="/" />
+            </div>
+            {/* Tablet/Desktop: Full logo */}
+            <div className="hidden sm:block">
+              <BrandLogo size="md" to="/" />
+            </div>
+          </div>
 
-        <div className="flex items-center gap-4">
-          <NavLink
-            to="/login"
-            className="text-xs sm:text-sm font-semibold text-slate-700 hover:text-slate-950 px-3 py-2 transition-colors"
-          >
-            Sign In
-          </NavLink>
-          <NavLink
-            to="/register"
-            className="px-4 sm:px-5 py-2 sm:py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold rounded-xl shadow-subtle hover:shadow transition-all"
-          >
-            Try StyleSync Free
-          </NavLink>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <NavLink
+              to="/login"
+              className="text-xs sm:text-sm font-bold text-slate-700 hover:text-slate-950 px-2.5 sm:px-3 py-2 transition-colors"
+            >
+              Sign In
+            </NavLink>
+            <NavLink
+              to="/register"
+              className="px-3.5 sm:px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer"
+            >
+              Get Started
+            </NavLink>
+          </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-6 pt-12 pb-20 lg:pt-20 lg:pb-32">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+      {/* 2. Hero Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-12 sm:pt-16 sm:pb-24 lg:pt-20 lg:pb-28">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           {/* Left Hero Copy */}
-          <div className="lg:col-span-6 space-y-6 text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-bold">
-              <Compass className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Personal Shopping & Wardrobe Advisor</span>
+          <div className="lg:col-span-6 space-y-4 sm:space-y-6 text-left">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-2xs">
+              <Compass className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+              <span>Menswear &amp; Personal Wardrobe Advisor</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.1]">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 leading-[1.15]">
               Before You Buy It, <br />
-              <span className="text-emerald-600 underline decoration-emerald-200 decoration-wavy decoration-2">Ask StyleSync.</span>
+              <span className="text-emerald-600">Ask StyleSync.</span>
             </h1>
 
-            <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed max-w-xl">
-              Get personalized advice on whether a product actually suits your style, wardrobe, budget, and lifestyle. Stop buying clothes you only wear once.
+            <p className="text-sm sm:text-base lg:text-lg text-slate-600 font-normal leading-relaxed max-w-xl">
+              Get personalized advice on whether a jacket, watch, boot, or suit actually fits your build, wardrobe, budget, and lifestyle. Stop buying clothes you only wear once.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
               <button
                 onClick={() => navigate('/onboarding')}
-                className="px-7 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm sm:text-base rounded-2xl shadow-floating hover:shadow-lg transition-all flex items-center justify-center gap-2 group active:scale-[0.98]"
+                className="w-full sm:w-auto px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm sm:text-base rounded-2xl shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 group active:scale-[0.98] cursor-pointer"
               >
                 <span>Try StyleSync</span>
                 <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
@@ -97,85 +109,87 @@ export const LandingPage = () => {
 
               <button
                 onClick={() => navigate('/advisor')}
-                className="px-6 py-3.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-bold text-sm sm:text-base rounded-2xl shadow-subtle hover:border-slate-300 transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-6 py-3.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-bold text-sm sm:text-base rounded-2xl shadow-2xs hover:border-slate-300 transition-all flex items-center justify-center gap-2 active:scale-[0.98] cursor-pointer"
               >
                 <span>See How It Works</span>
               </button>
             </div>
 
-            <div className="flex items-center gap-6 pt-4 text-xs font-medium text-slate-500">
+            {/* Value Highlights */}
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-1 text-xs font-semibold text-slate-500">
               <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>Instant Screenshot Analysis</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>Zero Sales Bias</span>
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>Zero Brand Bias</span>
               </div>
             </div>
           </div>
 
-          {/* Right Hero Visual: Realistic Live Advisor Interface Card */}
-          <div className="lg:col-span-6 relative">
-            <div className="relative bg-white rounded-3xl p-6 sm:p-7 shadow-floating border border-slate-200/80 max-w-lg mx-auto">
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+          {/* Right Hero Visual: Live Advisor Interface Card */}
+          <div className="lg:col-span-6 relative mt-4 lg:mt-0">
+            <div className="relative bg-white rounded-3xl p-5 sm:p-6 shadow-card border border-slate-200/90 max-w-md mx-auto">
+              <div className="flex items-center justify-between pb-3.5 border-b border-slate-100 mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Live AI Evaluation</span>
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700">Live Evaluation</span>
                 </div>
-                <span className="text-[11px] font-semibold text-slate-400">Match Confidence: 95%</span>
+                <span className="text-[11px] font-semibold text-slate-400">Match Confidence: 96%</span>
               </div>
 
               {/* Product Showcase */}
-              <div className="flex items-start gap-4 mb-5">
-                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0">
+              <div className="flex items-center gap-3.5 mb-4">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0">
                   <img
-                    src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=400&q=80"
-                    alt="White Casual Sneakers"
+                    src="https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=400&q=80"
+                    alt="Handcrafted Leather Chelsea Boots"
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Footwear / Shoes</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Menswear / Footwear</span>
                   <h3 className="text-sm sm:text-base font-bold text-slate-900 truncate">
-                    Minimal White Leather Low-Tops
+                    Classic Italian Leather Chelsea Boots
                   </h3>
-                  <p className="text-xs font-semibold text-slate-500 mb-2">₹7,499 · Italian Calfskin</p>
+                  <p className="text-xs font-semibold text-slate-500 mb-2">₹8,999 · Full-Grain Espresso Leather</p>
                   
                   {/* Recommendation Tag & Score */}
                   <div className="flex items-center gap-2">
-                    <RecommendationBadge decision="BUY" size="md" />
+                    <RecommendationBadge decision="BUY" size="sm" />
                     <span className="text-xs font-extrabold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">
-                      88 / 100
+                      92 / 100
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Small Key Insights */}
-              <div className="grid grid-cols-2 gap-2.5 pt-4 border-t border-slate-100 text-xs">
-                <div className="flex items-center gap-2 p-2 rounded-xl bg-emerald-50/60 border border-emerald-100 text-emerald-900 font-medium">
+              {/* Key Insights Pills */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-3 border-t border-slate-100 text-xs">
+                <div className="flex items-center gap-2 p-2 rounded-xl bg-emerald-50/70 border border-emerald-100/80 text-emerald-900 font-medium">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                  <span>Matches your style</span>
+                  <span className="truncate">Matches Smart Casual archetype</span>
                 </div>
-                <div className="flex items-center gap-2 p-2 rounded-xl bg-emerald-50/60 border border-emerald-100 text-emerald-900 font-medium">
+                <div className="flex items-center gap-2 p-2 rounded-xl bg-emerald-50/70 border border-emerald-100/80 text-emerald-900 font-medium">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                  <span>Works with 6 wardrobe items</span>
+                  <span className="truncate">Pairs with raw denim &amp; chinos</span>
                 </div>
-                <div className="flex items-center gap-2 p-2 rounded-xl bg-emerald-50/60 border border-emerald-100 text-emerald-900 font-medium">
+                <div className="flex items-center gap-2 p-2 rounded-xl bg-emerald-50/70 border border-emerald-100/80 text-emerald-900 font-medium">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                  <span>Within footwear budget</span>
+                  <span className="truncate">Within seasonal footwear budget</span>
                 </div>
-                <div className="flex items-center gap-2 p-2 rounded-xl bg-emerald-50/60 border border-emerald-100 text-emerald-900 font-medium">
+                <div className="flex items-center gap-2 p-2 rounded-xl bg-emerald-50/70 border border-emerald-100/80 text-emerald-900 font-medium">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                  <span>Highly versatile (Daily & Work)</span>
+                  <span className="truncate">High Versatility (Office &amp; Dinner)</span>
                 </div>
               </div>
 
-              <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span className="text-slate-400">StyleSync Recommendation Engine</span>
-                <NavLink to="/advisor" className="font-bold text-emerald-600 hover:text-emerald-700">
-                  Try with your screenshot →
+              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                <span className="text-slate-400 font-medium">Recommendation Engine</span>
+                <NavLink to="/advisor" className="font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
+                  <span>Try screenshot</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </NavLink>
               </div>
             </div>
@@ -183,48 +197,48 @@ export const LandingPage = () => {
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section className="py-20 bg-white border-y border-slate-200/80">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/60">
+      {/* 3. How It Works Section */}
+      <section className="py-8 sm:py-16 bg-white border-y border-slate-200/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-12">
+            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border border-emerald-200/60">
               Simple 3-Step Flow
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-3 tracking-tight">
+            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-900 mt-2 sm:mt-3 tracking-tight">
               How StyleSync Works
             </h2>
-            <p className="text-sm sm:text-base text-slate-500 mt-2 font-normal">
-              No sponsored brand links. No impulse buying. Just tailored clarity.
+            <p className="text-xs sm:text-sm text-slate-500 mt-1 font-normal">
+              No sponsored brand links. No impulse buying. Just tailored wardrobe clarity.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-8 rounded-3xl bg-[#FAFAF9] border border-slate-200/70 hover:shadow-card transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-extrabold text-lg mb-6 shadow-sm">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6">
+            <div className="p-4 sm:p-6 rounded-2xl bg-[#FAFAF9] border border-slate-200/80 hover:shadow-card transition-all">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-extrabold text-xs sm:text-sm mb-2.5 sm:mb-4 shadow-xs">
                 1
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">Upload a Product</h3>
-              <p className="text-sm text-slate-500 leading-relaxed font-normal">
-                Take a quick screenshot from Zara, ASOS, Nike, or any shop and drop it in. StyleSync extracts silhouette, color, and price.
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 mb-1">Upload a Product</h3>
+              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">
+                Take a quick screenshot from Zara, ASOS, Nike, Uniqlo, or MR PORTER and drop it in. StyleSync extracts silhouette, color, and price.
               </p>
             </div>
 
-            <div className="p-8 rounded-3xl bg-[#FAFAF9] border border-slate-200/70 hover:shadow-card transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-extrabold text-lg mb-6 shadow-sm">
+            <div className="p-4 sm:p-6 rounded-2xl bg-[#FAFAF9] border border-slate-200/80 hover:shadow-card transition-all">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-extrabold text-xs sm:text-sm mb-2.5 sm:mb-4 shadow-xs">
                 2
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">StyleSync Analyzes It</h3>
-              <p className="text-sm text-slate-500 leading-relaxed font-normal">
-                Our model tests the item against your 6 personal dimensions: fit, color palette, existing wardrobe items, budget, and occasions.
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 mb-1">Multi-Dimension Analysis</h3>
+              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">
+                Our model tests the item against your personal dimensions: fit proportions, color palette, existing wardrobe synergy, budget, and occasions.
               </p>
             </div>
 
-            <div className="p-8 rounded-3xl bg-[#FAFAF9] border border-slate-200/70 hover:shadow-card transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-slate-900 text-emerald-400 flex items-center justify-center font-extrabold text-lg mb-6 shadow-sm">
+            <div className="p-4 sm:p-6 rounded-2xl bg-[#FAFAF9] border border-slate-200/80 hover:shadow-card transition-all">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-extrabold text-xs sm:text-sm mb-2.5 sm:mb-4 shadow-xs">
                 3
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">Get Your Decision</h3>
-              <p className="text-sm text-slate-500 leading-relaxed font-normal">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 mb-1">Get Your Decision</h3>
+              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">
                 Receive an unequivocal 🟢 BUY, 🟡 MAYBE, or 🔴 SKIP verdict with exact score breakdown, outfit combinations, and better alternatives.
               </p>
             </div>
@@ -232,29 +246,29 @@ export const LandingPage = () => {
         </div>
       </section>
 
-      {/* What StyleSync Understands Matrix */}
-      <section className="py-20 max-w-7xl mx-auto px-6">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+      {/* 4. What StyleSync Understands Grid */}
+      <section className="py-8 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-12">
+          <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
             What StyleSync Understands
           </h2>
-          <p className="text-sm sm:text-base text-slate-500 mt-2 font-normal">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 font-normal">
             Generic shopping sites want to sell you anything. StyleSync protects your closet.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
           {understandingItems.map((item, idx) => {
             const Icon = item.icon;
             return (
               <div
                 key={idx}
-                className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-subtle hover:border-slate-300 transition-all"
+                className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs hover:shadow-subtle hover:border-slate-300 transition-all flex flex-col"
               >
-                <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-700 mb-4">
-                  <Icon className="w-5 h-5 text-emerald-600" />
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-700 mb-2.5">
+                  <Icon className="w-4 h-4 text-emerald-600" />
                 </div>
-                <h3 className="text-base font-bold text-slate-900 mb-1.5">{item.title}</h3>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 mb-1">{item.title}</h3>
                 <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">{item.desc}</p>
               </div>
             );
@@ -262,77 +276,136 @@ export const LandingPage = () => {
         </div>
       </section>
 
-      {/* Product Categories */}
-      <section className="py-20 bg-white border-y border-slate-200/80">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12">
+      {/* 5. Product Categories */}
+      <section className="py-8 sm:py-16 bg-white border-y border-slate-200/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-6 sm:mb-10">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/60">
+              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border border-emerald-200/60">
                 Multi-Category Intelligence
               </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-3 tracking-tight">
+              <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-900 mt-2 sm:mt-3 tracking-tight">
                 Evaluates Everything You Wear
               </h2>
             </div>
-            <p className="text-sm text-slate-500 max-w-xs mt-3 sm:mt-0">
+            <p className="text-xs sm:text-sm text-slate-500 max-w-xs mt-1 sm:mt-0">
               From head to toe, get expert verification across all wardrobe categories.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {categories.map((cat, idx) => {
-              const Icon = cat.icon;
-              return (
-                <div
-                  key={idx}
-                  className="group relative bg-[#FAFAF9] rounded-2xl p-4 border border-slate-200/80 hover:shadow-card transition-all flex flex-col"
-                >
-                  <div className="aspect-square rounded-xl overflow-hidden mb-3 bg-white">
-                    <img
-                      src={cat.img}
-                      alt={cat.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  <h4 className="text-sm font-bold text-slate-900 mb-0.5">{cat.name}</h4>
-                  <p className="text-[11px] text-slate-400 line-clamp-1">{cat.count}</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-4">
+            {categories.map((cat, idx) => (
+              <div
+                key={idx}
+                className="group relative bg-[#FAFAF9] rounded-2xl p-2.5 sm:p-3.5 border border-slate-200/80 hover:shadow-card transition-all flex flex-col"
+              >
+                <div className="aspect-square rounded-xl overflow-hidden mb-2 bg-white">
+                  <img
+                    src={cat.img}
+                    alt={cat.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
-              );
-            })}
+                <h4 className="text-xs sm:text-sm font-bold text-slate-900 mb-0.5 truncate">{cat.name}</h4>
+                <p className="text-[10px] sm:text-[11px] text-slate-400 line-clamp-1">{cat.count}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-24 max-w-5xl mx-auto px-6 text-center">
-        <div className="bg-slate-900 text-white rounded-3xl p-10 sm:p-16 shadow-floating relative overflow-hidden">
-          <div className="relative z-10 max-w-2xl mx-auto space-y-6">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-400 bg-white/10 px-3 py-1 rounded-full border border-white/10">
+      {/* 6. Final Call to Action */}
+      <section className="py-8 sm:py-16 max-w-5xl mx-auto px-4 sm:px-6 text-center">
+        <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-white rounded-3xl p-6 sm:p-12 shadow-card border border-slate-800/80 relative overflow-hidden">
+          <div className="absolute inset-0 bg-radial from-emerald-500/10 via-transparent to-transparent pointer-events-none" />
+          <div className="relative z-10 max-w-xl mx-auto space-y-3 sm:space-y-4">
+            <span className="inline-block text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-500/30">
               Start Shopping Smarter
             </span>
-            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight text-white">
               Stop guessing. <br />
               Start buying smarter.
             </h2>
-            <p className="text-sm sm:text-base text-slate-300 font-normal">
-              Join thousands of conscious shoppers building curated, highly wearable capsules without buyer remorse.
+            <p className="text-xs sm:text-sm text-slate-300 font-normal max-w-md mx-auto leading-relaxed">
+              Join conscious shoppers building curated, high-ROI capsule wardrobes without buyer remorse.
             </p>
-            <div className="pt-2">
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
               <button
                 onClick={() => navigate('/onboarding')}
-                className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm sm:text-base rounded-2xl shadow-lg transition-all active:scale-95"
+                className="w-full sm:w-auto px-7 py-3.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
               >
-                Set Up Your Free Profile
+                <span>Set Up Your Free Profile</span>
+                <ArrowRight className="w-4 h-4 text-slate-950" />
               </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-200 py-8 text-center text-xs text-slate-400">
-        <p>© 2025 StyleSync AI Inc. Built for personal shopping clarity. Your photos and styling data are strictly private.</p>
+      {/* 7. Comprehensive Modern Footer */}
+      <footer className="bg-white border-t border-slate-200/80 pt-10 pb-8 px-4 sm:px-8 text-slate-600">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-10">
+          {/* Brand Col */}
+          <div className="lg:col-span-2 space-y-3">
+            <BrandLogo size="md" to="/" />
+            <p className="text-xs sm:text-sm text-slate-500 max-w-sm leading-relaxed">
+              Your personal menswear &amp; capsule wardrobe decision engine. Test prospective clothing against your build, palette, budget, and closet before you buy.
+            </p>
+            <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg w-fit border border-emerald-100">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <span>100% Private Styling &amp; Photo Data</span>
+            </div>
+          </div>
+
+          {/* Features */}
+          <div className="space-y-2.5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900">Features</h4>
+            <ul className="space-y-2 text-xs font-medium text-slate-500">
+              <li><NavLink to="/advisor" className="hover:text-emerald-600 transition-colors">Product Advisor</NavLink></li>
+              <li><NavLink to="/daily-stylist" className="hover:text-emerald-600 transition-colors">Daily Stylist</NavLink></li>
+              <li><NavLink to="/wardrobe" className="hover:text-emerald-600 transition-colors">Capsule Wardrobe</NavLink></li>
+              <li><NavLink to="/builder" className="hover:text-emerald-600 transition-colors">Outfit Builder</NavLink></li>
+              <li><NavLink to="/budget" className="hover:text-emerald-600 transition-colors">Budget Optimizer</NavLink></li>
+            </ul>
+          </div>
+
+          {/* Platforms */}
+          <div className="space-y-2.5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900">Platforms</h4>
+            <ul className="space-y-2 text-xs font-medium text-slate-500">
+              <li><NavLink to="/login" className="hover:text-emerald-600 transition-colors">Web App</NavLink></li>
+              <li><NavLink to="/app" className="hover:text-emerald-600 transition-colors">Mobile App (PWA)</NavLink></li>
+              <li><NavLink to="/assistant" className="hover:text-emerald-600 transition-colors">Style Assistant</NavLink></li>
+              <li><NavLink to="/history" className="hover:text-emerald-600 transition-colors">Purchase Tracker</NavLink></li>
+            </ul>
+          </div>
+
+          {/* Company & Privacy */}
+          <div className="space-y-2.5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900">Privacy &amp; Trust</h4>
+            <ul className="space-y-2 text-xs font-medium text-slate-500">
+              <li><span className="text-slate-500">Zero Brand Sponsorships</span></li>
+              <li><NavLink to="/settings" className="hover:text-emerald-600 transition-colors">Account Settings</NavLink></li>
+              <li><span className="text-slate-400">Strict Photo Encryption</span></li>
+              <li><span className="text-slate-400">GDPR &amp; Privacy Compliant</span></li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom copyright line */}
+        <div className="max-w-7xl mx-auto pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 text-center sm:text-left">
+          <p>© 2026 StyleSync. Built for timeless personal style and mindful wardrobe curation.</p>
+          <div className="flex items-center gap-4 font-medium text-slate-400">
+            <NavLink to="/login" className="hover:text-slate-600">Sign In</NavLink>
+            <span>•</span>
+            <NavLink to="/register" className="hover:text-slate-600">Create Account</NavLink>
+            <span>•</span>
+            <NavLink to="/onboarding" className="hover:text-slate-600">Get Started</NavLink>
+          </div>
+        </div>
       </footer>
     </div>
   );
 };
+
+export default LandingPage;
