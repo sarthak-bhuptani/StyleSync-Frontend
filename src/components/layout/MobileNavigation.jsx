@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -12,22 +12,29 @@ import {
   ArrowLeftRight,
   X,
   PlusCircle,
-  UploadCloud,
-  Sparkles
+  Sparkles,
+  Settings,
+  LogOut,
+  ShoppingBag,
+  ChevronRight
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import { useWardrobe } from '../../context/WardrobeContext';
 import { AddWardrobeItemModal } from '../wardrobe/AddWardrobeItemModal';
 
 export const MobileNavigation = () => {
   const [actionSheetOpen, setActionSheetOpen] = useState(false);
+  const [accountSheetOpen, setAccountSheetOpen] = useState(false);
   const [cameraModalOpen, setCameraModalOpen] = useState(false);
+  
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { addWardrobeItem } = useWardrobe();
 
-  // Lock body scroll only while action sheet is open, restore on close/unmount
-  React.useEffect(() => {
-    if (actionSheetOpen) {
+  // Lock body scroll only while modals are open
+  useEffect(() => {
+    if (actionSheetOpen || accountSheetOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -35,10 +42,11 @@ export const MobileNavigation = () => {
     return () => {
       document.body.style.overflow = '';
     };
-  }, [actionSheetOpen]);
+  }, [actionSheetOpen, accountSheetOpen]);
 
   const handleNavigate = (path) => {
     setActionSheetOpen(false);
+    setAccountSheetOpen(false);
     navigate(path);
   };
 
@@ -46,6 +54,14 @@ export const MobileNavigation = () => {
     setActionSheetOpen(false);
     setCameraModalOpen(true);
   };
+
+  const handleLogout = async () => {
+    setAccountSheetOpen(false);
+    await logout();
+    navigate('/login');
+  };
+
+  const isAccountActive = ['/profile', '/settings', '/purchases'].includes(location.pathname) || accountSheetOpen;
 
   return (
     <>
@@ -91,7 +107,7 @@ export const MobileNavigation = () => {
           )}
         </NavLink>
 
-        {/* Tab 3: CENTER ACTION BUTTON (Elevated Clean Action Trigger) */}
+        {/* Tab 3: CENTER ACTION BUTTON (Elevated Action Trigger) */}
         <div className="flex-1 flex flex-col items-center justify-center -mt-5 relative z-10">
           <button
             type="button"
@@ -126,26 +142,139 @@ export const MobileNavigation = () => {
           )}
         </NavLink>
 
-        {/* Tab 5: Hub & Account */}
-        <NavLink
-          to="/profile"
-          className={({ isActive }) =>
-            `flex-1 flex flex-col items-center justify-center py-0.5 text-[10px] font-bold transition-all relative ${
-              isActive ? 'text-slate-900 font-black' : 'text-slate-400 hover:text-slate-600'
-            }`
-          }
+        {/* Tab 5: Account & Logout Sheet Trigger */}
+        <button
+          type="button"
+          onClick={() => setAccountSheetOpen(true)}
+          className={`flex-1 flex flex-col items-center justify-center py-0.5 text-[10px] font-bold transition-all relative cursor-pointer ${
+            isAccountActive ? 'text-slate-900 font-black' : 'text-slate-400 hover:text-slate-600'
+          }`}
         >
-          {({ isActive }) => (
-            <>
-              <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-slate-100 text-slate-900 scale-105' : 'text-slate-400'}`}>
-                <User className="w-4 h-4" />
-              </div>
-              <span className="mt-0.5 tracking-tight">Account</span>
-              {isActive && <span className="absolute -bottom-1 w-1 h-1 rounded-full bg-slate-900" />}
-            </>
-          )}
-        </NavLink>
+          <div className={`p-1.5 rounded-xl transition-all ${isAccountActive ? 'bg-slate-100 text-slate-900 scale-105' : 'text-slate-400'}`}>
+            <User className="w-4 h-4" />
+          </div>
+          <span className="mt-0.5 tracking-tight">Account</span>
+          {isAccountActive && <span className="absolute -bottom-1 w-1 h-1 rounded-full bg-slate-900" />}
+        </button>
       </nav>
+
+      {/* ACCOUNT & LOGOUT BOTTOM SHEET MODAL */}
+      {accountSheetOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden flex items-end justify-center">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity animate-fade-in"
+            onClick={() => setAccountSheetOpen(false)}
+          />
+
+          {/* Account Drawer Content */}
+          <div className="relative w-full max-w-lg bg-white rounded-t-3xl shadow-2xl z-10 p-5 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] animate-slide-up-mobile border-t border-slate-100 max-h-[85vh] overflow-y-auto">
+            {/* Grab Bar */}
+            <div className="w-12 h-1.5 rounded-full bg-slate-300 mx-auto mb-3" />
+
+            {/* User Profile Header Banner */}
+            <div className="flex items-center justify-between pb-3.5 mb-3 border-b border-slate-100">
+              <div className="flex items-center gap-3 min-w-0">
+                <img
+                  src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || user?.username || user?.email || 'User')}&background=0f172a&color=fff&size=100`}
+                  alt={user?.name || 'User'}
+                  className="w-12 h-12 rounded-2xl object-cover border-2 border-slate-200 shadow-xs flex-shrink-0"
+                />
+                <div className="min-w-0">
+                  <h3 className="text-sm font-black text-slate-900 truncate">
+                    {user?.name || user?.username || 'StyleSync Member'}
+                  </h3>
+                  <p className="text-xs text-slate-500 truncate">{user?.email || 'Logged In'}</p>
+                  <span className="inline-block mt-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 font-bold text-[10px] border border-emerald-200/60">
+                    {user?.stylePreferences?.[0] || 'Smart Casual'} · {user?.sizes?.shirt || 'Size L'}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setAccountSheetOpen(false)}
+                className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Navigation Options List */}
+            <div className="space-y-2 mb-4">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                Account & Preferences
+              </span>
+
+              {/* 1. Profile & Sizes */}
+              <button
+                type="button"
+                onClick={() => handleNavigate('/profile')}
+                className="w-full p-3 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200/70 transition-all flex items-center justify-between text-left active:scale-[0.99] cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs">
+                    <User className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-900">My Profile & Sizes</p>
+                    <p className="text-[10px] text-slate-500">Color season, face scan, sizes & style rules</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400" />
+              </button>
+
+              {/* 2. Settings */}
+              <button
+                type="button"
+                onClick={() => handleNavigate('/settings')}
+                className="w-full p-3 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200/70 transition-all flex items-center justify-between text-left active:scale-[0.99] cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-center border border-slate-200">
+                    <Settings className="w-4 h-4 text-slate-700" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-900">Settings & Security</p>
+                    <p className="text-[10px] text-slate-500">Theme, notifications, currency & passwords</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400" />
+              </button>
+
+              {/* 3. Purchase History */}
+              <button
+                type="button"
+                onClick={() => handleNavigate('/purchases')}
+                className="w-full p-3 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200/70 transition-all flex items-center justify-between text-left active:scale-[0.99] cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-teal-50 text-teal-800 flex items-center justify-center border border-teal-200/60">
+                    <ShoppingBag className="w-4 h-4 text-teal-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-900">Purchase History & Ratings</p>
+                    <p className="text-[10px] text-slate-500">Good vs Bad Buy feedback tracking</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400" />
+              </button>
+            </div>
+
+            {/* DEDICATED LOG OUT BUTTON */}
+            <div className="pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full p-3.5 rounded-2xl bg-rose-50 hover:bg-rose-100/80 border border-rose-200 text-rose-700 transition-all flex items-center justify-center gap-2 font-bold text-xs active:scale-[0.98] cursor-pointer shadow-2xs"
+              >
+                <LogOut className="w-4 h-4 text-rose-600" />
+                <span>Log Out of StyleSync</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modern Center Action Sheet Modal (Super Tools Hub) */}
       {actionSheetOpen && (

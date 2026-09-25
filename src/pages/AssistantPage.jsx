@@ -27,7 +27,18 @@ export const AssistantPage = () => {
   const { user } = useAuth();
   const { wardrobe } = useWardrobe();
   const { weather } = useWeather();
-  const [messages, setMessages] = useState(() => getInitialMessages(user?.name));
+
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem('stylesync_assistant_messages');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return getInitialMessages(user?.name);
+  });
+
   const [inputText, setInputText] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
@@ -43,6 +54,12 @@ export const AssistantPage = () => {
   ];
 
   useEffect(() => {
+    try {
+      localStorage.setItem('stylesync_assistant_messages', JSON.stringify(messages));
+    } catch {}
+  }, [messages]);
+
+  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
@@ -55,6 +72,15 @@ export const AssistantPage = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleResetChat = () => {
+    setMessages(getInitialMessages(user?.name));
+    setSelectedImage(null);
+    setInputText('');
+    try {
+      localStorage.removeItem('stylesync_assistant_messages');
+    } catch {}
   };
 
   const handleSend = async (textToSend = null) => {
@@ -165,7 +191,7 @@ export const AssistantPage = () => {
         </div>
 
         <button
-          onClick={() => setMessages(getInitialMessages(user?.name))}
+          onClick={handleResetChat}
           className="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 p-2 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />

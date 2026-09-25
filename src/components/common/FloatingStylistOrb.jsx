@@ -7,6 +7,7 @@ import {
   User,
   Maximize2,
   Image as ImageIcon,
+  Trash2,
   Sparkles,
   CheckCircle2
 } from 'lucide-react';
@@ -15,17 +16,27 @@ import { useWardrobe } from '../../context/WardrobeContext';
 import { useWeather } from '../../context/WeatherContext';
 import { chatApi } from '../../api/chatApi';
 
+const DEFAULT_WELCOME_MESSAGE = {
+  id: 'welcome',
+  sender: 'ai',
+  text: "Hey! I'm your StyleSync stylist. Send me a question or **upload a photo** of any item to see if it's a BUY or PASS!",
+  timestamp: 'Just now'
+};
+
 export const FloatingStylistOrb = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   
-  const [messages, setMessages] = useState([
-    {
-      id: 'welcome',
-      sender: 'ai',
-      text: "Hey! I'm your StyleSync stylist. Send me a question or **upload a photo** of any item to see if it's a BUY or PASS!",
-      timestamp: 'Just now'
-    }
-  ]);
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem('stylesync_chat_messages');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [DEFAULT_WELCOME_MESSAGE];
+  });
+
   const [input, setInput] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
@@ -40,6 +51,12 @@ export const FloatingStylistOrb = () => {
 
   // Hide widget if already on dedicated assistant page
   const isAssistantPage = location.pathname === '/assistant';
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('stylesync_chat_messages', JSON.stringify(messages));
+    } catch {}
+  }, [messages]);
 
   useEffect(() => {
     if (isChatOpen) {
@@ -58,6 +75,15 @@ export const FloatingStylistOrb = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleClearChat = () => {
+    setMessages([DEFAULT_WELCOME_MESSAGE]);
+    setSelectedImage(null);
+    setInput('');
+    try {
+      localStorage.removeItem('stylesync_chat_messages');
+    } catch {}
   };
 
   const handleSend = async (textToSend = null) => {
@@ -194,6 +220,15 @@ export const FloatingStylistOrb = () => {
               </div>
 
               <div className="flex items-center gap-1">
+                {/* Clear Chat Button */}
+                <button
+                  type="button"
+                  onClick={handleClearChat}
+                  title="Clear chat history"
+                  className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
                 <button
                   type="button"
                   onClick={() => {
@@ -201,14 +236,14 @@ export const FloatingStylistOrb = () => {
                     navigate('/assistant');
                   }}
                   title="Open Full Assistant Page"
-                  className="p-1.5 text-slate-400 hover:text-white rounded-lg transition-colors cursor-pointer"
+                  className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                 >
                   <Maximize2 className="w-4 h-4" />
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsChatOpen(false)}
-                  className="p-1.5 text-slate-400 hover:text-white rounded-lg transition-colors cursor-pointer"
+                  className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
