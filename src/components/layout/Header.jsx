@@ -298,6 +298,8 @@ export const Header = () => {
             <img
               src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || user?.username || user?.email || 'User')}&background=0f172a&color=fff&size=100`}
               alt="Profile"
+              referrerPolicy="no-referrer"
+              crossOrigin="anonymous"
               className="w-8 h-8 rounded-full object-cover border border-slate-200 group-hover:ring-2 group-hover:ring-slate-900 transition-all"
             />
           </NavLink>

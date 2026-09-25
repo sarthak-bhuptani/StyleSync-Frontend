@@ -139,6 +139,8 @@ export const Sidebar = () => {
           <img
             src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || user?.username || user?.email || 'User')}&background=0f172a&color=fff&size=100`}
             alt={user?.name || 'User'}
+            referrerPolicy="no-referrer"
+            crossOrigin="anonymous"
             className="w-9 h-9 rounded-full object-cover border border-slate-200"
           />
           <div className="min-w-0 flex-1">

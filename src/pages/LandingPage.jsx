@@ -145,6 +145,13 @@ export const LandingPage = () => {
                   <img
                     src="https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=400&q=80"
                     alt="Handcrafted Leather Chelsea Boots"
+                    referrerPolicy="no-referrer"
+                    crossOrigin="anonymous"
+                    loading="eager"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=400&q=80';
+                    }}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -299,10 +306,17 @@ export const LandingPage = () => {
                 key={idx}
                 className="group relative bg-[#FAFAF9] rounded-2xl p-2.5 sm:p-3.5 border border-slate-200/80 hover:shadow-card transition-all flex flex-col"
               >
-                <div className="aspect-square rounded-xl overflow-hidden mb-2 bg-white">
+                <div className="aspect-square rounded-xl overflow-hidden mb-2 bg-slate-100">
                   <img
                     src={cat.img}
                     alt={cat.name}
+                    referrerPolicy="no-referrer"
+                    crossOrigin="anonymous"
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=400&q=80';
+                    }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
@@ -342,65 +356,55 @@ export const LandingPage = () => {
         </div>
       </section>
 
-      {/* 7. Comprehensive Modern Footer */}
-      <footer className="bg-white border-t border-slate-200/80 pt-10 pb-8 px-4 sm:px-8 text-slate-600">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-10">
-          {/* Brand Col */}
-          <div className="lg:col-span-2 space-y-3">
+      {/* 7. Streamlined Clean Modern Footer */}
+      <footer className="bg-white border-t border-slate-200/80 py-8 sm:py-10 px-4 sm:px-8 text-slate-600">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
+          {/* Brand Info */}
+          <div className="space-y-2 max-w-sm">
             <BrandLogo size="md" to="/" />
-            <p className="text-xs sm:text-sm text-slate-500 max-w-sm leading-relaxed">
-              Your personal menswear &amp; capsule wardrobe decision engine. Test prospective clothing against your build, palette, budget, and closet before you buy.
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Personal menswear styling and capsule wardrobe decision engine. Test items before you buy.
             </p>
-            <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg w-fit border border-emerald-100">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-              <span>100% Private Styling &amp; Photo Data</span>
+          </div>
+
+          {/* Quick Clickable Links Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 gap-x-8 gap-y-2 text-xs font-semibold">
+            <div className="space-y-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
+                Styling Tools
+              </span>
+              <ul className="space-y-1.5 text-slate-600">
+                <li><NavLink to="/advisor" className="hover:text-emerald-600 transition-colors">Product Advisor</NavLink></li>
+                <li><NavLink to="/daily-stylist" className="hover:text-emerald-600 transition-colors">Wear Today</NavLink></li>
+                <li><NavLink to="/wardrobe" className="hover:text-emerald-600 transition-colors">My Wardrobe</NavLink></li>
+                <li><NavLink to="/assistant" className="hover:text-emerald-600 transition-colors">AI Stylist Chat</NavLink></li>
+              </ul>
             </div>
-          </div>
 
-          {/* Features */}
-          <div className="space-y-2.5">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900">Features</h4>
-            <ul className="space-y-2 text-xs font-medium text-slate-500">
-              <li><NavLink to="/advisor" className="hover:text-emerald-600 transition-colors">Product Advisor</NavLink></li>
-              <li><NavLink to="/daily-stylist" className="hover:text-emerald-600 transition-colors">Daily Stylist</NavLink></li>
-              <li><NavLink to="/wardrobe" className="hover:text-emerald-600 transition-colors">Capsule Wardrobe</NavLink></li>
-              <li><NavLink to="/builder" className="hover:text-emerald-600 transition-colors">Outfit Builder</NavLink></li>
-              <li><NavLink to="/budget" className="hover:text-emerald-600 transition-colors">Budget Optimizer</NavLink></li>
-            </ul>
-          </div>
-
-          {/* Platforms */}
-          <div className="space-y-2.5">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900">Platforms</h4>
-            <ul className="space-y-2 text-xs font-medium text-slate-500">
-              <li><NavLink to="/login" className="hover:text-emerald-600 transition-colors">Web App</NavLink></li>
-              <li><NavLink to="/app" className="hover:text-emerald-600 transition-colors">Mobile App (PWA)</NavLink></li>
-              <li><NavLink to="/assistant" className="hover:text-emerald-600 transition-colors">Style Assistant</NavLink></li>
-              <li><NavLink to="/history" className="hover:text-emerald-600 transition-colors">Purchase Tracker</NavLink></li>
-            </ul>
-          </div>
-
-          {/* Company & Privacy */}
-          <div className="space-y-2.5">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900">Privacy &amp; Trust</h4>
-            <ul className="space-y-2 text-xs font-medium text-slate-500">
-              <li><span className="text-slate-500">Zero Brand Sponsorships</span></li>
-              <li><NavLink to="/settings" className="hover:text-emerald-600 transition-colors">Account Settings</NavLink></li>
-              <li><span className="text-slate-400">Strict Photo Encryption</span></li>
-              <li><span className="text-slate-400">GDPR &amp; Privacy Compliant</span></li>
-            </ul>
+            <div className="space-y-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
+                Account
+              </span>
+              <ul className="space-y-1.5 text-slate-600">
+                <li><NavLink to="/login" className="hover:text-emerald-600 transition-colors">Sign In</NavLink></li>
+                <li><NavLink to="/register" className="hover:text-emerald-600 transition-colors">Create Account</NavLink></li>
+                <li><NavLink to="/onboarding" className="hover:text-emerald-600 transition-colors">Setup Profile</NavLink></li>
+                <li><NavLink to="/settings" className="hover:text-emerald-600 transition-colors">Settings</NavLink></li>
+              </ul>
+            </div>
           </div>
         </div>
 
         {/* Bottom copyright line */}
-        <div className="max-w-7xl mx-auto pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 text-center sm:text-left">
-          <p>© 2026 StyleSync. Built for timeless personal style and mindful wardrobe curation.</p>
-          <div className="flex items-center gap-4 font-medium text-slate-400">
-            <NavLink to="/login" className="hover:text-slate-600">Sign In</NavLink>
+        <div className="max-w-7xl mx-auto pt-5 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-[11px] text-slate-400 text-center sm:text-left">
+          <p>© 2026 StyleSync. Built for mindful wardrobe curation.</p>
+          <div className="flex items-center gap-3 text-emerald-700 font-medium">
+            <span className="flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              100% Private Styling Data
+            </span>
             <span>•</span>
-            <NavLink to="/register" className="hover:text-slate-600">Create Account</NavLink>
-            <span>•</span>
-            <NavLink to="/onboarding" className="hover:text-slate-600">Get Started</NavLink>
+            <span>Zero Brand Sponsorships</span>
           </div>
         </div>
       </footer>

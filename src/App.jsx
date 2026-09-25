@@ -22,17 +22,25 @@ import { WardrobeGapPage } from './pages/WardrobeGapPage';
 import { ProductAdvisorPage } from './pages/ProductAdvisorPage';
 import { ProductResultPage } from './pages/ProductResultPage';
 import { ComparePage } from './pages/ComparePage';
-import { OutfitBuilderPage } from './pages/OutfitBuilderPage';
 import { PurchaseHistoryPage } from './pages/PurchaseHistoryPage';
 import { BudgetPage } from './pages/BudgetPage';
 import { AssistantPage } from './pages/AssistantPage';
 import { SettingsPage } from './pages/SettingsPage';
 
-// Protected Route Guard
+// Protected Route Guard: Redirects unauthenticated users to /login
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
+// Public Only Route Guard: Prevents logged-in users from going back to login/register pages
+const PublicOnlyRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
   }
   return children;
 };
@@ -43,13 +51,52 @@ export const App = () => {
       <WardrobeProvider>
         <WeatherProvider>
           <Routes>
-            {/* Public Routes */}
+            {/* Public Landing Page */}
             <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+
+            {/* Auth / Guest Only Routes (Blocked if already logged in) */}
+            <Route
+              path="/login"
+              element={
+                <PublicOnlyRoute>
+                  <LoginPage />
+                </PublicOnlyRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <PublicOnlyRoute>
+                  <RegisterPage />
+                </PublicOnlyRoute>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <PublicOnlyRoute>
+                  <ForgotPasswordPage />
+                </PublicOnlyRoute>
+              }
+            />
+            <Route
+              path="/reset-password"
+              element={
+                <PublicOnlyRoute>
+                  <ResetPasswordPage />
+                </PublicOnlyRoute>
+              }
+            />
+            <Route
+              path="/reset-password/:token"
+              element={
+                <PublicOnlyRoute>
+                  <ResetPasswordPage />
+                </PublicOnlyRoute>
+              }
+            />
+
+            {/* Onboarding */}
             <Route path="/onboarding" element={<OnboardingPage />} />
 
             {/* Protected Application Routes */}
@@ -69,7 +116,7 @@ export const App = () => {
               <Route path="/advisor/result/:id" element={<ProductResultPage />} />
               <Route path="/compare" element={<ComparePage />} />
               <Route path="/outfits" element={<DailyStylistPage />} />
-              <Route path="/purchases" element={<BudgetPage />} />
+              <Route path="/purchases" element={<PurchaseHistoryPage />} />
               <Route path="/budget" element={<BudgetPage />} />
               <Route path="/assistant" element={<AssistantPage />} />
               <Route path="/settings" element={<SettingsPage />} />
