@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Compass,
@@ -15,15 +15,33 @@ import { BrandLogo } from '../common/BrandLogo';
 import { notificationApi } from '../../api/notificationApi';
 
 export const Header = () => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { wardrobe } = useWardrobe();
   const location = useLocation();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationsList, setNotificationsList] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const notifRef = useRef(null);
+
+  // Close notifications dropdown on click/touch outside
+  useEffect(() => {
+    if (!showNotifications) return;
+    const handleClickOutside = (event) => {
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [showNotifications]);
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     const fetchNotifs = async () => {
       try {
         const list = await notificationApi.getNotifications();
@@ -36,7 +54,7 @@ export const Header = () => {
       }
     };
     fetchNotifs();
-  }, [location.pathname]);
+  }, [location.pathname, isAuthenticated]);
 
   const handleMarkAllRead = async () => {
     const updated = await notificationApi.markAllAsRead();
@@ -182,7 +200,7 @@ export const Header = () => {
 
         {/* Notification Bell */}
         {!isSettingsPage && (
-          <div className="relative">
+          <div className="relative" ref={notifRef}>
             <button
               type="button"
               onClick={() => setShowNotifications(!showNotifications)}

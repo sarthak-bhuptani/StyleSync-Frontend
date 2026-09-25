@@ -357,23 +357,23 @@ export const LandingPage = () => {
       </section>
 
       {/* 7. Streamlined Clean Modern Footer */}
-      <footer className="bg-white border-t border-slate-200/80 py-8 sm:py-10 px-4 sm:px-8 text-slate-600">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
+      <footer className="bg-white border-t border-slate-200/80 py-8 sm:py-10 px-5 sm:px-8 text-slate-600">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-8 pb-6 border-b border-slate-100">
           {/* Brand Info */}
-          <div className="space-y-2 max-w-sm">
+          <div className="space-y-2 max-w-md">
             <BrandLogo size="md" to="/" />
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Personal menswear styling and capsule wardrobe decision engine. Test items before you buy.
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              Personal menswear styling and capsule wardrobe decision engine. Test prospective items against your build and closet before you buy.
             </p>
           </div>
 
-          {/* Quick Clickable Links Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 gap-x-8 gap-y-2 text-xs font-semibold">
-            <div className="space-y-2">
+          {/* Quick Clickable Links Grid - Symmetrical & Balanced */}
+          <div className="w-full sm:w-auto grid grid-cols-2 gap-6 sm:gap-12 text-xs font-semibold">
+            <div className="space-y-2.5">
               <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
                 Styling Tools
               </span>
-              <ul className="space-y-1.5 text-slate-600">
+              <ul className="space-y-2 text-slate-600">
                 <li><NavLink to="/advisor" className="hover:text-emerald-600 transition-colors">Product Advisor</NavLink></li>
                 <li><NavLink to="/daily-stylist" className="hover:text-emerald-600 transition-colors">Wear Today</NavLink></li>
                 <li><NavLink to="/wardrobe" className="hover:text-emerald-600 transition-colors">My Wardrobe</NavLink></li>
@@ -381,11 +381,11 @@ export const LandingPage = () => {
               </ul>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
                 Account
               </span>
-              <ul className="space-y-1.5 text-slate-600">
+              <ul className="space-y-2 text-slate-600">
                 <li><NavLink to="/login" className="hover:text-emerald-600 transition-colors">Sign In</NavLink></li>
                 <li><NavLink to="/register" className="hover:text-emerald-600 transition-colors">Create Account</NavLink></li>
                 <li><NavLink to="/onboarding" className="hover:text-emerald-600 transition-colors">Setup Profile</NavLink></li>
@@ -396,14 +396,14 @@ export const LandingPage = () => {
         </div>
 
         {/* Bottom copyright line */}
-        <div className="max-w-7xl mx-auto pt-5 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-[11px] text-slate-400 text-center sm:text-left">
+        <div className="max-w-7xl mx-auto pt-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 text-center sm:text-left">
           <p>© 2026 StyleSync. Built for mindful wardrobe curation.</p>
-          <div className="flex items-center gap-3 text-emerald-700 font-medium">
-            <span className="flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-emerald-700 font-medium text-xs">
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
               100% Private Styling Data
             </span>
-            <span>•</span>
+            <span className="hidden sm:inline">•</span>
             <span>Zero Brand Sponsorships</span>
           </div>
         </div>

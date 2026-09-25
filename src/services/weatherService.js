@@ -1,6 +1,7 @@
 /**
  * StyleSync Real-Time Weather & Geolocation Service
  * Uses Open-Meteo (Free, No API Key required, Global Coverage) & Geocoding APIs
+ * Fully deduplicated with 15-minute smart memory & local storage caching
  */
 
 // WMO Weather interpretation codes (WW)
@@ -27,6 +28,38 @@ const WMO_CODE_MAP = {
   96: { condition: 'Rainy', label: 'Thunderstorm with Hail', icon: 'Zap', desc: 'Severe storm with hail', category: 'Rainy' },
   99: { condition: 'Rainy', label: 'Heavy Thunderstorm', icon: 'Zap', desc: 'Heavy thunderstorm', category: 'Rainy' },
 };
+
+// Global in-flight fetch deduplication map
+const inFlightRequests = new Map();
+const requestCache = new Map();
+const CACHE_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+
+async function fetchJsonDeduped(url, ttlMs = CACHE_DURATION_MS) {
+  const now = Date.now();
+  if (requestCache.has(url)) {
+    const cached = requestCache.get(url);
+    if (now - cached.timestamp < ttlMs) {
+      return cached.data;
+    }
+  }
+
+  if (inFlightRequests.has(url)) {
+    return inFlightRequests.get(url);
+  }
+
+  const promise = (async () => {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    const data = await res.json();
+    requestCache.set(url, { data, timestamp: Date.now() });
+    return data;
+  })().finally(() => {
+    inFlightRequests.delete(url);
+  });
+
+  inFlightRequests.set(url, promise);
+  return promise;
+}
 
 /**
  * Derives styling tips based on temperature and condition
@@ -71,13 +104,17 @@ export function getStylingAdvice(temp, condition, weatherLabel) {
   };
 }
 
+let inFlightGpsPromise = null;
+
 /**
  * Get device GPS coordinates with timeout & fallback
  */
-export function getBrowserCoordinates(timeoutMs = 7000) {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error('Geolocation is not supported by your browser'));
+export function getBrowserCoordinates(timeoutMs = 5000) {
+  if (inFlightGpsPromise) return inFlightGpsPromise;
+
+  inFlightGpsPromise = new Promise((resolve, reject) => {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
+      reject(new Error('Geolocation is not supported'));
       return;
     }
 
@@ -96,10 +133,14 @@ export function getBrowserCoordinates(timeoutMs = 7000) {
       {
         enableHighAccuracy: true,
         timeout: timeoutMs,
-        maximumAge: 10 * 60 * 1000, // 10 min cache
+        maximumAge: 15 * 60 * 1000,
       }
     );
+  }).finally(() => {
+    inFlightGpsPromise = null;
   });
+
+  return inFlightGpsPromise;
 }
 
 /**
@@ -107,9 +148,7 @@ export function getBrowserCoordinates(timeoutMs = 7000) {
  */
 export async function getIpCoordinates() {
   try {
-    const res = await fetch('https://get.geojs.io/v1/ip/geo.json');
-    if (!res.ok) throw new Error('IP geolocation service failed');
-    const data = await res.json();
+    const data = await fetchJsonDeduped('https://get.geojs.io/v1/ip/geo.json');
     return {
       latitude: parseFloat(data.latitude),
       longitude: parseFloat(data.longitude),
@@ -118,7 +157,6 @@ export async function getIpCoordinates() {
       isGps: false,
     };
   } catch (err) {
-    // Ultimate fallback: Mumbai, India default
     return {
       latitude: 19.0760,
       longitude: 72.8777,
@@ -129,48 +167,26 @@ export async function getIpCoordinates() {
   }
 }
 
-// In-memory cache & in-flight deduplication
-const geocodeCache = new Map();
-let inFlightWeatherPromise = null;
-let lastWeatherCache = null;
-let lastWeatherTime = 0;
-const CACHE_DURATION_MS = 10 * 60 * 1000; // 10 minutes
-
 /**
- * Reverse geocode latitude/longitude to City, State, Country (Cached)
+ * Reverse geocode latitude/longitude to City, State, Country (Cached & Deduplicated)
  */
 export async function reverseGeocode(latitude, longitude) {
-  const cacheKey = `${Number(latitude).toFixed(3)},${Number(longitude).toFixed(3)}`;
-  if (geocodeCache.has(cacheKey)) {
-    return geocodeCache.get(cacheKey);
-  }
-
+  const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`;
   try {
-    const res = await fetch(
-      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
-    );
-    if (res.ok) {
-      const data = await res.json();
-      const city = data.city || data.locality || data.principalSubdivision || 'Current City';
-      const country = data.countryName || '';
-      const state = data.principalSubdivision || '';
-      const formatted = country ? `${city}, ${country}` : city;
-      const result = { city, state, country, formattedLocation: formatted };
-      geocodeCache.set(cacheKey, result);
-      return result;
-    }
+    const data = await fetchJsonDeduped(url);
+    const city = data.city || data.locality || data.principalSubdivision || 'Current City';
+    const country = data.countryName || '';
+    const state = data.principalSubdivision || '';
+    const formatted = country ? `${city}, ${country}` : city;
+    return { city, state, country, formattedLocation: formatted };
   } catch (e) {
-    console.warn('Reverse geocoding error:', e);
+    return {
+      city: 'Current Location',
+      state: '',
+      country: '',
+      formattedLocation: 'Current Location',
+    };
   }
-
-  const fallback = {
-    city: 'Current Location',
-    state: '',
-    country: '',
-    formattedLocation: 'Current Location',
-  };
-  geocodeCache.set(cacheKey, fallback);
-  return fallback;
 }
 
 /**
@@ -178,12 +194,9 @@ export async function reverseGeocode(latitude, longitude) {
  */
 export async function searchCities(query) {
   if (!query || query.trim().length < 2) return [];
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=6&language=en&format=json`;
   try {
-    const res = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=6&language=en&format=json`
-    );
-    if (!res.ok) return [];
-    const data = await res.json();
+    const data = await fetchJsonDeduped(url, 60 * 1000);
     if (!data.results) return [];
     return data.results.map((item) => ({
       id: `${item.id}-${item.name}`,
@@ -195,23 +208,17 @@ export async function searchCities(query) {
       formatted: `${item.name}${item.admin1 ? `, ${item.admin1}` : ''}, ${item.country || ''}`,
     }));
   } catch (e) {
-    console.error('Error searching cities:', e);
     return [];
   }
 }
 
 /**
- * Fetch live weather from Open-Meteo for given coordinates
+ * Fetch live weather from Open-Meteo for given coordinates (Deduplicated)
  */
 export async function fetchLiveWeather(latitude, longitude, customLocationName = null) {
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto`;
 
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`Weather fetch failed: ${res.statusText}`);
-  }
-
-  const data = await res.json();
+  const data = await fetchJsonDeduped(url);
   const current = data.current;
   const weatherCode = current.weather_code;
   const codeInfo = WMO_CODE_MAP[weatherCode] || {
@@ -258,28 +265,31 @@ export async function fetchLiveWeather(latitude, longitude, customLocationName =
   };
 }
 
+let inFlightWeatherPipeline = null;
+let lastWeatherResult = null;
+let lastWeatherTimestamp = 0;
+
 /**
  * Unified pipeline: tries GPS -> reverse geocode -> Open-Meteo.
- * Includes in-flight deduplication and 10-minute caching.
+ * Includes global in-flight deduplication and 15-minute caching.
  */
 export async function getCompleteLiveWeather(forceRefresh = false) {
   const now = Date.now();
-  if (!forceRefresh && lastWeatherCache && (now - lastWeatherTime) < CACHE_DURATION_MS) {
-    return lastWeatherCache;
+  if (!forceRefresh && lastWeatherResult && (now - lastWeatherTimestamp) < CACHE_DURATION_MS) {
+    return lastWeatherResult;
   }
 
-  if (inFlightWeatherPromise) {
-    return inFlightWeatherPromise;
+  if (inFlightWeatherPipeline) {
+    return inFlightWeatherPipeline;
   }
 
-  inFlightWeatherPromise = (async () => {
+  inFlightWeatherPipeline = (async () => {
     let coords;
     let isGps = false;
     let locationInfo = { city: 'Local Area', formattedLocation: 'Local Area' };
 
     try {
-      // Try GPS first
-      coords = await getBrowserCoordinates(5000);
+      coords = await getBrowserCoordinates(4000);
       isGps = true;
       locationInfo = await reverseGeocode(coords.latitude, coords.longitude);
     } catch {
@@ -307,12 +317,12 @@ export async function getCompleteLiveWeather(forceRefresh = false) {
       isGps,
     };
 
-    lastWeatherCache = result;
-    lastWeatherTime = Date.now();
+    lastWeatherResult = result;
+    lastWeatherTimestamp = Date.now();
     return result;
   })().finally(() => {
-    inFlightWeatherPromise = null;
+    inFlightWeatherPipeline = null;
   });
 
-  return inFlightWeatherPromise;
+  return inFlightWeatherPipeline;
 }

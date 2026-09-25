@@ -70,6 +70,11 @@ export const notificationApi = {
 
   // 3. Fetch In-App Notifications Feed
   getNotifications: async (unreadOnly = false) => {
+    const token = localStorage.getItem('stylesync_token') || localStorage.getItem('buywise_token');
+    if (!token) {
+      return getStoredNotifications();
+    }
+
     try {
       const url = typeof unreadOnly === 'boolean'
         ? `/notifications?unreadOnly=${unreadOnly}`
@@ -131,39 +136,43 @@ export const notificationApi = {
 
   // 4. Mark single notification as read
   markAsRead: async (notificationId) => {
-    try {
-      const res = await apiClient.patch(`/notifications/${notificationId}/read`);
-      return res.data;
-    } catch {
-      // Local fallback
-    }
     const current = getStoredNotifications();
     const updated = current.map(n => n.id === notificationId || n._id === notificationId ? { ...n, read: true, isRead: true } : n);
     localStorage.setItem('stylesync_notifications', JSON.stringify(updated));
+
+    // Only ping backend for remote database IDs (not local sample IDs)
+    if (notificationId && !String(notificationId).startsWith('notif_')) {
+      try {
+        await apiClient.patch(`/notifications/${notificationId}/read`);
+      } catch {}
+    }
     return updated;
   },
 
   // Mark all notifications as read
   markAllAsRead: async () => {
-    try {
-      const res = await apiClient.patch('/notifications/read-all');
-      return res.data;
-    } catch {}
     const current = getStoredNotifications();
     const updated = current.map(n => ({ ...n, read: true, isRead: true }));
     localStorage.setItem('stylesync_notifications', JSON.stringify(updated));
+
+    try {
+      await apiClient.patch('/notifications/read-all');
+    } catch {}
     return updated;
   },
 
   // 5. Delete notification
   deleteNotification: async (notificationId) => {
-    try {
-      const res = await apiClient.delete(`/notifications/${notificationId}`);
-      return res.data;
-    } catch {}
     const current = getStoredNotifications();
     const updated = current.filter(n => n.id !== notificationId && n._id !== notificationId);
     localStorage.setItem('stylesync_notifications', JSON.stringify(updated));
+
+    // Only ping backend for remote database IDs (not local sample IDs)
+    if (notificationId && !String(notificationId).startsWith('notif_')) {
+      try {
+        await apiClient.delete(`/notifications/${notificationId}`);
+      } catch {}
+    }
     return updated;
   },
 

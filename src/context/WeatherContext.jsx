@@ -122,8 +122,12 @@ export const WeatherProvider = ({ children }) => {
     });
   }, []);
 
-  // Initial fetch on mount
+  const hasLoadedRef = React.useRef(false);
+
+  // Initial fetch on mount (Single execution)
   useEffect(() => {
+    if (hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
     refreshWeather(false);
   }, [refreshWeather]);
 

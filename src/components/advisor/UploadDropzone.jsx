@@ -89,10 +89,28 @@ export const UploadDropzone = ({ onProductReady, initialProduct = null }) => {
   const handleUrlSubmit = async (e) => {
     e.preventDefault();
     if (!urlInput.trim()) return;
+    const trimmedUrl = urlInput.trim();
     setUrlLoading(true);
     setUrlError('');
+
+    // If user entered a direct image link, load directly without scraper
+    const isDirectImg = /\.(jpeg|jpg|png|webp|gif|svg)($|\?)/i.test(trimmedUrl) || 
+      trimmedUrl.includes('images.unsplash.com') || 
+      trimmedUrl.includes('res.cloudinary.com');
+
+    if (isDirectImg) {
+      setImagePreview(trimmedUrl);
+      setProductData(prev => ({
+        ...prev,
+        image: trimmedUrl,
+        name: prev.name || 'Store Item'
+      }));
+      setUrlLoading(false);
+      return;
+    }
+
     try {
-      const data = await productApi.parseProductUrl(urlInput.trim());
+      const data = await productApi.parseProductUrl(trimmedUrl);
       if (data && data.image) {
         setImagePreview(data.image);
         setProductData(prev => ({
@@ -106,10 +124,11 @@ export const UploadDropzone = ({ onProductReady, initialProduct = null }) => {
           image: data.image
         }));
       } else {
-        throw new Error('Could not find product image in URL.');
+        throw new Error('Could not find product image in URL. Please upload a screenshot.');
       }
     } catch (err) {
-      setUrlError(err.response?.data?.message || err.message || 'Could not parse URL. Please upload a photo or screenshot instead.');
+      const backendMsg = err.response?.data?.message || err.message;
+      setUrlError(backendMsg || 'This website blocks automated link reading. Please upload a quick screenshot instead.');
     } finally {
       setUrlLoading(false);
     }
@@ -239,9 +258,22 @@ export const UploadDropzone = ({ onProductReady, initialProduct = null }) => {
                 </div>
 
                 {urlError && (
-                  <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-start gap-2 text-left">
-                    <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                    <span>{urlError}</span>
+                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 space-y-2 text-left">
+                    <div className="flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                      <span className="leading-relaxed font-medium">{urlError}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUploadMode('photo');
+                        setTimeout(() => galleryInputRef.current?.click(), 100);
+                      }}
+                      className="w-full py-2 px-3 bg-white hover:bg-rose-100/60 border border-rose-300 rounded-lg text-rose-900 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                    >
+                      <Camera className="w-3.5 h-3.5 text-rose-700" />
+                      <span>Upload Screenshot Instead</span>
+                    </button>
                   </div>
                 )}
               </form>

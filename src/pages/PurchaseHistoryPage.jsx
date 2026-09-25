@@ -7,7 +7,9 @@ import {
   Plus,
   ShoppingBag,
   TrendingUp,
-  CheckCircle2
+  CheckCircle2,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { purchaseApi } from '../api/purchaseApi';
 import { RecommendationBadge } from '../components/common/RecommendationBadge';
@@ -22,6 +24,8 @@ export const PurchaseHistoryPage = () => {
     return saved ? JSON.parse(saved) : [];
   });
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({ open: false, purchase: null });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const loadPurchases = async () => {
@@ -67,14 +71,60 @@ export const PurchaseHistoryPage = () => {
   const handleAddPurchase = async (e) => {
     e.preventDefault();
     if (!newPurchase.productName) return;
+    const itemPrice = Number(newPurchase.price) || 2999;
     const created = await purchaseApi.addPurchase({
       ...newPurchase,
-      price: Number(newPurchase.price) || 2999,
+      price: itemPrice,
       image: newPurchase.image || 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=400&q=80'
     });
     setPurchases(prev => [created, ...prev]);
+
+    const savedBudget = localStorage.getItem('stylesync_budget');
+    if (savedBudget) {
+      try {
+        const parsed = JSON.parse(savedBudget);
+        const updated = {
+          ...parsed,
+          spentThisMonth: (parsed.spentThisMonth || 0) + itemPrice
+        };
+        localStorage.setItem('stylesync_budget', JSON.stringify(updated));
+      } catch {}
+    }
+
     setIsAddModalOpen(false);
     showToast('Recorded purchase outcome in your ledger', 'success');
+  };
+
+  const handleDeletePurchase = async () => {
+    if (!deleteModal.purchase) return;
+    const purchase = deleteModal.purchase;
+    const purchasePrice = Number(purchase.price) || 0;
+    setIsDeleting(true);
+
+    try {
+      await purchaseApi.deletePurchase(purchase.id || purchase._id);
+      setPurchases(prev => prev.filter(p => p.id !== purchase.id && p._id !== purchase.id));
+
+      const savedBudget = localStorage.getItem('stylesync_budget');
+      if (savedBudget) {
+        try {
+          const parsed = JSON.parse(savedBudget);
+          const updated = {
+            ...parsed,
+            spentThisMonth: Math.max(0, (parsed.spentThisMonth || 0) - purchasePrice)
+          };
+          localStorage.setItem('stylesync_budget', JSON.stringify(updated));
+        } catch {}
+      }
+
+      showToast(`Removed "${purchase.productName || 'Item'}" from history`, 'success');
+    } catch (err) {
+      console.error('Failed to delete purchase:', err);
+      showToast('Could not delete purchase', 'error');
+    } finally {
+      setIsDeleting(false);
+      setDeleteModal({ open: false, purchase: null });
+    }
   };
 
   const totalSpent = purchases.reduce((acc, curr) => acc + (curr.price || 0), 0);
@@ -203,7 +253,7 @@ export const PurchaseHistoryPage = () => {
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => handleFeedback(purchase.id, 'good')}
+                        onClick={() => handleFeedback(purchase.id || purchase._id, 'good')}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                           purchase.userFeedback === 'good'
                             ? 'bg-emerald-600 text-white shadow-xs'
@@ -216,7 +266,7 @@ export const PurchaseHistoryPage = () => {
 
                       <button
                         type="button"
-                        onClick={() => handleFeedback(purchase.id, 'bad')}
+                        onClick={() => handleFeedback(purchase.id || purchase._id, 'bad')}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                           purchase.userFeedback === 'bad'
                             ? 'bg-rose-600 text-white shadow-xs'
@@ -226,6 +276,15 @@ export const PurchaseHistoryPage = () => {
                         <ThumbsDown className="w-3.5 h-3.5" />
                         <span>Regret</span>
                       </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setDeleteModal({ open: true, purchase })}
+                        className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
+                        title="Delete from history"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -234,6 +293,48 @@ export const PurchaseHistoryPage = () => {
           </div>
         </>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={deleteModal.open}
+        onClose={() => !isDeleting && setDeleteModal({ open: false, purchase: null })}
+        title="Delete Purchase"
+        maxWidth="max-w-md"
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-rose-50 border border-rose-100">
+            <div className="w-9 h-9 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0 font-bold">
+              <Trash2 className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-rose-950">Remove from History?</h4>
+              <p className="text-[11px] text-rose-700 mt-0.5">
+                This item will be deleted from your purchase history ledger and budget calculation.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+            <button
+              type="button"
+              disabled={isDeleting}
+              onClick={() => setDeleteModal({ open: false, purchase: null })}
+              className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={isDeleting}
+              onClick={handleDeletePurchase}
+              className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>{isDeleting ? 'Deleting...' : 'Delete Item'}</span>
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Record Purchase Modal */}
       <Modal
