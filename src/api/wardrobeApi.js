@@ -170,6 +170,48 @@ export const wardrobeApi = {
 
     return { success: true, id };
   },
+
+  // Auto-analyze clothing photo with Gemini AI Vision
+  analyzeWardrobeItem: async (fileOrPayload) => {
+    try {
+      let body;
+      let headers = {};
+
+      const isFormData = fileOrPayload instanceof FormData;
+      if (isFormData) {
+        body = fileOrPayload;
+        // Do NOT manually set Content-Type so Axios calculates boundary automatically
+      } else if (fileOrPayload instanceof File || fileOrPayload instanceof Blob) {
+        body = new FormData();
+        body.append('image', fileOrPayload);
+      } else if (typeof fileOrPayload === 'string') {
+        body = { image: fileOrPayload };
+        headers = { 'Content-Type': 'application/json' };
+      } else if (fileOrPayload && typeof fileOrPayload === 'object' && fileOrPayload.image) {
+        body = fileOrPayload;
+        headers = { 'Content-Type': 'application/json' };
+      } else {
+        body = fileOrPayload;
+      }
+
+      const response = await apiClient.post('/wardrobe/analyze', body, {
+        headers,
+        timeout: 30000,
+      });
+
+      return response.data;
+    } catch (err) {
+      console.warn('AI Vision analysis endpoint call error:', err.response?.data || err.message);
+      return {
+        success: false,
+        error: err.response?.data?.message || err.message || 'AI Vision analysis failed',
+      };
+    }
+  },
 };
+
+// Export standalone function for flexible imports
+export const analyzeWardrobeItem = wardrobeApi.analyzeWardrobeItem;
+
 
 

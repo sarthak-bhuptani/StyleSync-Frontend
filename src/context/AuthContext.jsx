@@ -18,11 +18,23 @@ export const AuthProvider = ({ children }) => {
   const [refreshToken, setRefreshToken] = useState(
     () => localStorage.getItem('stylesync_refresh_token') || null
   );
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    // If we already have stored token and user, render instantly (loading = false)
+    const storedToken = localStorage.getItem('stylesync_token');
+    const storedUser = localStorage.getItem('stylesync_user');
+    return !(storedToken && storedUser);
+  });
 
   // Initialize and validate session on mount
   useEffect(() => {
     let isMounted = true;
+
+    // Safety timeout: ensure loading is resolved within 1.5s no matter what
+    const safetyTimer = setTimeout(() => {
+      if (isMounted) {
+        setLoading(false);
+      }
+    }, 1500);
 
     const initAuth = async () => {
       const storedToken = localStorage.getItem('stylesync_token');
@@ -39,7 +51,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        // Validate user with /auth/me (interceptor will auto-refresh if token is expired but refreshToken is valid)
+        // Validate user with /auth/me in background
         const res = await authApi.getCurrentUser();
         if (isMounted) {
           if (res?.user) {
@@ -65,10 +77,12 @@ export const AuthProvider = ({ children }) => {
 
     // Listen for auth expiration events dispatched by Axios interceptor
     const handleAuthExpired = () => {
-      setUser(null);
-      setToken(null);
-      setRefreshToken(null);
-      setLoading(false);
+      if (isMounted) {
+        setUser(null);
+        setToken(null);
+        setRefreshToken(null);
+        setLoading(false);
+      }
     };
 
     window.addEventListener('auth:expired', handleAuthExpired);
@@ -76,6 +90,7 @@ export const AuthProvider = ({ children }) => {
 
     return () => {
       isMounted = false;
+      clearTimeout(safetyTimer);
       window.removeEventListener('auth:expired', handleAuthExpired);
       window.removeEventListener('auth:logout', handleAuthExpired);
     };

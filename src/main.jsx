@@ -3,37 +3,35 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App.jsx';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 import './index.css';
 
-// One-time purge of legacy mock data & stock photos
-if (localStorage.getItem('stylesync_clean_v1') !== 'true') {
-  localStorage.removeItem('stylesync_wardrobe');
-  localStorage.removeItem('stylesync_analyzed_products');
-  localStorage.removeItem('stylesync_purchases');
-  localStorage.removeItem('stylesync_outfits');
-  localStorage.removeItem('stylesync_budget');
-  localStorage.removeItem('stylesync_user');
-  localStorage.removeItem('stylesync_token');
-  localStorage.setItem('stylesync_clean_v1', 'true');
-}
+// Handle dynamic Vite chunk load errors gracefully (e.g., after new deployments)
+window.addEventListener('vite:preloadError', (event) => {
+  console.warn('Vite preload dynamic chunk error detected. Reloading fresh page...', event);
+  window.location.reload();
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60 * 5, // 5 mins
+      retry: 1,
     },
   },
 });
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </QueryClientProvider>
-  </React.StrictMode>,
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </QueryClientProvider>
+    </ErrorBoundary>
+  </React.StrictMode>
 );
 
 // Register Service Worker for PWA
@@ -42,11 +40,22 @@ if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
     navigator.serviceWorker
       .register('/sw.js')
       .then((reg) => {
-        console.log('StyleSync PWA ServiceWorker registered with scope:', reg.scope);
+        // Auto-update service worker if a new version is waiting
+        reg.onupdatefound = () => {
+          const installingWorker = reg.installing;
+          if (installingWorker) {
+            installingWorker.onstatechange = () => {
+              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('New StyleSync PWA version available. Auto-updating...');
+              }
+            };
+          }
+        };
       })
       .catch((err) => {
-        console.log('StyleSync PWA ServiceWorker registration failed:', err);
+        console.warn('StyleSync PWA ServiceWorker registration failed:', err);
       });
   });
 }
+
 
