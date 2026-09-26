@@ -24,7 +24,8 @@ import { Modal } from '../components/common/Modal';
 import { EmptyState } from '../components/common/EmptyState';
 
 export const WardrobePage = () => {
-  const { wardrobe, addWardrobeItem, updateWardrobeItem, deleteWardrobeItem } = useWardrobe();
+  const { wardrobe, isLoading, refreshWardrobe, addWardrobeItem, updateWardrobeItem, deleteWardrobeItem } =
+    useWardrobe();
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,13 +34,22 @@ export const WardrobePage = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [isDeletingItem, setIsDeletingItem] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    await refreshWardrobe(true);
+    setIsRefreshing(false);
+  };
 
   const categories = ['All', 'Tops', 'Bottoms', 'Shoes', 'Outerwear', 'Eyewear', 'Accessories', 'Bags', 'Watches'];
 
   // Filter items
   const filteredItems = wardrobe.filter((item) => {
-    const matchesCategory = activeCategory === 'All' || item.category?.toLowerCase() === activeCategory.toLowerCase();
-    const matchesSearch = item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const matchesCategory =
+      activeCategory === 'All' || item.category?.toLowerCase() === activeCategory.toLowerCase();
+    const matchesSearch =
+      item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.color?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
@@ -155,8 +165,23 @@ export const WardrobePage = () => {
         </div>
       </div>
 
-      {/* Wardrobe Grid */}
-      {filteredItems.length > 0 ? (
+      {/* Wardrobe Content: Shimmer Skeleton vs. Items Grid vs. Empty State */}
+      {isLoading && wardrobe.length === 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((idx) => (
+            <div
+              key={idx}
+              className="bg-white rounded-2xl border border-slate-200/80 p-3 space-y-3 animate-pulse shadow-xs"
+            >
+              <div className="aspect-3/4 rounded-xl bg-slate-100 w-full" />
+              <div className="space-y-1.5">
+                <div className="h-3.5 bg-slate-100 rounded-md w-4/5" />
+                <div className="h-2.5 bg-slate-100 rounded-md w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : filteredItems.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
           {filteredItems.map((item) => (
             <WardrobeCard

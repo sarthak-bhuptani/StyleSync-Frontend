@@ -36,7 +36,7 @@ export const MobileAppHub = ({ isOpen, onClose }) => {
   const handleLogout = async () => {
     await logout();
     onClose();
-    navigate('/login');
+    navigate('/');
   };
 
   const handleTouchStart = (e) => {
