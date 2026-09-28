@@ -111,6 +111,8 @@ export const FloatingStylistOrb = () => {
         content: m.text
       }));
       const userContext = {
+        name: user?.name || user?.fullName || user?.username,
+        email: user?.email,
         style: user?.stylePreferences?.[0] || 'Smart Casual',
         wardrobeCount: wardrobe?.length || 0,
         weather: weather?.temp ? `${weather.temp}°C ${weather.condition || ''}` : 'mild'

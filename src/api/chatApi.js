@@ -168,7 +168,7 @@ export const chatApi = {
       // Backend chat endpoint offline
     }
 
-    // 4. Intelligent Human Conversational Stylist Engine (Handles greetings, questions, styling, occasions, colors)
+    // 4. Intelligent Human Conversational Stylist Engine
     await simulateNetworkDelay(350);
 
     if (image) {
@@ -178,21 +178,80 @@ export const chatApi = {
 
     const q = (message || '').toLowerCase().trim();
 
-    // 1. Greetings & Small Talk
-    if (q.match(/^(hi|hello|hey|hey there|howdy|hola|yo)[\s!.]*$/i)) {
-      return `Hey! Great to see you. What are we styling today? You can ask me for outfit advice or upload a photo of an item you're thinking of buying!`;
+    // Get current user details from context or localStorage
+    let currentUserName = context?.name;
+    let currentUserEmail = context?.email;
+    let currentUserStyle = context?.style || 'Smart Casual';
+    let wardrobeCount = context?.wardrobeCount;
+
+    if (!currentUserName || typeof currentUserName !== 'string') {
+      try {
+        const storedUser = localStorage.getItem('stylesync_user') || localStorage.getItem('user');
+        if (storedUser) {
+          const parsed = JSON.parse(storedUser);
+          currentUserName = parsed.name || parsed.fullName || parsed.username;
+          currentUserEmail = currentUserEmail || parsed.email;
+          if (parsed.stylePreferences?.length) currentUserStyle = parsed.stylePreferences[0];
+        }
+      } catch {}
+    }
+
+    // 1. Bot Identity & Name Queries ("what is your name", "who are you")
+    if (
+      q.includes('your name') || 
+      q.includes('ur name') || 
+      q.includes('who are you') || 
+      q.includes('who are u') || 
+      q.includes('who r u') || 
+      q.includes('what are you') || 
+      q.includes('what is your name') || 
+      q.includes('whats your name') || 
+      q.includes('call you') || 
+      q.includes('tell me about yourself')
+    ) {
+      return `I'm your **StyleSync AI Stylist**! I'm here to give you honest outfit advice, review potential buys with a simple BUY or PASS verdict, and help you look your best every day.`;
+    }
+
+    // 2. User Identity & Profile Queries ("what is my name", "who am i")
+    if (
+      q.includes('my name') || 
+      q.includes('who am i') || 
+      q.includes('who i am') || 
+      q.includes('what is my name') || 
+      q.includes('whats my name') || 
+      q.includes('know my name')
+    ) {
+      if (currentUserName) {
+        return `Your name is **${currentUserName}**! You're currently logged into StyleSync with a **${currentUserStyle}** style profile.`;
+      }
+      return `You're currently signed in as a guest or your profile name isn't set yet. You can update your name anytime in your Profile settings!`;
+    }
+    if (q.includes('my email') || q.includes('my account') || q.includes('my profile')) {
+      return `You're logged in as **${currentUserName || 'StyleSync User'}** ${currentUserEmail ? `(${currentUserEmail})` : ''} with a **${currentUserStyle}** style profile.`;
+    }
+    if (q.includes('my closet') || q.includes('my wardrobe') || q.includes('how many clothes') || q.includes('how many items')) {
+      return `You have **${wardrobeCount !== undefined ? wardrobeCount : 0} items** saved in your digital wardrobe.`;
+    }
+
+    // 3. Greetings & Small Talk
+    if (q.match(/^(hi|hello|hey|hey there|howdy|hola|yo|gm|good morning|good evening|good afternoon)[\s!.]*$/i)) {
+      const greetingName = currentUserName ? ` ${currentUserName.split(' ')[0]}` : '';
+      return `Hey${greetingName}! Great to see you. What are we styling today? You can ask me for outfit advice or upload a photo of an item you're thinking of buying!`;
     }
     if (q.includes('how are you') || q.includes('how r u') || q.includes('how you doing') || q.includes("how's it going") || q.includes('whats up') || q.includes("what's up")) {
       return `I'm doing great, thanks for asking! Ready to help you put together some sharp outfits. What's on your mind today?`;
     }
-    if (q.includes('who are you') || q.includes('what are you') || q.includes('what can you do')) {
-      return `I'm your personal AI stylist for StyleSync! I help you evaluate new clothes before you buy, put together daily outfits from your closet, and give quick fashion advice.`;
-    }
     if (q.includes('thank') || q.includes('thx') || q.includes('appreciate it')) {
       return `You're welcome! Anytime you need a quick second opinion on an outfit or purchase, just drop it here.`;
     }
+    if (q.includes('bye') || q.includes('goodbye') || q.includes('see you') || q.includes('good night')) {
+      return `Have a great day! Drop by anytime you want to check an outfit or review a piece.`;
+    }
+    if (q.includes('help') || q.includes('how to use') || q.includes('what can you do') || q.includes('how does this work')) {
+      return `Here's how I can help: 1) **Upload any clothing photo** to get a fast BUY or PASS verdict, 2) **Ask for daily outfit pairings** based on your wardrobe, or 3) **Get color and styling advice** for any occasion!`;
+    }
 
-    // 2. Weather & Daily Outfits
+    // 3. Weather & Daily Outfits
     if (q.includes('today') || q.includes('weather') || q.includes('today look') || q.includes('what should i wear')) {
       const weatherContext = context?.weather || 'mild';
       if (q.includes('hot') || q.includes('summer') || weatherContext.includes('hot')) {
@@ -204,7 +263,7 @@ export const chatApi = {
       return `For today's weather, pair a clean Oxford button-down or textured knit with slim dark denim and minimal leather sneakers. Layer with an overshirt if the evening gets breezy.`;
     }
 
-    // 3. Occasions (Date, Interview/Work, Party, Wedding)
+    // 4. Occasions (Date, Interview/Work, Party, Wedding, Casual)
     if (q.includes('date') || q.includes('first date') || q.includes('dinner')) {
       return `For a date, keep it effortlessly sharp: a fitted dark knit or merino crewneck, charcoal or black slim trousers, and clean Chelsea boots or leather low-tops.`;
     }
@@ -218,7 +277,7 @@ export const chatApi = {
       return `Unless the invite says black-tie, a tailored navy or slate grey two-piece suit with a white dress shirt, silk pocket square, and oxford shoes is foolproof.`;
     }
 
-    // 4. Footwear & Shoes
+    // 5. Footwear & Shoes
     if (q.includes('white sneaker') || q.includes('white shoe') || (q.includes('white') && q.includes('sneaker'))) {
       return `🟢 **BUY** — Clean white sneakers are the most versatile shoe you can own. They match over 90% of casual outfits, from jeans to relaxed chinos.`;
     }
@@ -226,23 +285,23 @@ export const chatApi = {
       return `A solid footwear rotation starts with three pairs: clean minimal white sneakers for daily wear, brown leather loafers for smart casual, and black boots for evenings.`;
     }
 
-    // 5. Wardrobe Gaps & Shopping Advice
+    // 6. Wardrobe Gaps & Shopping Advice
     if (q.includes('gap') || q.includes('buy next') || q.includes('missing') || q.includes('wardrobe')) {
-      return `The best pieces to add next are versatile neutral staples: a tailored overshirt, charcoal chinos, a quality white tee, and minimal leather low-tops.`;
+      return `The best pieces to add next are versatile neutral staples: a tailored overshirt, charcoal chinos, a quality white tee, and minimal leather low-top sneakers.`;
     }
-    if (q.includes('jacket') || q.includes('coat') || q.includes('outerwear')) {
-      return `A neutral Harrington jacket or a classic wool overcoat adds structure to any casual outfit and works across three seasons.`;
+    if (q.includes('jacket') || q.includes('coat') || q.includes('outerwear') || q.includes('hoodie')) {
+      return `A neutral Harrington jacket or a classic wool overcoat adds structure to any casual outfit and works across multiple seasons.`;
     }
     if (q.includes('jean') || q.includes('denim') || q.includes('pant') || q.includes('trouser')) {
       return `Aim for a classic straight or slim-straight cut in dark indigo or washed black. They offer the cleanest silhouette and pair with almost everything.`;
     }
 
-    // 6. Colors & Palette
+    // 7. Colors & Palette
     if (q.includes('color') || q.includes('match') || q.includes('palette')) {
       return `Stick to the 3-color rule: build your base with neutrals (navy, grey, black, white, beige) and add at most one accent color like olive, burgundy, or forest green.`;
     }
 
-    // 7. Contextual / General Catch-All
-    return `That's a great style question. For a clean, modern look, focus on proper fit and neutral foundations (navy, black, white, olive). Feel free to upload a photo of any specific piece you want me to evaluate!`;
+    // 8. General Conversational Fallback
+    return `That sounds interesting! For your **${currentUserStyle}** aesthetic, focusing on clean silhouettes and neutral staples gives the best versatility. Feel free to upload a photo of any item or ask specific outfit questions!`;
   }
 };
