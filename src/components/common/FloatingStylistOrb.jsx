@@ -110,7 +110,13 @@ export const FloatingStylistOrb = () => {
         role: m.sender === 'user' ? 'user' : 'model',
         content: m.text
       }));
-      const backendReply = await chatApi.sendMessage(userMessage.text, history, currentImage);
+      const userContext = {
+        style: user?.stylePreferences?.[0] || 'Smart Casual',
+        wardrobeCount: wardrobe?.length || 0,
+        weather: weather?.temp ? `${weather.temp}°C ${weather.condition || ''}` : 'mild'
+      };
+
+      const backendReply = await chatApi.sendMessage(userMessage.text, history, currentImage, userContext);
       if (backendReply) {
         setMessages((prev) => [
           ...prev,
