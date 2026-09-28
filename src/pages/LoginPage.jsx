@@ -44,22 +44,22 @@ export const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-[#060F1E] text-slate-900 flex justify-center items-center py-0 sm:py-10 px-0 sm:px-4 selection:bg-emerald-500/20 selection:text-emerald-950 font-sans">
-      {/* Universal Luxury Card Container */}
-      <div className="w-full max-w-[430px] min-h-screen sm:min-h-0 sm:h-auto bg-[#091224] sm:rounded-[36px] shadow-2xl overflow-hidden flex flex-col justify-between border-0 sm:border sm:border-slate-800/80 relative">
+      {/* Full-Height Mobile & Desktop Card Container */}
+      <div className="w-full max-w-[430px] min-h-screen bg-[#091224] sm:rounded-[38px] shadow-2xl overflow-hidden flex flex-col justify-between border-0 sm:border sm:border-slate-800/80 relative">
         
         {/* =========================================================================
-            TOP HERO SECTION (Dark Navy with Emerald Ambient Glow & Bold Typography)
+            TOP HERO SECTION (Spacious Dark Hero with Grand Breathing Room)
            ========================================================================= */}
-        <div className="relative pt-8 sm:pt-9 pb-10 sm:pb-11 px-6 sm:px-7 bg-gradient-to-b from-[#060F1E] via-[#09172E] to-[#0D213D] overflow-hidden">
+        <div className="relative pt-9 sm:pt-10 pb-12 sm:pb-13 px-6 sm:px-7 bg-gradient-to-b from-[#060F1E] via-[#09172E] to-[#0D213D] overflow-hidden flex-shrink-0">
           
           {/* Subtle geometric dot pattern */}
           <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]" />
           
-          {/* Ambient Emerald & Cyan Lighting Accents */}
-          <div className="absolute -top-16 -right-16 w-52 h-52 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute top-1/2 -left-20 w-44 h-44 bg-teal-600/15 rounded-full blur-3xl pointer-events-none" />
+          {/* Ambient Lighting Accents */}
+          <div className="absolute -top-16 -right-16 w-56 h-56 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-1/2 -left-20 w-48 h-48 bg-teal-600/15 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Top Brand Header & Fixed Logo */}
+          {/* Top Brand Header */}
           <div className="relative z-10 flex items-center justify-between">
             <NavLink to="/" className="flex items-center gap-3.5 group active:scale-95 transition-transform">
               {/* StyleSync Emblem Box */}
@@ -111,17 +111,17 @@ export const LoginPage = () => {
         </div>
 
         {/* =========================================================================
-            BOTTOM CARD / FORM SECTION (Clean White Sheet with Large Rounded Top)
+            BOTTOM CARD / FORM SECTION (Spacious White Sheet with Large Rounded Top)
            ========================================================================= */}
-        <div className="relative z-20 flex-1 bg-white rounded-t-[34px] px-6 sm:px-7 pt-6 pb-7 sm:pb-8 flex flex-col justify-between shadow-2xl -mt-4">
+        <div className="relative z-20 flex-1 bg-white rounded-t-[34px] px-6 sm:px-7 pt-7 pb-8 sm:pb-9 flex flex-col justify-between shadow-2xl -mt-5">
           
           <div>
             {/* Header */}
-            <div className="mb-5">
+            <div className="mb-6">
               <h2 className="text-xl sm:text-[22px] font-black text-slate-900 tracking-tight">
                 Login to Your Account
               </h2>
-              <p className="text-xs sm:text-[13px] text-slate-400 font-medium mt-0.5">
+              <p className="text-xs sm:text-[13px] text-slate-400 font-medium mt-1">
                 Enter your details to continue
               </p>
             </div>
@@ -136,7 +136,7 @@ export const LoginPage = () => {
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               
-              {/* 1. Email Address (Clear Separated Label & Roomy Input) */}
+              {/* 1. Email Address */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1.5 ml-0.5">
                   Email Address
@@ -151,12 +151,12 @@ export const LoginPage = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full pl-12 pr-4 py-3 bg-slate-50/80 border border-slate-200/90 rounded-2xl text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition-all shadow-2xs"
+                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50/80 border border-slate-200/90 rounded-2xl text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition-all shadow-2xs"
                   />
                 </div>
               </div>
 
-              {/* 2. Password (Clear Separated Label & Roomy Input with Toggle) */}
+              {/* 2. Password */}
               <div>
                 <div className="flex items-center justify-between mb-1.5 ml-0.5">
                   <label className="text-xs font-bold text-slate-700">
@@ -179,7 +179,7 @@ export const LoginPage = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
-                    className="w-full pl-12 pr-12 py-3 bg-slate-50/80 border border-slate-200/90 rounded-2xl text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition-all shadow-2xs"
+                    className="w-full pl-12 pr-12 py-3.5 bg-slate-50/80 border border-slate-200/90 rounded-2xl text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition-all shadow-2xs"
                   />
                   <button
                     type="button"
@@ -192,7 +192,7 @@ export const LoginPage = () => {
                 </div>
               </div>
 
-              {/* Remember Me Checkbox */}
+              {/* Remember Me */}
               <div className="pt-0.5">
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input
@@ -211,7 +211,7 @@ export const LoginPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-2 py-3.5 bg-[#0A1224] hover:bg-[#121F3A] active:scale-[0.99] text-white font-bold rounded-2xl text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer"
+                className="w-full mt-2 py-3.5 sm:py-4 bg-[#0A1224] hover:bg-[#121F3A] active:scale-[0.99] text-white font-bold rounded-2xl text-sm sm:text-base shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer"
               >
                 <span>{loading ? 'Signing in...' : 'Login'}</span>
                 <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform" strokeWidth={2.5} />
@@ -219,7 +219,7 @@ export const LoginPage = () => {
             </form>
 
             {/* Divider "OR" */}
-            <div className="relative my-4">
+            <div className="relative my-4 sm:my-5">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-200/80" />
               </div>
@@ -230,9 +230,8 @@ export const LoginPage = () => {
               </div>
             </div>
 
-            {/* Social / SSO Row */}
+            {/* Social Row */}
             <div className="grid grid-cols-2 gap-2.5">
-              {/* Google Button */}
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
@@ -247,7 +246,6 @@ export const LoginPage = () => {
                 <span className="truncate">Continue with Google</span>
               </button>
 
-              {/* Apple Sign-In Button */}
               <button
                 type="button"
                 onClick={handleAppleSignIn}
@@ -262,7 +260,7 @@ export const LoginPage = () => {
           </div>
 
           {/* Footer Links */}
-          <div className="mt-5 text-center text-xs text-slate-500">
+          <div className="mt-6 text-center text-xs text-slate-500 pb-2">
             <span>Don't have an account yet? </span>
             <NavLink to="/register" className="font-bold text-emerald-600 hover:text-emerald-700 transition-colors hover:underline">
               Create account
