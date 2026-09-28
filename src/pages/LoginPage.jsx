@@ -32,185 +32,245 @@ export const LoginPage = () => {
   const handleGoogleSignIn = () => {
     const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (googleClientId) {
-      // Real Google OAuth redirect if client ID is present
       window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${encodeURIComponent(window.location.origin + '/auth/google/callback')}&response_type=token&scope=email%20profile`;
     } else {
-      // Enforce security: do not allow unauthorized bypass without credentials
-      setError('🔒 Google Sign-In is currently disabled. Please sign in securely using your Email Address and Password.');
+      setError('Google Sign-In is configured for connected accounts. Please sign in with your email & password.');
     }
   };
 
+  const handleAppleSignIn = () => {
+    setError('Apple ID Sign-In is enabled for connected accounts.');
+  };
+
   return (
-    <div className="min-h-screen bg-[#FAFAF9] flex flex-col justify-center items-center px-5 py-8 sm:py-12 selection:bg-emerald-100 selection:text-emerald-900">
-      <div className="w-full max-w-[420px] mx-auto flex flex-col">
-        {/* 1. Official Centered Logo & Branding */}
-        <div className="flex flex-col items-center text-center">
-          <NavLink to="/" className="inline-flex flex-col items-center group active:scale-95 transition-transform">
-            {/* Emblem Mark (Hanger + Emerald Ribbon 'S') */}
-            <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center mb-1">
-              <StyleSyncEmblem className="w-full h-full" />
-            </div>
+    <div className="min-h-screen bg-[#060F1E] text-slate-900 flex justify-center items-center py-0 sm:py-10 px-0 sm:px-4 selection:bg-emerald-500/20 selection:text-emerald-950 font-sans">
+      {/* Universal Luxury Card Container */}
+      <div className="w-full max-w-[430px] min-h-screen sm:min-h-0 sm:h-auto bg-[#091224] sm:rounded-[36px] shadow-2xl overflow-hidden flex flex-col justify-between border-0 sm:border sm:border-slate-800/80 relative">
+        
+        {/* =========================================================================
+            TOP HERO SECTION (Dark Navy with Emerald Ambient Glow & Bold Typography)
+           ========================================================================= */}
+        <div className="relative pt-8 sm:pt-9 pb-10 sm:pb-11 px-6 sm:px-7 bg-gradient-to-b from-[#060F1E] via-[#09172E] to-[#0D213D] overflow-hidden">
+          
+          {/* Subtle geometric dot pattern */}
+          <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]" />
+          
+          {/* Ambient Emerald & Cyan Lighting Accents */}
+          <div className="absolute -top-16 -right-16 w-52 h-52 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-1/2 -left-20 w-44 h-44 bg-teal-600/15 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Typography */}
-            <div className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 flex items-center">
-              Style<span className="text-emerald-500 font-black">Sync</span>
-            </div>
-
-            {/* Subtitle */}
-            <span className="text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase text-slate-400 mt-1">
-              PERSONAL STYLIST &amp; WARDROBE
-            </span>
-          </NavLink>
-        </div>
-
-        {/* 2. Welcome Back Section */}
-        <div className="text-center mt-7 mb-6">
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-            Welcome back
-          </h1>
-          <p className="text-sm sm:text-base font-normal text-slate-500 mt-1.5">
-            Your wardrobe, your style, your way.
-          </p>
-        </div>
-
-        {/* Error Alert */}
-        {error && (
-          <div className="mb-4 p-3.5 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-2xl font-medium animate-shake">
-            {error}
-          </div>
-        )}
-
-        {/* 3. Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Email Address */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-800 mb-1.5">
-              Email Address
-            </label>
-            <div className="relative flex items-center">
-              <div className="absolute left-4 text-slate-400 pointer-events-none flex items-center justify-center">
-                <Mail className="w-5 h-5" strokeWidth={1.75} />
+          {/* Top Brand Header & Fixed Logo */}
+          <div className="relative z-10 flex items-center justify-between">
+            <NavLink to="/" className="flex items-center gap-3.5 group active:scale-95 transition-transform">
+              {/* StyleSync Emblem Box */}
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950 p-2 border border-emerald-400/40 shadow-lg shadow-emerald-950/60 flex items-center justify-center flex-shrink-0 group-hover:border-emerald-300 transition-all">
+                <StyleSyncEmblem dark={true} className="w-full h-full" />
               </div>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200/90 rounded-2xl text-sm sm:text-base font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all shadow-xs"
-              />
-            </div>
+
+              {/* Brand Title & Tagline */}
+              <div className="flex flex-col">
+                <div className="flex items-center text-white text-[22px] font-black tracking-tight leading-none">
+                  <span>Style</span>
+                  <span className="text-emerald-400 font-black">Sync</span>
+                </div>
+                <span className="text-[9.5px] uppercase font-bold tracking-widest text-slate-300 mt-1">
+                  Personal Stylist &amp; Wardrobe
+                </span>
+              </div>
+            </NavLink>
           </div>
 
-          {/* Password */}
+          {/* Emerald Accent Divider Line */}
+          <div className="relative z-10 w-8 h-[3.5px] bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full mt-4 mb-4 shadow-sm shadow-emerald-400/50" />
+
+          {/* Hero Main Copy & Cursive Script Row */}
+          <div className="relative z-10 flex items-end justify-between mt-1">
+            {/* 3-Tier Bold Headline */}
+            <div>
+              <h1 className="text-2xl sm:text-[28px] font-black text-white leading-[1.18] tracking-tight">
+                Style<br />
+                Wardrobe<br />
+                Confidence
+              </h1>
+              <p className="text-slate-300 text-xs sm:text-[13px] font-normal mt-2 tracking-wide text-slate-300/90">
+                A smarter wardrobe, together.
+              </p>
+            </div>
+
+            {/* Cursive "Dress Smarter" Artistic Accent */}
+            <div className="relative flex flex-col items-center pb-1 text-slate-200/90 select-none">
+              <span className="font-handwriting text-2xl sm:text-3xl leading-none text-emerald-200/95 -rotate-6">
+                Dress<br />Smarter
+              </span>
+              {/* Hand-drawn underline swoop */}
+              <svg className="w-20 h-3 text-emerald-400/80 -mt-0.5 -rotate-6" viewBox="0 0 100 15" fill="none">
+                <path d="M5 10 Q 50 -2, 95 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* =========================================================================
+            BOTTOM CARD / FORM SECTION (Clean White Sheet with Large Rounded Top)
+           ========================================================================= */}
+        <div className="relative z-20 flex-1 bg-white rounded-t-[34px] px-6 sm:px-7 pt-6 pb-7 sm:pb-8 flex flex-col justify-between shadow-2xl -mt-4">
+          
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-sm font-semibold text-slate-800">
-                Password
-              </label>
-              <NavLink
-                to="/forgot-password"
-                className="text-xs sm:text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+            {/* Header */}
+            <div className="mb-5">
+              <h2 className="text-xl sm:text-[22px] font-black text-slate-900 tracking-tight">
+                Login to Your Account
+              </h2>
+              <p className="text-xs sm:text-[13px] text-slate-400 font-medium mt-0.5">
+                Enter your details to continue
+              </p>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="mb-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-2xl font-medium">
+                {error}
+              </div>
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              
+              {/* 1. Email Address (Clear Separated Label & Roomy Input) */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 ml-0.5">
+                  Email Address
+                </label>
+                <div className="relative flex items-center">
+                  <div className="absolute left-4 text-slate-400 pointer-events-none flex items-center justify-center">
+                    <Mail className="w-5 h-5" strokeWidth={1.75} />
+                  </div>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-50/80 border border-slate-200/90 rounded-2xl text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition-all shadow-2xs"
+                  />
+                </div>
+              </div>
+
+              {/* 2. Password (Clear Separated Label & Roomy Input with Toggle) */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5 ml-0.5">
+                  <label className="text-xs font-bold text-slate-700">
+                    Password
+                  </label>
+                  <NavLink
+                    to="/forgot-password"
+                    className="text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
+                  >
+                    Forgot Password?
+                  </NavLink>
+                </div>
+                <div className="relative flex items-center">
+                  <div className="absolute left-4 text-slate-400 pointer-events-none flex items-center justify-center">
+                    <Lock className="w-5 h-5" strokeWidth={1.75} />
+                  </div>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="w-full pl-12 pr-12 py-3 bg-slate-50/80 border border-slate-200/90 rounded-2xl text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition-all shadow-2xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 text-slate-400 hover:text-slate-600 p-1.5 flex items-center justify-center focus:outline-none cursor-pointer"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff className="w-4.5 h-4.5" strokeWidth={1.75} /> : <Eye className="w-4.5 h-4.5" strokeWidth={1.75} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Remember Me Checkbox */}
+              <div className="pt-0.5">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500/20 cursor-pointer accent-emerald-600"
+                  />
+                  <span className="text-xs font-semibold text-slate-700">
+                    Remember me on this device
+                  </span>
+                </label>
+              </div>
+
+              {/* Primary Login Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full mt-2 py-3.5 bg-[#0A1224] hover:bg-[#121F3A] active:scale-[0.99] text-white font-bold rounded-2xl text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer"
               >
-                Forgot password?
-              </NavLink>
-            </div>
-            <div className="relative flex items-center">
-              <div className="absolute left-4 text-slate-400 pointer-events-none flex items-center justify-center">
-                <Lock className="w-5 h-5" strokeWidth={1.75} />
+                <span>{loading ? 'Signing in...' : 'Login'}</span>
+                <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform" strokeWidth={2.5} />
+              </button>
+            </form>
+
+            {/* Divider "OR" */}
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200/80" />
               </div>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                className="w-full pl-12 pr-12 py-3.5 bg-white border border-slate-200/90 rounded-2xl text-sm sm:text-base font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all shadow-xs"
-              />
+              <div className="relative flex justify-center text-[11px]">
+                <span className="bg-white px-3 text-slate-400 font-bold tracking-wider">
+                  OR
+                </span>
+              </div>
+            </div>
+
+            {/* Social / SSO Row */}
+            <div className="grid grid-cols-2 gap-2.5">
+              {/* Google Button */}
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 text-slate-400 hover:text-slate-600 p-1 focus:outline-none cursor-pointer"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                onClick={handleGoogleSignIn}
+                className="w-full py-2.5 px-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 flex items-center justify-center gap-2 transition-all shadow-xs active:scale-[0.98] cursor-pointer"
               >
-                {showPassword ? <EyeOff className="w-5 h-5" strokeWidth={1.75} /> : <Eye className="w-5 h-5" strokeWidth={1.75} />}
+                <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                </svg>
+                <span className="truncate">Continue with Google</span>
+              </button>
+
+              {/* Apple Sign-In Button */}
+              <button
+                type="button"
+                onClick={handleAppleSignIn}
+                className="w-full py-2.5 px-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 flex items-center justify-center gap-2 transition-all shadow-xs active:scale-[0.98] cursor-pointer"
+              >
+                <svg className="w-4 h-4 flex-shrink-0 fill-current text-slate-900" viewBox="0 0 170 170">
+                  <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.04-7.58-7.79-11.67-14.24-6.84-10.76-11.83-22.75-14.98-35.97-3.15-13.22-4.73-25.07-4.73-35.56 0-14.56 3.63-26.68 10.88-36.36 7.25-9.68 16.48-14.65 27.69-14.91 4.79 0 10.22 1.25 16.29 3.75 6.07 2.5 10.17 3.81 12.3 3.93 1.74-.24 6.05-1.63 12.92-4.18 6.87-2.55 12.43-3.64 16.69-3.26 12.82.88 23.01 5.68 30.57 14.41-11.08 6.74-16.5 15.89-16.27 27.44.23 9.46 3.9 17.3 11.01 23.51 7.11 6.21 15.35 9.8 24.72 10.77-2.28 7.07-5.11 14.03-8.49 20.89zM119.22 33.74c0-7.39 2.66-14.37 7.98-20.93 5.32-6.56 12.01-11.06 20.08-13.5 1.09 7.61-.87 14.73-5.88 21.36-5.01 6.63-11.8 11.09-20.37 13.37-.43-.1-.97-.18-1.61-.25-.13-.02-.2-.05-.2-.05z"/>
+                </svg>
+                <span className="truncate">Continue with Apple</span>
               </button>
             </div>
           </div>
 
-          {/* Keep me signed in */}
-          <div className="pt-0.5">
-            <label className="flex items-center gap-2.5 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 sm:w-4.5 sm:h-4.5 rounded-md border-slate-300 text-emerald-600 focus:ring-emerald-500/20 focus:ring-offset-0 cursor-pointer accent-emerald-600"
-              />
-              <span className="text-sm font-medium text-slate-700">
-                Keep me signed in
-              </span>
-            </label>
+          {/* Footer Links */}
+          <div className="mt-5 text-center text-xs text-slate-500">
+            <span>Don't have an account yet? </span>
+            <NavLink to="/register" className="font-bold text-emerald-600 hover:text-emerald-700 transition-colors hover:underline">
+              Create account
+            </NavLink>
           </div>
 
-          {/* Primary Sign In Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-4 bg-[#0F172A] hover:bg-slate-800 text-white font-bold rounded-2xl text-base shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer mt-3"
-          >
-            <span>{loading ? 'Signing In...' : 'Sign In'}</span>
-            <ArrowRight className="w-4 h-4 text-emerald-400" strokeWidth={2.5} />
-          </button>
-        </form>
-
-        {/* Divider */}
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-200/80" />
-          </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-[#FAFAF9] px-3 text-slate-400 font-medium">
-              or
-            </span>
-          </div>
         </div>
 
-        {/* Google Sign In Button */}
-        <button
-          type="button"
-          onClick={handleGoogleSignIn}
-          className="w-full py-3.5 bg-white hover:bg-slate-50/80 border border-slate-200/90 rounded-2xl text-sm font-bold text-slate-800 flex items-center justify-center gap-3 transition-all shadow-2xs active:scale-[0.99] cursor-pointer"
-        >
-          {/* Official Google 'G' SVG */}
-          <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
-            <path
-              fill="#4285F4"
-              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-            />
-            <path
-              fill="#34A853"
-              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-            />
-            <path
-              fill="#FBBC05"
-              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-            />
-            <path
-              fill="#EA4335"
-              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-            />
-          </svg>
-          <span>Continue with Google</span>
-        </button>
-
-        {/* Footer */}
-        <p className="mt-8 text-center text-sm font-medium text-slate-500">
-          Don’t have an account yet?{' '}
-          <NavLink to="/register" className="font-bold text-emerald-600 hover:text-emerald-700 transition-colors">
-            Create account
-          </NavLink>
-        </p>
       </div>
     </div>
   );
