@@ -308,7 +308,7 @@ export const SettingsPage = () => {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate('/');
   };
 
   const defaultAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(profileForm.name || profileForm.username || user?.email || 'User')}&background=0f172a&color=fff&size=200`;

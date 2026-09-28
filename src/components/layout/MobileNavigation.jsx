@@ -61,7 +61,7 @@ export const MobileNavigation = () => {
   const handleLogout = async () => {
     setLogoutModalOpen(false);
     await logout();
-    navigate('/login');
+    navigate('/');
   };
 
   const startPress = () => {

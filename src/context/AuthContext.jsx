@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authApi } from '../api/authApi';
 import { profileApi } from '../api/profileApi';
 
@@ -6,11 +6,95 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('stylesync_user');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('stylesync_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
   });
+
   const [token, setToken] = useState(() => localStorage.getItem('stylesync_token') || null);
-  const [loading, setLoading] = useState(false);
+  const [refreshToken, setRefreshToken] = useState(
+    () => localStorage.getItem('stylesync_refresh_token') || null
+  );
+  const [loading, setLoading] = useState(() => {
+    // If we already have stored token and user, render instantly (loading = false)
+    const storedToken = localStorage.getItem('stylesync_token');
+    const storedUser = localStorage.getItem('stylesync_user');
+    return !(storedToken && storedUser);
+  });
+
+  // Initialize and validate session on mount
+  useEffect(() => {
+    let isMounted = true;
+
+    // Safety timeout: ensure loading is resolved within 1.5s no matter what
+    const safetyTimer = setTimeout(() => {
+      if (isMounted) {
+        setLoading(false);
+      }
+    }, 1500);
+
+    const initAuth = async () => {
+      const storedToken = localStorage.getItem('stylesync_token');
+      const storedRefreshToken = localStorage.getItem('stylesync_refresh_token');
+
+      if (!storedToken && !storedRefreshToken) {
+        if (isMounted) {
+          setUser(null);
+          setToken(null);
+          setRefreshToken(null);
+          setLoading(false);
+        }
+        return;
+      }
+
+      try {
+        // Validate user with /auth/me in background
+        const res = await authApi.getCurrentUser();
+        if (isMounted) {
+          if (res?.user) {
+            setUser(res.user);
+            setToken(localStorage.getItem('stylesync_token'));
+            setRefreshToken(localStorage.getItem('stylesync_refresh_token'));
+          } else if (!localStorage.getItem('stylesync_token')) {
+            setUser(null);
+            setToken(null);
+            setRefreshToken(null);
+          }
+        }
+      } catch (err) {
+        console.warn('Initial session validation skipped:', err.message);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    initAuth();
+
+    // Listen for auth expiration events dispatched by Axios interceptor
+    const handleAuthExpired = () => {
+      if (isMounted) {
+        setUser(null);
+        setToken(null);
+        setRefreshToken(null);
+        setLoading(false);
+      }
+    };
+
+    window.addEventListener('auth:expired', handleAuthExpired);
+    window.addEventListener('auth:logout', handleAuthExpired);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(safetyTimer);
+      window.removeEventListener('auth:expired', handleAuthExpired);
+      window.removeEventListener('auth:logout', handleAuthExpired);
+    };
+  }, []);
 
   const login = async (email, password) => {
     setLoading(true);
@@ -18,6 +102,7 @@ export const AuthProvider = ({ children }) => {
       const res = await authApi.login({ email, password });
       if (res.token) {
         setToken(res.token);
+        setRefreshToken(res.refreshToken || null);
         setUser(res.user);
         return { success: true };
       }
@@ -35,6 +120,7 @@ export const AuthProvider = ({ children }) => {
       const res = await authApi.register(userData);
       if (res.token) {
         setToken(res.token);
+        setRefreshToken(res.refreshToken || null);
         setUser(res.user);
         return { success: true };
       }
@@ -59,16 +145,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    await authApi.logout();
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('stylesync_token');
-    localStorage.removeItem('stylesync_user');
-    localStorage.removeItem('stylesync_wardrobe');
-    localStorage.removeItem('stylesync_analyzed_products');
-    localStorage.removeItem('stylesync_purchases');
-    localStorage.removeItem('stylesync_outfits');
-    localStorage.removeItem('stylesync_budget');
+    try {
+      await authApi.logout();
+    } finally {
+      setToken(null);
+      setRefreshToken(null);
+      setUser(null);
+      window.dispatchEvent(new CustomEvent('auth:logout'));
+    }
   };
 
   return (
@@ -76,6 +160,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         token,
+        refreshToken,
         isAuthenticated: !!token,
         loading,
         login,
@@ -93,11 +178,13 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    const savedUser = JSON.parse(localStorage.getItem('stylesync_user')) || null;
+    const savedUser = JSON.parse(localStorage.getItem('stylesync_user') || 'null');
     const savedToken = localStorage.getItem('stylesync_token') || null;
+    const savedRefreshToken = localStorage.getItem('stylesync_refresh_token') || null;
     return {
       user: savedUser,
       token: savedToken,
+      refreshToken: savedRefreshToken,
       isAuthenticated: !!savedToken,
       loading: false,
       login: async () => ({ success: false }),
@@ -109,3 +196,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

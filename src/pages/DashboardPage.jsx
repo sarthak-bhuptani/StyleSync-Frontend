@@ -20,7 +20,7 @@ import { AddWardrobeItemModal } from '../components/wardrobe/AddWardrobeItemModa
 
 export const DashboardPage = () => {
   const { user } = useAuth();
-  const { wardrobe, showToast } = useWardrobe();
+  const { wardrobe, addWardrobeItem, showToast } = useWardrobe();
   const { weather, isLoading: isWeatherLoading, refreshWeather } = useWeather();
   const navigate = useNavigate();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -244,6 +244,7 @@ export const DashboardPage = () => {
       <AddWardrobeItemModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
+        onAdd={addWardrobeItem}
       />
     </div>
   );
