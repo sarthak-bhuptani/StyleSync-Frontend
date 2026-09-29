@@ -22,7 +22,7 @@ The backend evaluates shopping screenshots, clothing, shoes, eyewear, and access
 - Database: MongoDB (with Mongoose) OR PostgreSQL (with Prisma / Drizzle)
 - Authentication: JWT (JsonWebToken) with bcrypt password hashing + auth middleware
 - AI Vision & Chat Engine:
-  - Google Gemini 2.0 Flash / 1.5 Pro Vision (`@google/genai` or `@google/generative-ai`) OR OpenAI GPT-4o Vision (`openai`)
+  - Google Gemini 1.5 Flash / 2.0 Flash (`@google/genai` or `@google/generative-ai`) — (model: `gemini-1.5-flash`)
 - File Storage / Upload: Multer + Cloudinary (or AWS S3) for product screenshots and selfies
 - OpenAPI / Swagger: Integrated Swagger UI documentation at `/api-docs` using the provided `docs/swagger.yaml`
 
@@ -41,7 +41,7 @@ The backend evaluates shopping screenshots, clothing, shoes, eyewear, and access
 - `PUT /profile` — Update user styling preferences, brand preferences, sizes, and avoid-colors
 - `POST /profile/onboarding` — Complete 6-step personalized setup
 - `POST /profile/scan-face-body` — Upload selfie/portrait photo:
-  - Calls Gemini / GPT-4o Vision to detect Face Shape (`Oval`, `Square`, `Round`, `Heart`), Skin Undertone (`Warm Golden`, `Cool Rosy`, `Olive`), Color Season (`Warm Autumn`, `Cool Winter`), and Body Build (`Athletic V-Taper`, `Lean Rectangle`).
+  - Calls Gemini 1.5 Flash Vision to detect Face Shape (`Oval`, `Square`, `Round`, `Heart`), Skin Undertone (`Warm Golden`, `Cool Rosy`, `Olive`), Color Season (`Warm Autumn`, `Cool Winter`), and Body Build (`Athletic V-Taper`, `Lean Rectangle`).
 
 #### C. Capsule Wardrobe (`/api/v1/wardrobe`)
 - `GET /wardrobe` — Get all wardrobe items (with optional `?category=Tops` filter)
@@ -53,7 +53,7 @@ The backend evaluates shopping screenshots, clothing, shoes, eyewear, and access
 - `POST /products/analyze` (FLAGSHIP ENDPOINT):
   - Accepts: `{ image, name, brand, category, price, color, description }`
   - Injects User Context: User face shape, skin undertone, body type, budget limits, avoid colors, and existing wardrobe items.
-  - Sends Multimodal Prompt to Gemini / GPT-4o Vision:
+  - Sends Multimodal Prompt to Gemini 1.5 Flash Vision:
     "Analyze this product against the user's physical attributes (Face: {faceShape}, Complexion: {skinUndertone}, Build: {bodyType}) and wardrobe ({wardrobeItems}).
     Check if the color clashes with {avoidColors} or exceeds budget {budgetLimits}.
     Return valid JSON with:
@@ -97,8 +97,19 @@ The backend evaluates shopping screenshots, clothing, shoes, eyewear, and access
 - `GET /budget` — Monthly budget allocation, spent amount, category totals, and 6-month trends
 - `PATCH /budget/limit` — Update monthly spending ceiling `{ limit }`
 
-#### H. AI Chat Assistant (`/api/v1/chat`)
-- `POST /chat/message` — Conversational AI stylist using user profile + wardrobe context to provide instant fashion advice.
+#### H. AI Chat Assistant — Syncra (`/api/v1/chat`)
+- `POST /chat/message` — Conversational AI stylist named **Syncra**.
+  - System Prompt:
+    ```
+    You are Syncra, an honest, stylish, and down-to-earth personal fashion stylist chatting with a friend in a fitting room.
+    CRITICAL RULES:
+    1. Always introduce yourself as Syncra when asked about your identity or name.
+    2. Speak in natural, everyday conversational English (no robotic jargon like 'elevate', 'delve', 'curate').
+    3. Keep answers short, punchy, and actionable (2-3 sentences max).
+    4. Provide concrete pairing suggestions (e.g. "wear with dark wash jeans and white sneakers").
+    5. When evaluating an item photo, provide an instant BUY, PASS, or CONSIDER verdict.
+    ```
+  - Injects User Profile + Capsule Wardrobe Context to return personalized styling recommendations.
 
 ---
 

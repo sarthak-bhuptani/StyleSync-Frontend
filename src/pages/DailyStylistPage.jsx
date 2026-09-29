@@ -500,17 +500,17 @@ export const DailyStylistPage = () => {
                 {generatedEnsembles.map((outfit, index) => (
                   <div
                     key={outfit.id}
-                    className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-xs transition-all space-y-4"
+                    className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-subtle transition-all space-y-4 hover:shadow-card"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 bg-emerald-50 text-emerald-800 font-bold text-[11px] rounded-md border border-emerald-100">
-                            {outfit.compatibilityScore}% Match
+                          <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 font-bold text-[11px] rounded-full border border-emerald-200 font-mono">
+                            {outfit.compatibilityScore}% Compatibility
                           </span>
-                          <span className="text-xs font-semibold text-slate-400">· {outfit.vibe}</span>
+                          <span className="text-xs font-semibold text-slate-500">· {outfit.vibe}</span>
                         </div>
-                        <h3 className="text-base font-bold text-slate-900 mt-1">
+                        <h3 className="text-lg font-bold text-slate-900 mt-1">
                           {outfit.title}
                         </h3>
                       </div>
@@ -519,10 +519,10 @@ export const DailyStylistPage = () => {
                         <button
                           type="button"
                           onClick={() => handleWearToday(outfit)}
-                          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                          className={`px-4 py-2 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 ${
                             wornTodayOutfitId === outfit.id
-                              ? 'bg-emerald-600 text-white shadow-xs'
-                              : 'bg-slate-900 hover:bg-slate-800 text-white shadow-xs'
+                              ? 'bg-emerald-700 text-white shadow-xs'
+                              : 'bg-[#091224] hover:bg-[#121F3A] text-white shadow-xs'
                           }`}
                         >
                           {wornTodayOutfitId === outfit.id ? (
@@ -540,24 +540,25 @@ export const DailyStylistPage = () => {
                       </div>
                     </div>
 
-                    <p className="text-xs text-slate-500 leading-relaxed">
+                    {/* Clean Styling Advice */}
+                    <p className="text-xs text-slate-600 leading-relaxed">
                       {outfit.reason}
                     </p>
 
                     {/* Clothing Slots Grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       {/* Top */}
-                      <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/70 text-center">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Top</span>
+                      <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200/70 text-center shadow-2xs group hover:border-slate-300 transition-all">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1 font-mono">Top</span>
                         {outfit.top ? (
                           <>
                             <img
                               src={outfit.top.image}
                               alt={outfit.top.name}
-                              className="w-full aspect-square rounded-lg object-cover bg-white mb-1.5 border border-slate-100"
+                              className="w-full aspect-square rounded-xl object-cover bg-white mb-2 border border-slate-100 shadow-2xs group-hover:scale-102 transition-transform"
                             />
-                            <p className="text-xs font-bold text-slate-800 truncate">{outfit.top.name}</p>
-                            <p className="text-[10px] text-slate-400 truncate">{outfit.top.color} · {outfit.top.fabric || 'Cotton'}</p>
+                            <p className="text-xs font-bold text-slate-900 truncate">{outfit.top.name}</p>
+                            <p className="text-[10px] text-slate-500 truncate">{outfit.top.color} · {outfit.top.fabric || 'Cotton'}</p>
                           </>
                         ) : (
                           <button

@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-[#FAFAF9] text-slate-900 font-sans min-h-screen;
+    @apply bg-[#F8FAFC] text-slate-900 font-sans min-h-screen;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-tap-highlight-color: transparent;
@@ -14,6 +14,61 @@
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+  }
+}
+
+@layer components {
+  /* Emerald Luxe & Modern Clean Utilities */
+  .bento-card {
+    background-color: #ffffff;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 1.5rem;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .bento-card:hover {
+    box-shadow: 0 8px 30px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+    transform: translateY(-2px);
+    border-color: #CBD5E1;
+  }
+
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  .glass-dark {
+    background: rgba(15, 23, 42, 0.90);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(51, 65, 85, 0.5);
+  }
+
+  .btn-emerald {
+    background-color: #059669;
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 1rem;
+    transition: all 0.2s ease;
+  }
+  .btn-emerald:hover {
+    background-color: #047857;
+  }
+
+  .btn-obsidian {
+    background-color: #0F172A;
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 1rem;
+    transition: all 0.2s ease;
+  }
+  .btn-obsidian:hover {
+    background-color: #1E293B;
   }
 }
 

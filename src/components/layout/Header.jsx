@@ -124,7 +124,7 @@ export const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-100 px-4 sm:px-8 py-3 flex items-center justify-between transition-all">
+    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-100 px-4 sm:px-8 py-3.5 flex items-center justify-between transition-all">
       {/* Left: Brand Logo on Mobile, Instagram Username on Profile, or Dynamic Page Title */}
       <div className="flex items-center gap-3 min-w-0">
         {/* Mobile Header */}
@@ -142,10 +142,10 @@ export const Header = () => {
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <div className="flex items-center gap-1.5 min-w-0">
-                <span className="text-base font-extrabold text-slate-900 tracking-tight truncate">
+                <span className="text-base font-bold text-slate-900 tracking-tight truncate">
                   @{cleanUsername}
                 </span>
-                <span className="w-4 h-4 rounded-full bg-blue-500 text-white flex items-center justify-center text-[9px] font-black shrink-0" title="Verified Stylist">
+                <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] font-black shrink-0" title="Verified Stylist">
                   ✓
                 </span>
               </div>
@@ -160,7 +160,7 @@ export const Header = () => {
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
-              <h1 className="text-base font-extrabold text-slate-900 truncate tracking-tight">
+              <h1 className="text-base font-bold text-slate-900 truncate tracking-tight">
                 {currentMeta.title}
               </h1>
             </div>
@@ -170,11 +170,11 @@ export const Header = () => {
         {/* Desktop Header Title */}
         <div className="hidden lg:block">
           <div className="flex items-center gap-2">
-            <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight leading-tight">
               {currentMeta.title}
             </h1>
             {isProfilePage && (
-              <span className="w-4 h-4 rounded-full bg-blue-500 text-white flex items-center justify-center text-[9px] font-black" title="Verified Stylist">
+              <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] font-black" title="Verified Stylist">
                 ✓
               </span>
             )}
@@ -191,7 +191,7 @@ export const Header = () => {
         {location.pathname !== '/advisor' && !isProfilePage && !isSettingsPage && (
           <button
             onClick={() => navigate('/advisor')}
-            className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer"
+            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-2xl shadow-xs transition-all active:scale-95 cursor-pointer"
           >
             <Compass className="w-3.5 h-3.5 text-emerald-400" />
             <span>Check a Product</span>
@@ -204,7 +204,7 @@ export const Header = () => {
             <button
               type="button"
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              className="relative p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-2xl transition-colors cursor-pointer"
               aria-label="Notifications"
             >
               <Bell className="w-5 h-5" />
@@ -300,7 +300,7 @@ export const Header = () => {
           <button
             type="button"
             onClick={() => navigate('/settings')}
-            className="p-2 text-slate-800 hover:text-slate-950 hover:bg-slate-100 rounded-xl transition-all cursor-pointer active:scale-90"
+            className="p-2 text-slate-800 hover:text-slate-950 hover:bg-slate-100 rounded-2xl transition-all cursor-pointer active:scale-90"
             title="Settings & Activity"
             aria-label="Settings"
           >
@@ -318,7 +318,7 @@ export const Header = () => {
               alt="Profile"
               referrerPolicy="no-referrer"
               crossOrigin="anonymous"
-              className="w-8 h-8 rounded-full object-cover border border-slate-200 group-hover:ring-2 group-hover:ring-slate-900 transition-all"
+              className="w-8 h-8 rounded-full object-cover border border-slate-200 group-hover:ring-2 group-hover:ring-emerald-500 transition-all"
             />
           </NavLink>
         )}

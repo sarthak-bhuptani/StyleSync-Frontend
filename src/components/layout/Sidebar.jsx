@@ -56,7 +56,7 @@ export const Sidebar = () => {
       <div className="flex-1 overflow-y-auto px-4 py-5 space-y-6">
         <div>
           <p className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Styling & Shopping
+            Styling &amp; Shopping
           </p>
           <nav className="space-y-1">
             {navItems.map((item) => {
@@ -66,21 +66,25 @@ export const Sidebar = () => {
                   key={item.to}
                   to={item.to}
                   className={({ isActive }) =>
-                    `flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${
+                    `flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs sm:text-sm font-medium transition-all group ${
                       isActive
-                        ? 'bg-slate-900 text-white font-semibold shadow-sm'
+                        ? 'bg-slate-900 text-white font-semibold shadow-xs'
                         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                     }`
                   }
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon className="w-4 h-4 text-inherit" />
-                    <span>{item.label}</span>
-                  </div>
-                  {item.badge && (
-                    <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-600 px-1.5 py-0.5 rounded-full">
-                      {item.badge}
-                    </span>
+                  {({ isActive }) => (
+                    <>
+                      <div className="flex items-center gap-3">
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-400' : 'text-slate-400 group-hover:text-slate-900'}`} />
+                        <span>{item.label}</span>
+                      </div>
+                      {item.badge && (
+                        <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-600 px-2 py-0.5 rounded-full">
+                          {item.badge}
+                        </span>
+                      )}
+                    </>
                   )}
                 </NavLink>
               );
@@ -90,7 +94,7 @@ export const Sidebar = () => {
 
         <div>
           <p className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Preferences & Account
+            Preferences &amp; Account
           </p>
           <nav className="space-y-1">
             {secondaryNavItems.map((item) => {
@@ -100,15 +104,19 @@ export const Sidebar = () => {
                   key={item.to}
                   to={item.to}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    `flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs sm:text-sm font-medium transition-all group ${
                       isActive
-                        ? 'bg-slate-900 text-white font-semibold shadow-sm'
+                        ? 'bg-slate-900 text-white font-semibold shadow-xs'
                         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                     }`
                   }
                 >
-                  <Icon className="w-4 h-4 text-inherit" />
-                  <span>{item.label}</span>
+                  {({ isActive }) => (
+                    <>
+                      <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-400' : 'text-slate-400 group-hover:text-slate-900'}`} />
+                      <span>{item.label}</span>
+                    </>
+                  )}
                 </NavLink>
               );
             })}
@@ -116,9 +124,9 @@ export const Sidebar = () => {
         </div>
 
         {/* Quick Style Snapshot Widget in Sidebar */}
-        <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/60 space-y-2">
+        <div className="p-3.5 bg-slate-50 rounded-3xl border border-slate-200/80 space-y-2 shadow-2xs">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-semibold text-slate-700">Profile Health</span>
+            <span className="font-semibold text-slate-800">Profile Health</span>
             <span className="font-bold text-emerald-600">{user?.profileCompleteness || 85}%</span>
           </div>
           <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
@@ -128,7 +136,7 @@ export const Sidebar = () => {
             />
           </div>
           <p className="text-[11px] text-slate-500 leading-tight">
-            Style: <span className="font-medium text-slate-700">{user?.stylePreferences?.[0] || 'Minimal'}</span> · {user?.sizes?.shirt || 'L'}
+            Style: <span className="font-semibold text-slate-800">{user?.stylePreferences?.[0] || 'Minimal'}</span> · {user?.sizes?.shirt || 'L'}
           </p>
         </div>
       </div>
@@ -154,7 +162,7 @@ export const Sidebar = () => {
         <button
           onClick={handleLogout}
           title="Log Out"
-          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
         </button>

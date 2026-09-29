@@ -16,47 +16,63 @@ import { useWardrobe } from '../../context/WardrobeContext';
 import { useWeather } from '../../context/WeatherContext';
 import { chatApi } from '../../api/chatApi';
 
-const DEFAULT_WELCOME_MESSAGE = {
-  id: 'welcome',
-  sender: 'ai',
-  text: "Hey! I'm your StyleSync stylist. Send me a question or **upload a photo** of any item to see if it's a BUY or PASS!",
-  timestamp: 'Just now'
-};
+const SHARED_CHAT_STORAGE_KEY = 'stylesync_syncra_messages';
+
+const getInitialMessages = (name) => [
+  {
+    id: 'welcome',
+    sender: 'ai',
+    text: `Hey ${name ? name.split(' ')[0] : 'there'}! I'm **Syncra**, your personal stylist. What are we styling today? ✨`,
+    timestamp: 'Just now'
+  }
+];
 
 export const FloatingStylistOrb = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
-  
-  const [messages, setMessages] = useState(() => {
-    try {
-      const saved = localStorage.getItem('stylesync_chat_messages');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {}
-    return [DEFAULT_WELCOME_MESSAGE];
-  });
-
-  const [input, setInput] = useState('');
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [isTyping, setIsTyping] = useState(false);
-  
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { wardrobe } = useWardrobe();
   const { weather } = useWeather();
+  
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem(SHARED_CHAT_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return getInitialMessages(user?.name);
+  });
+
+  const [input, setInput] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
   // Hide widget if already on dedicated assistant page
   const isAssistantPage = location.pathname === '/assistant';
 
+  // Sync to shared storage and broadcast update
   useEffect(() => {
     try {
-      localStorage.setItem('stylesync_chat_messages', JSON.stringify(messages));
+      localStorage.setItem(SHARED_CHAT_STORAGE_KEY, JSON.stringify(messages));
+      window.dispatchEvent(new CustomEvent('stylesync:chat_sync', { detail: messages }));
     } catch {}
   }, [messages]);
+
+  // Listen for sync events from AssistantPage
+  useEffect(() => {
+    const handleSync = (e) => {
+      if (e.detail && Array.isArray(e.detail)) {
+        setMessages(e.detail);
+      }
+    };
+    window.addEventListener('stylesync:chat_sync', handleSync);
+    return () => window.removeEventListener('stylesync:chat_sync', handleSync);
+  }, []);
 
   useEffect(() => {
     if (isChatOpen) {
@@ -78,11 +94,13 @@ export const FloatingStylistOrb = () => {
   };
 
   const handleClearChat = () => {
-    setMessages([DEFAULT_WELCOME_MESSAGE]);
+    const initial = getInitialMessages(user?.name);
+    setMessages(initial);
     setSelectedImage(null);
     setInput('');
     try {
-      localStorage.removeItem('stylesync_chat_messages');
+      localStorage.setItem(SHARED_CHAT_STORAGE_KEY, JSON.stringify(initial));
+      window.dispatchEvent(new CustomEvent('stylesync:chat_sync', { detail: initial }));
     } catch {}
   };
 
@@ -119,49 +137,28 @@ export const FloatingStylistOrb = () => {
       };
 
       const backendReply = await chatApi.sendMessage(userMessage.text, history, currentImage, userContext);
-      if (backendReply) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: 'ai_' + Date.now(),
-            sender: 'ai',
-            text: backendReply,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }
-        ]);
-        setIsTyping(false);
-        return;
-      }
-    } catch {
-      // fallback
-    }
-
-    setTimeout(() => {
-      let reply = '';
-      if (currentImage) {
-        reply = `🟢 **BUY — Great Match!**\n\nThis piece looks super clean. The color and silhouette fit your ${user?.stylePreferences?.[0] || 'Smart Casual'} aesthetic and will pair easily with your existing jeans and neutral tops.`;
-      } else {
-        const lower = (query || '').toLowerCase();
-        if (lower.includes('white') || lower.includes('sneaker')) {
-          reply = `Minimal white low-tops pair with 90%+ of your wardrobe (jeans, chinos & overshirts). 🟢 **High Match.**`;
-        } else if (lower.includes('today') || lower.includes('wear') || lower.includes('weather')) {
-          reply = `For today's ${weather.temp}°C ${weather.label}, go with a lightweight Oxford shirt, tapered chinos, and clean low-tops.`;
-        } else {
-          reply = `That fits your ${user?.stylePreferences?.[0] || 'Smart Casual'} profile and pairs cleanly with your ${wardrobe.length} wardrobe staples!`;
-        }
-      }
-
       setMessages((prev) => [
         ...prev,
         {
           id: 'ai_' + Date.now(),
           sender: 'ai',
-          text: reply,
+          text: backendReply || "I couldn't get a response. Please try again!",
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ]);
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: 'ai_' + Date.now(),
+          sender: 'ai',
+          text: "⚠️ Couldn't connect to AI backend. Please verify your backend server is active.",
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
+    } finally {
       setIsTyping(false);
-    }, 600);
+    }
   };
 
   return (
@@ -180,22 +177,22 @@ export const FloatingStylistOrb = () => {
         <button
           type="button"
           onClick={() => setIsChatOpen(!isChatOpen)}
-          aria-label="Ask Stylist"
-          className="w-12 h-12 rounded-full bg-slate-900 hover:bg-slate-800 text-white shadow-floating border border-slate-700/80 flex items-center justify-center transition-all duration-300 active:scale-90 hover:scale-105 cursor-pointer relative group"
+          aria-label="Ask Syncra"
+          className="w-12 h-12 rounded-full bg-[#091224] hover:bg-[#121F3A] text-white shadow-floating border border-emerald-400/30 flex items-center justify-center transition-all duration-300 active:scale-90 hover:scale-105 cursor-pointer relative group"
         >
           {isChatOpen ? (
             <X className="w-5 h-5 text-white transition-transform duration-200 rotate-90" />
           ) : (
             <div className="relative flex items-center justify-center">
               <MessageSquare className="w-5 h-5 text-emerald-400" />
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-slate-900 animate-pulse" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full ring-2 ring-[#091224] animate-pulse" />
             </div>
           )}
 
           {/* Desktop Hover Tooltip */}
           {!isChatOpen && (
-            <span className="hidden lg:group-hover:block absolute right-16 bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-md whitespace-nowrap">
-              Ask Stylist
+            <span className="hidden lg:group-hover:block absolute right-16 bg-[#091224] text-white text-xs font-semibold px-4 py-1.5 rounded-2xl shadow-card whitespace-nowrap border border-slate-800">
+              Ask Syncra 
             </span>
           )}
         </button>
@@ -206,24 +203,24 @@ export const FloatingStylistOrb = () => {
         <div className="fixed inset-0 lg:inset-auto lg:bottom-22 lg:right-6 z-50 flex items-end justify-center lg:block animate-slide-up-mobile">
           {/* Backdrop on mobile */}
           <div
-            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs lg:hidden"
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs lg:hidden"
             onClick={() => setIsChatOpen(false)}
           />
 
           {/* Dialog Container */}
-          <div className="relative w-full lg:w-96 max-h-[85dvh] lg:max-h-[540px] h-[520px] bg-white rounded-t-3xl lg:rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden z-10">
+          <div className="relative w-full lg:w-96 max-h-[85dvh] lg:max-h-[540px] h-[520px] bg-white rounded-t-3xl lg:rounded-3xl shadow-floating border border-slate-200/90 flex flex-col overflow-hidden z-10">
             {/* Header */}
-            <div className="px-4 py-3.5 bg-slate-900 text-white flex items-center justify-between flex-shrink-0">
+            <div className="px-4 py-3.5 bg-[#091224] text-white flex items-center justify-between flex-shrink-0 border-b border-slate-800">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
                   <MessageSquare className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <h3 className="text-xs font-black text-white">Ask StyleSync</h3>
+                    <h3 className="text-xs font-bold text-white">Syncra AI</h3>
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   </div>
-                  <p className="text-[10px] text-slate-400">Personal Stylist &amp; Visual Advisor</p>
+                  <p className="text-[10px] text-slate-400">Personal Stylist</p>
                 </div>
               </div>
 
@@ -259,7 +256,7 @@ export const FloatingStylistOrb = () => {
             </div>
 
             {/* Messages Scroll Body */}
-            <div className="flex-1 p-3.5 overflow-y-auto space-y-3 bg-[#FAFAF9]">
+            <div className="flex-1 p-3.5 overflow-y-auto space-y-3 bg-slate-50/50">
               {messages.map((m) => {
                 const isAI = m.sender === 'ai';
                 return (
@@ -271,16 +268,16 @@ export const FloatingStylistOrb = () => {
                   >
                     <div
                       className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${
-                        isAI ? 'bg-slate-900 text-emerald-400' : 'bg-emerald-600 text-white'
+                        isAI ? 'bg-[#091224] text-emerald-400 border border-slate-800' : 'bg-emerald-600 text-white'
                       }`}
                     >
                       {isAI ? <MessageSquare className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
                     </div>
                     <div
-                      className={`p-3 rounded-2xl text-xs leading-relaxed space-y-2 ${
+                      className={`p-3 rounded-2xl text-xs leading-relaxed space-y-2 shadow-2xs ${
                         isAI
-                          ? 'bg-white border border-slate-200/80 text-slate-800 shadow-2xs'
-                          : 'bg-slate-900 text-white font-medium'
+                          ? 'bg-white border border-slate-200 text-slate-900'
+                          : 'bg-[#091224] text-white font-medium border border-slate-800'
                       }`}
                     >
                       {/* Attached Photo in chat bubble */}
@@ -310,20 +307,20 @@ export const FloatingStylistOrb = () => {
               })}
 
               {isTyping && (
-                <div className="flex items-center gap-2 text-xs text-slate-500 bg-white p-2.5 rounded-2xl border border-slate-200 w-fit">
-                  <MessageSquare className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
-                  <span>Analyzing style match...</span>
+                <div className="flex items-center gap-2 text-xs text-slate-600 bg-white p-2.5 rounded-2xl border border-slate-200 w-fit shadow-2xs">
+                  <MessageSquare className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+                  <span>Syncra is reviewing...</span>
                 </div>
               )}
               <div ref={messagesEndRef} />
             </div>
 
             {/* Quick Suggestions Chips */}
-            <div className="px-3 py-1.5 bg-slate-100/70 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto scrollbar-none flex-shrink-0">
+            <div className="px-3 py-2 bg-white border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto scrollbar-none flex-shrink-0">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-lg border border-emerald-200 whitespace-nowrap flex items-center gap-1 cursor-pointer"
+                className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-lg border border-emerald-200 whitespace-nowrap flex items-center gap-1 cursor-pointer transition-colors"
               >
                 <ImageIcon className="w-3 h-3 text-emerald-600" />
                 <span>📷 Upload Photo</span>
@@ -331,14 +328,14 @@ export const FloatingStylistOrb = () => {
               <button
                 type="button"
                 onClick={() => handleSend(`What should I wear today in ${weather.city || 'my city'} for ${weather.temp}°C ${weather.condition}?`)}
-                className="px-2.5 py-1 bg-white hover:bg-slate-200 text-slate-700 text-[10px] font-bold rounded-lg border border-slate-200 whitespace-nowrap"
+                className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 text-[10px] font-semibold rounded-lg border border-slate-200 whitespace-nowrap transition-colors"
               >
-                ☀️ Today's Look ({weather.temp}°C)
+                ☀️ Today's Look ({weather.temp || 22}°C)
               </button>
               <button
                 type="button"
-                onClick={() => handleSend('Will white sneakers match?')}
-                className="px-2.5 py-1 bg-white hover:bg-slate-200 text-slate-700 text-[10px] font-bold rounded-lg border border-slate-200 whitespace-nowrap"
+                onClick={() => handleSend('Will minimal white sneakers match my wardrobe?')}
+                className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 text-[10px] font-semibold rounded-lg border border-slate-200 whitespace-nowrap transition-colors"
               >
                 👟 White Sneakers
               </button>
@@ -347,7 +344,7 @@ export const FloatingStylistOrb = () => {
             {/* Preview image thumbnail above input if selected */}
             {selectedImage && (
               <div className="px-3 pt-2 bg-white flex items-center gap-2">
-                <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 flex-shrink-0">
+                <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-emerald-200 bg-emerald-50/50 flex-shrink-0">
                   <img src={selectedImage} alt="Preview" className="w-full h-full object-cover" />
                   <button
                     type="button"
@@ -382,14 +379,14 @@ export const FloatingStylistOrb = () => {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={selectedImage ? "Ask about this photo..." : "Ask about style or upload photo..."}
-                className="flex-1 px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-emerald-500 focus:bg-white"
+                placeholder={selectedImage ? "Ask Syncra about this photo..." : "Ask Syncra or upload photo..."}
+                className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-emerald-500 focus:bg-white"
               />
 
               <button
                 type="submit"
                 disabled={!input.trim() && !selectedImage}
-                className="p-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white rounded-xl transition-all cursor-pointer flex-shrink-0"
+                className="p-2 bg-[#091224] hover:bg-[#121F3A] disabled:opacity-40 text-white rounded-xl transition-all cursor-pointer flex-shrink-0 shadow-2xs flex items-center justify-center"
               >
                 <Send className="w-4 h-4 text-emerald-400" />
               </button>

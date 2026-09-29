@@ -6,19 +6,19 @@ export const RecommendationBadge = ({ decision = 'BUY', size = 'md', showIcon = 
 
   const config = {
     BUY: {
-      bg: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
+      bg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
       icon: CheckCircle2,
       label: 'BUY',
     },
     MAYBE: {
-      bg: 'bg-amber-50 text-amber-700 border-amber-200/80',
+      bg: 'bg-amber-50 text-amber-700 border-amber-200',
       icon: AlertCircle,
-      label: 'MAYBE',
+      label: 'CONSIDER',
     },
     SKIP: {
-      bg: 'bg-rose-50 text-rose-700 border-rose-200/80',
+      bg: 'bg-rose-50 text-rose-700 border-rose-200',
       icon: XCircle,
-      label: 'SKIP',
+      label: 'PASS',
     },
   }[norm] || {
     bg: 'bg-slate-50 text-slate-700 border-slate-200',
@@ -29,11 +29,11 @@ export const RecommendationBadge = ({ decision = 'BUY', size = 'md', showIcon = 
   const Icon = config.icon;
 
   const sizeClasses = {
-    sm: 'px-2 py-0.5 text-xs font-bold gap-1',
-    md: 'px-2.5 py-1 text-xs font-bold gap-1.5',
-    lg: 'px-3.5 py-1.5 text-sm font-extrabold gap-2',
-    xl: 'px-4.5 py-2 text-base font-extrabold tracking-wide gap-2 shadow-xs',
-  }[size] || 'px-2.5 py-1 text-xs font-bold gap-1.5';
+    sm: 'px-2.5 py-0.5 text-[11px] font-bold gap-1 font-mono',
+    md: 'px-3 py-1 text-xs font-bold gap-1.5 font-mono shadow-subtle',
+    lg: 'px-4 py-1.5 text-sm font-bold gap-2 font-mono shadow-subtle',
+    xl: 'px-5 py-2 text-base font-bold tracking-wide gap-2 font-mono shadow-card',
+  }[size] || 'px-3 py-1 text-xs font-bold gap-1.5 font-mono';
 
   return (
     <span
