@@ -11,8 +11,7 @@ import {
   Wallet,
   Calendar,
   Check,
-  ShoppingBag,
-  Sparkles
+  ShoppingBag
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import confetti from 'canvas-confetti';
@@ -110,21 +109,21 @@ export const OnboardingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9] flex flex-col justify-center items-center px-4 py-8 sm:py-12">
-      <div className="w-full max-w-2xl bg-white rounded-3xl p-6 sm:p-10 shadow-card border border-slate-200/80">
+    <div className="min-h-screen bg-[#F6F4EE] flex flex-col justify-center items-center px-4 py-8 sm:py-12">
+      <div className="w-full max-w-2xl bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-[#E5E0D6]">
         {/* Progress Bar & Header */}
         {step <= totalSteps && (
           <div className="mb-8">
-            <div className="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-              <span className="flex items-center gap-1.5 text-slate-800">
-                <Compass className="w-3.5 h-3.5 text-emerald-600" />
-                Quick Style Setup
+            <div className="flex items-center justify-between text-xs font-bold text-[#8E968C] uppercase tracking-wider mb-2">
+              <span className="flex items-center gap-1.5 text-[#1A1D1A]">
+                <Compass className="w-3.5 h-3.5 text-[#1E2E22]" />
+                Style Identity Setup
               </span>
               <span>Step {step} of {totalSteps}</span>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-[#FAF8F5] border border-[#E5E0D6] rounded-full h-2 overflow-hidden">
               <div
-                className="bg-slate-900 h-full rounded-full transition-all duration-300"
+                className="bg-[#1E2E22] h-full rounded-full transition-all duration-300"
                 style={{ width: `${(step / totalSteps) * 100}%` }}
               />
             </div>
@@ -135,8 +134,8 @@ export const OnboardingPage = () => {
         {step === 1 && (
           <div className="space-y-5 animate-fade-in">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Step 1 — Tell us about yourself</h2>
-              <p className="text-xs text-slate-500 mt-0.5">Basic details to help StyleSync suggest clothes that fit you well.</p>
+              <h2 className="font-serif text-2xl font-bold text-[#1A1D1A]">Step 1 — Tell us about yourself</h2>
+              <p className="text-xs text-[#8E968C] mt-0.5">Basic details to help StyleSync calibrate your personal fashion profile.</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -512,22 +511,22 @@ export const OnboardingPage = () => {
             <button
               type="button"
               onClick={() => navigate('/dashboard')}
-              className="px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-floating transition-all inline-flex items-center gap-2 active:scale-95 cursor-pointer"
+              className="px-8 py-3.5 bg-[#1E2E22] hover:bg-[#162319] text-[#F8F6F0] font-bold rounded-full shadow-sm transition-all inline-flex items-center gap-2 active:scale-95 cursor-pointer"
             >
               <span>Go to My Dashboard</span>
-              <ArrowRight className="w-4 h-4 text-emerald-400" />
+              <ArrowRight className="w-4 h-4 text-[#F8F6F0]" />
             </button>
           </div>
         )}
 
         {/* Navigation Buttons for Steps 1-6 */}
         {step <= totalSteps && (
-          <div className="flex items-center justify-between pt-8 mt-6 border-t border-slate-100">
+          <div className="flex items-center justify-between pt-8 mt-6 border-t border-[#E5E0D6]">
             {step > 1 ? (
               <button
                 type="button"
                 onClick={handleBack}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-bold text-[#8E968C] hover:text-[#1A1D1A] flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Back</span>
@@ -537,10 +536,10 @@ export const OnboardingPage = () => {
             <button
               type="button"
               onClick={handleNext}
-              className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm rounded-xl shadow-subtle hover:shadow transition-all flex items-center gap-2 active:scale-95 ml-auto cursor-pointer"
+              className="px-6 py-2.5 bg-[#1E2E22] hover:bg-[#162319] text-[#F8F6F0] font-bold text-xs sm:text-sm rounded-full shadow-sm hover:shadow transition-all flex items-center gap-2 active:scale-95 ml-auto cursor-pointer"
             >
               <span>{step === totalSteps ? 'Finish Setup' : 'Next Step'}</span>
-              <ArrowRight className="w-4 h-4 text-emerald-400" />
+              <ArrowRight className="w-4 h-4 text-[#F8F6F0]" />
             </button>
           </div>
         )}

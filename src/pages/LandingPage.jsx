@@ -18,7 +18,6 @@ import {
   Briefcase,
   Gem,
   User,
-  Sparkles,
   ChevronRight
 } from 'lucide-react';
 import { RecommendationBadge } from '../components/common/RecommendationBadge';
@@ -53,7 +52,7 @@ export const LandingPage = () => {
           <div className="flex items-center">
             {/* Mobile: Compact single-line logo */}
             <div className="sm:hidden">
-              <BrandLogo size="sm" showSubtitle={false} to="/" />
+              <BrandLogo size="sm" variant="compact" to="/" />
             </div>
             {/* Tablet/Desktop: Full logo */}
             <div className="hidden sm:block">

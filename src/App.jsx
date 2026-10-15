@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { WardrobeProvider } from './context/WardrobeContext';
 import { WeatherProvider } from './context/WeatherContext';
@@ -8,6 +8,7 @@ import { WeatherProvider } from './context/WeatherContext';
 import { AppLayout } from './components/layout/AppLayout';
 
 // Pages
+import { WelcomeIntroPage } from './pages/WelcomeIntroPage';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -26,6 +27,24 @@ import { PurchaseHistoryPage } from './pages/PurchaseHistoryPage';
 import { BudgetPage } from './pages/BudgetPage';
 import { AssistantPage } from './pages/AssistantPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { OutfitBuilderPage } from './pages/OutfitBuilderPage';
+import { SyncraPreferencesPage } from './pages/SyncraPreferencesPage';
+import { StyleScannerPage } from './pages/StyleScannerPage';
+import { MoreMenuPage } from './pages/MoreMenuPage';
+import { CollectionsPage } from './pages/CollectionsPage';
+
+// Scroll to top automatically on every route or query param change
+const ScrollToTop = () => {
+  const { pathname, search } = useLocation();
+
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [pathname, search]);
+
+  return null;
+};
 
 // Loading Spinner Screen
 const AuthLoadingScreen = () => (
@@ -59,9 +78,9 @@ const PublicOnlyRoute = ({ children }) => {
   return children;
 };
 
-// Root / Marketing Route Guard:
-// If logged in, automatically go to /dashboard (do not show or redirect back to marketing)
-// If logged out / guest, show marketing LandingPage
+// Root / Welcome Route Guard:
+// If logged in, automatically go to /dashboard
+// If logged out / guest, show WelcomeIntroPage (matching reference Screen 1)
 const LandingRoute = () => {
   const { isAuthenticated, loading } = useAuth();
   if (loading) {
@@ -70,14 +89,18 @@ const LandingRoute = () => {
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
-  return <LandingPage />;
+  return <WelcomeIntroPage />;
 };
 
 const AppRoutes = () => {
   return (
-    <Routes>
-      {/* Root / Marketing Landing Page */}
+    <>
+      <ScrollToTop />
+      <Routes>
+      {/* Root / Welcome Page */}
       <Route path="/" element={<LandingRoute />} />
+      <Route path="/welcome" element={<PublicOnlyRoute><WelcomeIntroPage /></PublicOnlyRoute>} />
+      <Route path="/landing" element={<LandingPage />} />
 
       {/* Auth / Guest Only Routes (Blocked if already logged in) */}
       <Route
@@ -142,6 +165,7 @@ const AppRoutes = () => {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/daily-stylist" element={<DailyStylistPage />} />
         <Route path="/wardrobe-gaps" element={<WardrobeGapPage />} />
+        <Route path="/collections" element={<CollectionsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/wardrobe" element={<WardrobePage />} />
         <Route path="/advisor" element={<ProductAdvisorPage />} />
@@ -152,11 +176,18 @@ const AppRoutes = () => {
         <Route path="/budget" element={<BudgetPage />} />
         <Route path="/assistant" element={<AssistantPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/profile-sizes" element={<SettingsPage defaultSection="sizes" />} />
+        <Route path="/my-looks" element={<OutfitBuilderPage />} />
+        <Route path="/syncra-preferences" element={<SyncraPreferencesPage />} />
+        <Route path="/style-scanner" element={<StyleScannerPage />} />
+        <Route path="/more" element={<MoreMenuPage />} />
+        <Route path="/tools" element={<MoreMenuPage />} />
       </Route>
 
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 };
 

@@ -1,142 +1,157 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Sparkles,
-  Camera,
-  Compass,
-  MessageSquare,
-  Sun,
-  ArrowLeftRight,
   Plus,
-  X,
-  PlusCircle,
-  Layers
+  Shirt,
+  Layers,
+  Sparkles,
+  ShoppingBag,
+  MoreHorizontal
 } from 'lucide-react';
-import { useWardrobe } from '../../context/WardrobeContext';
-import { AddWardrobeItemModal } from '../wardrobe/AddWardrobeItemModal';
 
 export const FloatingStylistOrb = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isCameraAddOpen, setIsCameraAddOpen] = useState(false);
   const navigate = useNavigate();
-  const { addWardrobeItem } = useWardrobe();
+  const location = useLocation();
 
-  const handleAction = (path) => {
+  const handleNavigate = (path) => {
     setIsOpen(false);
     navigate(path);
   };
 
-  const handleOpenSnap = () => {
-    setIsOpen(false);
-    setIsCameraAddOpen(true);
-  };
+  // Modules list not displayed in tabs (matching the screenshot)
+  const menuItems = [
+    {
+      id: 'wear-today',
+      label: 'Wear Today',
+      path: '/daily-stylist',
+      icon: Shirt,
+      bg: 'bg-[#CBE3CB]',
+      text: 'text-[#1E2E22]',
+      offset: '-translate-x-3.5'
+    },
+    {
+      id: 'my-wardrobe',
+      label: 'My Wardrobe',
+      path: '/wardrobe',
+      icon: Layers,
+      bg: 'bg-[#E5D7C7]',
+      text: 'text-[#4A3828]',
+      offset: '-translate-x-2'
+    },
+    {
+      id: 'outfit-lab',
+      label: 'Outfit Lab',
+      path: '/my-looks',
+      icon: Sparkles,
+      bg: 'bg-[#CFE2F5]',
+      text: 'text-[#1D4A70]',
+      offset: 'translate-x-0'
+    },
+    {
+      id: 'what-to-buy',
+      label: 'What to Buy Next',
+      path: '/wardrobe-gaps',
+      icon: ShoppingBag,
+      bg: 'bg-[#F2D2DE]',
+      text: 'text-[#6E1C38]',
+      offset: 'translate-x-1'
+    },
+    {
+      id: 'more',
+      label: 'More',
+      path: '/more',
+      icon: MoreHorizontal,
+      bg: 'bg-white',
+      text: 'text-[#1A1D1A]',
+      offset: 'translate-x-1.5'
+    }
+  ];
 
   return (
     <>
-      {/* Backdrop overlay when speed dial is open */}
+      {/* Dim Backdrop Overlay when open */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-xs transition-opacity animate-fade-in lg:hidden"
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-xs transition-opacity animate-fade-in"
           onClick={() => setIsOpen(false)}
         />
       )}
 
-      {/* Floating Speed Dial Items */}
-      {isOpen && (
-        <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] right-4 z-50 flex flex-col items-end gap-2.5 lg:hidden animate-slide-up-mobile">
-          {/* Action 1: Snap Photo with Camera */}
-          <button
-            type="button"
-            onClick={handleOpenSnap}
-            className="flex items-center gap-2.5 px-3.5 py-2 bg-white text-slate-800 rounded-2xl shadow-floating border border-slate-100 font-bold text-xs hover:bg-slate-50 active:scale-95 transition-all cursor-pointer group"
-          >
-            <span className="text-slate-800 group-hover:text-emerald-700">Snap Clothes (Camera)</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-sm">
-              <Camera className="w-4 h-4" />
-            </div>
-          </button>
+      {/* Floating Speed Dial Container on Right Side */}
+      <div className="fixed bottom-[calc(5.75rem+env(safe-area-inset-bottom,0px))] lg:bottom-8 inset-x-0 lg:inset-x-auto lg:right-8 max-w-md lg:max-w-none mx-auto lg:mx-0 z-50 pointer-events-none select-none flex justify-end px-3.5 sm:px-4 lg:px-0">
+        <div className="pointer-events-auto relative flex flex-col items-end">
+          {/* Curved Animated Speed-Dial Items */}
+          {isOpen && (
+            <div className="mb-3 flex flex-col items-end space-y-2.5 relative">
+              {/* Subtle connecting curved arc line */}
+              <svg
+                className="absolute right-5 bottom-0 pointer-events-none w-16 h-72 overflow-visible"
+                fill="none"
+              >
+                <path
+                  d="M 12 280 Q 28 150 -4 10"
+                  stroke="white"
+                  strokeWidth="1.5"
+                  strokeDasharray="3 3"
+                  opacity="0.6"
+                />
+              </svg>
 
-          {/* Action 2: Ask Stylist */}
-          <button
-            type="button"
-            onClick={() => handleAction('/assistant')}
-            className="flex items-center gap-2.5 px-3.5 py-2 bg-white text-slate-800 rounded-2xl shadow-floating border border-slate-100 font-bold text-xs hover:bg-slate-50 active:scale-95 transition-all cursor-pointer group"
-          >
-            <span className="text-slate-800 group-hover:text-emerald-700">Ask Stylist</span>
-            <div className="w-8 h-8 rounded-xl bg-indigo-500 text-white flex items-center justify-center shadow-sm">
-              <MessageSquare className="w-4 h-4" />
-            </div>
-          </button>
+              {menuItems.map((item, index) => {
+                const Icon = item.icon;
+                const isCurrent = location.pathname === item.path;
 
-          {/* Action 3: Evaluate Item (Advisor) */}
-          <button
-            type="button"
-            onClick={() => handleAction('/advisor')}
-            className="flex items-center gap-2.5 px-3.5 py-2 bg-white text-slate-800 rounded-2xl shadow-floating border border-slate-100 font-bold text-xs hover:bg-slate-50 active:scale-95 transition-all cursor-pointer group"
-          >
-            <span className="text-slate-800 group-hover:text-emerald-700">Check Before Buying</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-sm">
-              <Compass className="w-4 h-4" />
-            </div>
-          </button>
+                return (
+                  <div
+                    key={item.id}
+                    style={{ animationDelay: `${index * 35}ms` }}
+                    className={`flex items-center gap-2.5 animate-slide-up-mobile transition-all duration-200 ${item.offset}`}
+                  >
+                    {/* White Pill Tag Label */}
+                    <button
+                      type="button"
+                      onClick={() => handleNavigate(item.path)}
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold shadow-md border transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
+                        isCurrent
+                          ? 'bg-[#1E2E22] text-[#F8F6F0] border-[#1E2E22]'
+                          : 'bg-white text-[#1A1D1A] hover:bg-[#FAF8F5] border-[#ECE8DF]'
+                      }`}
+                    >
+                      {item.label}
+                    </button>
 
-          {/* Action 4: Wear Today Outfit */}
-          <button
-            type="button"
-            onClick={() => handleAction('/daily-stylist')}
-            className="flex items-center gap-2.5 px-3.5 py-2 bg-white text-slate-800 rounded-2xl shadow-floating border border-slate-100 font-bold text-xs hover:bg-slate-50 active:scale-95 transition-all cursor-pointer group"
-          >
-            <span className="text-slate-800 group-hover:text-emerald-700">Wear Today Outfits</span>
-            <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-sm">
-              <Sun className="w-4 h-4" />
-            </div>
-          </button>
-
-          {/* Action 5: Shopping Duel (Compare) */}
-          <button
-            type="button"
-            onClick={() => handleAction('/compare')}
-            className="flex items-center gap-2.5 px-3.5 py-2 bg-white text-slate-800 rounded-2xl shadow-floating border border-slate-100 font-bold text-xs hover:bg-slate-50 active:scale-95 transition-all cursor-pointer group"
-          >
-            <span className="text-slate-800 group-hover:text-emerald-700">Compare 2 Products</span>
-            <div className="w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-sm">
-              <ArrowLeftRight className="w-4 h-4" />
-            </div>
-          </button>
-        </div>
-      )}
-
-      {/* Main Floating Orb Button */}
-      <div className="fixed bottom-[calc(4.2rem+env(safe-area-inset-bottom,0px))] right-4 z-50 lg:hidden">
-        <button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Quick Stylist Actions"
-          className={`w-12 h-12 rounded-2xl shadow-2xl flex items-center justify-center transition-all duration-300 cursor-pointer active:scale-90 ${
-            isOpen
-              ? 'bg-slate-900 text-white rotate-90 ring-4 ring-slate-900/20 shadow-emerald-500/20'
-              : 'bg-gradient-to-tr from-slate-900 via-slate-800 to-emerald-700 text-white ring-2 ring-white shadow-floating hover:scale-105'
-          }`}
-        >
-          {isOpen ? (
-            <X className="w-6 h-6" />
-          ) : (
-            <div className="relative flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-emerald-400 animate-pulse-subtle" />
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full ring-2 ring-slate-900" />
+                    {/* Circular Icon Orb */}
+                    <button
+                      type="button"
+                      onClick={() => handleNavigate(item.path)}
+                      aria-label={item.label}
+                      className={`w-11 h-11 rounded-full ${item.bg} ${item.text} border-2 border-white shadow-md flex items-center justify-center cursor-pointer active:scale-90 hover:scale-105 transition-all`}
+                    >
+                      <Icon className="w-5 h-5 stroke-[2]" />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
-        </button>
-      </div>
 
-      {/* Direct Add Clothes Modal triggered from FAB */}
-      {isCameraAddOpen && (
-        <AddWardrobeItemModal
-          isOpen={isCameraAddOpen}
-          onClose={() => setIsCameraAddOpen(false)}
-          onAdd={addWardrobeItem}
-        />
-      )}
+          {/* Floating + Trigger Button */}
+          <button
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label={isOpen ? 'Close module list' : 'Open module list'}
+            title="All Features & Modules"
+            className={`w-12 h-12 rounded-full flex items-center justify-center shadow-xl border-2 border-white transition-all duration-300 cursor-pointer active:scale-90 ${
+              isOpen
+                ? 'bg-[#141F17] text-white rotate-45 ring-4 ring-[#1E2E22]/20 scale-105'
+                : 'bg-[#1E2E22] hover:bg-[#162319] text-[#F8F6F0] ring-2 ring-black/10 hover:scale-105'
+            }`}
+          >
+            <Plus className="w-6 h-6 stroke-[2.2] transition-transform duration-300" />
+          </button>
+        </div>
+      </div>
     </>
   );
 };

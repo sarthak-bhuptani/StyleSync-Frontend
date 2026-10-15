@@ -1,4 +1,4 @@
-import { Shirt, Layers, ShoppingBag, Sun, Sparkles } from 'lucide-react';
+import { Shirt, Layers, ShoppingBag, Sun, Watch } from 'lucide-react';
 
 export const CATEGORY_DEFINITIONS = [
   {
@@ -37,7 +37,7 @@ export const CATEGORY_DEFINITIONS = [
     id: 'Accessories',
     label: 'Accessories & Extras',
     shortLabel: 'Accessories',
-    icon: Sparkles,
+    icon: Watch,
     desc: 'Watches, bags, eyewear, belts & caps',
     badgeClass: 'bg-rose-50 text-rose-700 border-rose-200'
   }

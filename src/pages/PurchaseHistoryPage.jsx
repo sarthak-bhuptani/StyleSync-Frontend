@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Clock,
   ThumbsUp,
@@ -9,15 +10,18 @@ import {
   TrendingUp,
   CheckCircle2,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  ChevronLeft
 } from 'lucide-react';
 import { purchaseApi } from '../api/purchaseApi';
 import { RecommendationBadge } from '../components/common/RecommendationBadge';
 import { Modal } from '../components/common/Modal';
 import { useWardrobe } from '../context/WardrobeContext';
 import { EmptyState } from '../components/common/EmptyState';
+import { ProfileAvatarButton } from '../components/common/ProfileAvatarButton';
 
 export const PurchaseHistoryPage = () => {
+  const navigate = useNavigate();
   const { showToast } = useWardrobe();
   const [purchases, setPurchases] = useState(() => {
     const saved = localStorage.getItem('stylesync_purchases');
@@ -132,8 +136,21 @@ export const PurchaseHistoryPage = () => {
   const satisfactionRate = Math.round((goodPurchasesCount / Math.max(1, purchases.length)) * 100);
 
   return (
-    <div className="space-y-8 animate-fade-in max-w-5xl mx-auto pb-12">
+    <div className="space-y-8 animate-fade-in max-w-5xl mx-auto pb-1">
       {/* Header */}
+      <div className="flex items-center justify-between pb-2 border-b border-[#ECE8DF]">
+        <button
+          type="button"
+          onClick={() => navigate('/profile')}
+          className="p-1 -ml-1 text-[#1A1D1A] hover:opacity-75 rounded-full active:scale-95 cursor-pointer flex items-center gap-1.5"
+          aria-label="Back"
+        >
+          <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
+          <span className="text-xs font-semibold text-[#1A1D1A]">Back</span>
+        </button>
+        <ProfileAvatarButton />
+      </div>
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold mb-2 border border-emerald-200/60">

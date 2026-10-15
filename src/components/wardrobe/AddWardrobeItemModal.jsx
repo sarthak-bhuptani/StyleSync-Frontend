@@ -5,7 +5,6 @@ import {
   UploadCloud,
   Check,
   X,
-  Sparkles,
   Loader2,
   RefreshCw,
   Palette,
@@ -483,8 +482,8 @@ export const AddWardrobeItemModal = ({ isOpen, onClose, onAdd }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add to Closet" maxWidth="max-w-md">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <Modal isOpen={isOpen} onClose={onClose} title="Add to Wardrobe" maxWidth="max-w-md">
+      <form onSubmit={handleSubmit} className="space-y-4 text-[#1A1D1A]">
         {/* Hidden File & Camera Inputs */}
         <input
           id="wardrobe-camera-capture"
@@ -504,336 +503,132 @@ export const AddWardrobeItemModal = ({ isOpen, onClose, onAdd }) => {
           style={{ opacity: 0, position: 'absolute', pointerEvents: 'none', width: '1px', height: '1px' }}
         />
 
-        {/* 1. Photo Capture Box */}
-        <div>
+        {/* 1. Photo Capture Box matching Image 15 */}
+        <div
+          onClick={() => fileInputRef.current?.click()}
+          className="bg-white rounded-3xl border border-[#ECE8DF] p-6 flex flex-col items-center justify-center text-center shadow-2xs aspect-[4/3] cursor-pointer hover:border-[#1A1D1A]/30 transition-all relative overflow-hidden group"
+        >
           {formData.image ? (
-            <div className="relative aspect-4/3 w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 group shadow-2xs">
+            <>
               <img
                 src={formData.image}
                 alt="Selected clothing"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain rounded-2xl"
               />
-              <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
-                <label
-                  htmlFor="wardrobe-photo-upload"
-                  className="p-2 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white shadow-md transition-all cursor-pointer flex items-center justify-center"
+              <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-10">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    fileInputRef.current?.click();
+                  }}
+                  className="p-2 rounded-full bg-[#111827]/80 hover:bg-[#111827] text-white shadow-md transition-all cursor-pointer"
                   title="Change photo"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
-                </label>
+                </button>
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setFormData((prev) => ({ ...prev, image: null }));
-                    setAiConfidence(null);
                   }}
-                  className="p-2 rounded-full bg-rose-600/90 hover:bg-rose-600 text-white shadow-md transition-all cursor-pointer flex items-center justify-center"
+                  className="p-2 rounded-full bg-rose-600/90 hover:bg-rose-600 text-white shadow-md transition-all cursor-pointer"
                   title="Remove photo"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
-
-              {/* Status Pill on preview */}
-              <div className="absolute bottom-2 left-2.5 px-2.5 py-1 rounded-lg bg-slate-950/75 backdrop-blur-xs text-white text-[10px] font-bold flex items-center gap-1.5 shadow-xs">
-                {isAnalyzing ? (
-                  <>
-                    <Loader2 className="w-3 h-3 animate-spin text-emerald-400" />
-                    <span>AI analyzing garment &amp; color...</span>
-                  </>
-                ) : aiConfidence ? (
-                  <>
-                    <Sparkles className="w-3 h-3 text-emerald-400" />
-                    <span>AI Analyzed • {aiConfidence} match</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-3 h-3 text-emerald-400" />
-                    <span>{formData.color ? `Color: ${formData.color}` : 'Ready to save'}</span>
-                  </>
-                )}
-              </div>
-            </div>
+            </>
           ) : (
-            <div className="border-2 border-dashed border-slate-200 hover:border-slate-300 rounded-2xl p-5 text-center bg-slate-50 transition-colors relative">
-              <div className="w-12 h-12 rounded-2xl bg-white text-slate-700 shadow-2xs border border-slate-200 flex items-center justify-center mx-auto mb-2">
+            <div className="space-y-2">
+              <div className="w-10 h-10 rounded-full mx-auto flex items-center justify-center text-[#1A1D1A] group-hover:scale-110 transition-transform">
                 {isAnalyzing ? (
-                  <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
+                  <Loader2 className="w-8 h-8 animate-spin text-[#1A1D1A]" />
                 ) : (
-                  <Camera className="w-6 h-6 text-slate-700" />
+                  <Plus className="w-8 h-8 text-[#1A1D1A] stroke-[1.8]" />
                 )}
               </div>
-              <p className="text-xs font-bold text-slate-900">
-                {isAnalyzing ? '✨ AI is analyzing garment & color...' : 'Snap or Upload Clothing Photo'}
-              </p>
-              <p className="text-[11px] text-slate-400 mt-0.5 mb-3.5">
-                AI will auto-detect name, category, color, and fabric
-              </p>
-
-              {errorMessage && (
-                <p className="text-xs font-semibold text-rose-600 mb-2">{errorMessage}</p>
-              )}
-
-              <div className="flex items-center justify-center gap-2.5">
-                <label
-                  htmlFor="wardrobe-camera-capture"
-                  className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
-                >
-                  <Camera className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Take Photo</span>
-                </label>
-
-                <label
-                  htmlFor="wardrobe-photo-upload"
-                  className="px-4 py-2.5 bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 text-xs font-bold rounded-xl transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
-                >
-                  <UploadCloud className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Photo Library</span>
-                </label>
+              <div>
+                <p className="font-bold text-sm sm:text-base text-[#1A1D1A]">
+                  {isAnalyzing ? 'Analyzing photo...' : 'Upload a photo'}
+                </p>
+                <p className="text-xs text-[#8E968C] mt-0.5">
+                  or take one with your camera
+                </p>
               </div>
             </div>
           )}
         </div>
 
-        {/* 2. Item Name */}
-        <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
-            <span>
-              Item Name <span className="text-rose-500">*</span>
-            </span>
-            {aiConfidence && (
-              <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
-                <Sparkles className="w-3 h-3" /> AI Suggested
-              </span>
-            )}
-          </label>
-          <input
-            type="text"
-            required
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="e.g. Navy Blue Oxford Cotton Shirt"
-            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-emerald-500"
-          />
-        </div>
+        {/* 2. ITEM DETAILS Section matching Image 15 */}
+        <div className="space-y-2.5 pt-1">
+          <span className="text-[10px] font-bold text-[#8E968C] uppercase tracking-wider block">
+            ITEM DETAILS
+          </span>
 
-        {/* 3. Category Selector Chips */}
-        <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1.5">Category</label>
-          <div className="flex flex-wrap gap-1.5">
-            {CATEGORIES.map((cat) => {
-              const isSelected = formData.category === cat;
-              return (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, category: cat })}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    isSelected
-                      ? 'bg-slate-900 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'
-                  }`}
-                >
-                  {cat}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+          <div className="space-y-2.5">
+            {/* Category */}
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-[#717670] font-medium w-20 shrink-0">Category</span>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                className="flex-1 bg-white border border-[#ECE8DF] rounded-2xl px-4 py-2.5 text-xs font-semibold text-[#1A1D1A] focus:outline-none shadow-2xs cursor-pointer"
+              >
+                {CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        {/* 4. Color with Live Dynamic Swatch & Brand */}
-        <div className="grid grid-cols-2 gap-2.5">
-          {/* Color & Swatch */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
-              <span>Color</span>
-              {formData.colorHex && (
-                <span className="text-[10px] text-slate-400 font-mono">{formData.colorHex}</span>
-              )}
-            </label>
-            <div className="relative flex items-center">
-              <div
-                className="absolute left-3 w-4 h-4 rounded-full border border-slate-300 shadow-2xs shrink-0 transition-colors"
-                style={{ backgroundColor: formData.colorHex || '#1E3A8A' }}
-                title={formData.color || 'Color preview'}
-              />
+            {/* Color */}
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-[#717670] font-medium w-20 shrink-0">Color</span>
               <input
                 type="text"
                 value={formData.color}
                 onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                placeholder="e.g. Navy Blue, Olive Green"
-                className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-emerald-500"
+                placeholder="e.g. Olive, Navy, Beige"
+                className="flex-1 bg-white border border-[#ECE8DF] rounded-2xl px-4 py-2.5 text-xs font-semibold text-[#1A1D1A] focus:outline-none shadow-2xs"
+              />
+            </div>
+
+            {/* Brand */}
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-[#717670] font-medium w-20 shrink-0">Brand</span>
+              <input
+                type="text"
+                value={formData.brand}
+                onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                placeholder="Optional"
+                className="flex-1 bg-white border border-[#ECE8DF] rounded-2xl px-4 py-2.5 text-xs font-semibold text-[#1A1D1A] placeholder:text-[#A0A69F] focus:outline-none shadow-2xs"
+              />
+            </div>
+
+            {/* Price */}
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-[#717670] font-medium w-20 shrink-0">Price</span>
+              <input
+                type="text"
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value.replace(/[^0-9]/g, '') })}
+                placeholder="₹0"
+                className="flex-1 bg-white border border-[#ECE8DF] rounded-2xl px-4 py-2.5 text-xs font-semibold text-[#1A1D1A] placeholder:text-[#A0A69F] focus:outline-none shadow-2xs"
               />
             </div>
           </div>
-
-          {/* Brand */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Brand (Optional)</label>
-            <input
-              type="text"
-              value={formData.brand}
-              onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-              placeholder="e.g. Uniqlo, Zara"
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-emerald-500"
-            />
-          </div>
         </div>
 
-        {/* 5. Fabric & Pattern (2 Columns) */}
-        <div className="grid grid-cols-2 gap-2.5">
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Fabric / Material</label>
-            <input
-              type="text"
-              value={formData.fabric}
-              onChange={(e) => setFormData({ ...formData, fabric: e.target.value })}
-              placeholder="e.g. Cotton, Denim, Linen"
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-emerald-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Pattern</label>
-            <input
-              type="text"
-              value={formData.pattern}
-              onChange={(e) => setFormData({ ...formData, pattern: e.target.value })}
-              placeholder="e.g. Solid, Striped, Plaid"
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-emerald-500"
-            />
-          </div>
-        </div>
-
-        {/* 6. Price (Optional) */}
-        <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1">
-            Price / Value (₹) <span className="text-slate-400 font-normal">(Optional)</span>
-          </label>
-          <input
-            type="number"
-            value={formData.price}
-            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-            placeholder="e.g. 1999"
-            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-emerald-500"
-          />
-        </div>
-
-        {/* 7. Collapsible Advanced AI Attributes */}
-        <div className="pt-1 border-t border-slate-100">
-          <button
-            type="button"
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="w-full py-1 text-[11px] font-bold text-slate-500 hover:text-slate-800 flex items-center justify-between cursor-pointer"
-          >
-            <span className="flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-              <span>AI Styling Details (Season, Formality &amp; Tags)</span>
-            </span>
-            <ChevronDown
-              className={`w-3.5 h-3.5 text-slate-400 transition-transform ${
-                showAdvanced ? 'rotate-180' : ''
-              }`}
-            />
-          </button>
-
-          {showAdvanced && (
-            <div className="space-y-3 pt-2.5 pb-1 animate-fade-in">
-              {/* Season Selection Chips */}
-              <div>
-                <label className="block text-[11px] font-bold text-slate-600 mb-1">Season</label>
-                <div className="flex flex-wrap gap-1">
-                  {SEASONS.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, season: s })}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                        formData.season === s
-                          ? 'bg-slate-900 text-white'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Formality Selection Chips */}
-              <div>
-                <label className="block text-[11px] font-bold text-slate-600 mb-1">Formality</label>
-                <div className="flex flex-wrap gap-1">
-                  {FORMALITIES.map((f) => (
-                    <button
-                      key={f}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, formality: f })}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                        formData.formality === f
-                          ? 'bg-slate-900 text-white'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
-                    >
-                      {f}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tags Pills */}
-              <div>
-                <label className="block text-[11px] font-bold text-slate-600 mb-1">
-                  Tags &amp; Style Keywords
-                </label>
-                <div className="flex flex-wrap items-center gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-xl min-h-[38px]">
-                  {formData.tags.map((t) => (
-                    <span
-                      key={t}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-slate-200 text-slate-800 text-[10px] font-bold rounded-md shadow-2xs"
-                    >
-                      #{t}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTag(t)}
-                        className="text-slate-400 hover:text-rose-600 cursor-pointer"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </span>
-                  ))}
-                  <input
-                    type="text"
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyDown={handleAddTag}
-                    placeholder={formData.tags.length === 0 ? 'Type tag & press enter...' : 'Add more...'}
-                    className="flex-1 min-w-[80px] bg-transparent text-xs text-slate-900 placeholder:text-slate-400 outline-none"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Submit Button */}
+        {/* 3. Submit Button */}
         <div className="pt-2">
           <button
             type="submit"
-            disabled={!formData.name.trim() || isAnalyzing}
-            className="w-full py-3 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white text-xs sm:text-sm font-bold rounded-2xl shadow-floating transition-all active:scale-98 cursor-pointer flex items-center justify-center gap-2"
+            className="w-full py-3.5 bg-[#111827] hover:bg-[#030712] text-white rounded-2xl font-bold text-xs shadow-xs cursor-pointer active:scale-[0.98] transition-all"
           >
-            {isAnalyzing ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
-                <span>AI Analyzing Garment...</span>
-              </>
-            ) : (
-              <>
-                <Check className="w-4 h-4 text-emerald-400" />
-                <span>Save Item to Wardrobe</span>
-              </>
-            )}
+            Add to wardrobe
           </button>
         </div>
       </form>

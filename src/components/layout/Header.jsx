@@ -94,12 +94,15 @@ export const Header = () => {
     '/wardrobe-gaps': { title: 'What to Buy', subtitle: 'Missing pieces that unlock more outfits' },
     '/advisor': { title: 'Product Advisor', subtitle: 'AI check before you buy' },
     '/wardrobe': { title: 'My Wardrobe', subtitle: `${wardrobe.length} pieces in your closet` },
+    '/collections': { title: 'My Collections', subtitle: 'Organize your wardrobe and outfits' },
     '/compare': { title: 'Compare Products', subtitle: 'Side-by-side versatility check' },
     '/outfits': { title: 'Outfit Builder', subtitle: 'Mix & match combinations' },
     '/purchases': { title: 'Purchase History', subtitle: 'Track fashion investments & feedback' },
     '/budget': { title: 'Shopping Budget', subtitle: 'Monthly spending & limits' },
     '/assistant': { title: 'Style Assistant', subtitle: 'Ask anything about outfits & style' },
-    '/profile': { title: `@${cleanUsername}`, subtitle: 'Personal Stylist & Capsule Wardrobe' },
+    '/profile': { title: 'My Profile', subtitle: 'Personal style & preferences' },
+    '/more': { title: 'More', subtitle: 'All StyleSync tools' },
+    '/tools': { title: 'More Tools', subtitle: 'All StyleSync tools' },
     '/settings': isSettingsPage && currentSection && settingsSectionMeta[currentSection]
       ? settingsSectionMeta[currentSection]
       : { title: 'Settings and activity', subtitle: 'Preferences, Profile & Privacy' }
@@ -111,56 +114,72 @@ export const Header = () => {
     subtitle: 'Personal Stylist & Wardrobe'
   };
 
+  const isMorePage = location.pathname === '/more' || location.pathname === '/tools';
+
   const handleBack = () => {
+    if (isMorePage) {
+      navigate('/profile');
+      return;
+    }
+    const originFrom = location.state?.from;
+    if (originFrom) {
+      navigate(originFrom);
+      return;
+    }
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+      return;
+    }
     if (isSettingsPage) {
       if (currentSection) {
         navigate('/settings');
       } else {
         navigate('/profile');
       }
+    } else if (isProfilePage) {
+      navigate('/dashboard');
     } else {
-      navigate(-1);
+      navigate('/dashboard');
     }
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-100 px-4 sm:px-8 py-3.5 flex items-center justify-between transition-all">
-      {/* Left: Brand Logo on Mobile, Instagram Username on Profile, or Dynamic Page Title */}
+    <header className={`sticky top-0 z-30 transition-all ${
+      isProfilePage
+        ? 'bg-[#FAF8F5] border-b border-[#ECE8DF]/80 px-4 sm:px-6 py-3.5'
+        : 'bg-white/95 backdrop-blur-md border-b border-[#E5E0D6] px-4 sm:px-8 py-3.5'
+    } flex items-center justify-between`}>
+      {/* Left: Brand Logo on Mobile, Page Title & Back Button */}
       <div className="flex items-center gap-3 min-w-0">
         {/* Mobile Header */}
         <div className="lg:hidden flex items-center gap-2 min-w-0">
           {isDashboard ? (
-            <BrandLogo size="sm" showSubtitle={false} to="/dashboard" />
+            <BrandLogo size="sm" variant="compact" to="/dashboard" />
           ) : isProfilePage ? (
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0">
               <button
                 type="button"
                 onClick={handleBack}
-                className="p-1 -ml-1 text-slate-500 hover:text-slate-900 rounded-lg active:scale-95 cursor-pointer"
+                className="p-1 -ml-1 text-[#1A1D1A] hover:opacity-75 rounded-full active:scale-95 cursor-pointer"
                 aria-label="Back"
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
               </button>
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="text-base font-bold text-slate-900 tracking-tight truncate">
-                  @{cleanUsername}
-                </span>
-                <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] font-black shrink-0" title="Verified Stylist">
-                  ✓
-                </span>
-              </div>
+              <h1 className="font-serif text-2xl font-bold text-[#1A1D1A] tracking-tight">
+                My Profile
+              </h1>
             </div>
           ) : (
             <div className="flex items-center gap-2 min-w-0">
               <button
                 type="button"
                 onClick={handleBack}
-                className="p-1 -ml-1 text-slate-500 hover:text-slate-900 rounded-lg active:scale-95 cursor-pointer"
+                className="p-1 -ml-1 text-[#687066] hover:text-[#1A1D1A] rounded-full active:scale-95 cursor-pointer"
                 aria-label="Back"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
-              <h1 className="text-base font-bold text-slate-900 truncate tracking-tight">
+              <h1 className="font-serif text-lg font-semibold text-[#1A1D1A] truncate tracking-tight">
                 {currentMeta.title}
               </h1>
             </div>
@@ -169,19 +188,26 @@ export const Header = () => {
 
         {/* Desktop Header Title */}
         <div className="hidden lg:block">
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight leading-tight">
+          <div className="flex items-center gap-2.5">
+            {isProfilePage && (
+              <button
+                type="button"
+                onClick={handleBack}
+                className="p-1 -ml-1 text-[#1A1D1A] hover:opacity-75 rounded-full active:scale-95 cursor-pointer"
+                aria-label="Back"
+              >
+                <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
+              </button>
+            )}
+            <h1 className="font-serif text-2xl font-bold text-[#1A1D1A] tracking-tight leading-tight">
               {currentMeta.title}
             </h1>
-            {isProfilePage && (
-              <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] font-black" title="Verified Stylist">
-                ✓
-              </span>
-            )}
           </div>
-          <p className="text-xs text-slate-500 font-medium">
-            {currentMeta.subtitle}
-          </p>
+          {!isProfilePage && (
+            <p className="text-xs text-[#8E968C] font-normal mt-0.5">
+              {currentMeta.subtitle}
+            </p>
+          )}
         </div>
       </div>
 
@@ -191,25 +217,25 @@ export const Header = () => {
         {location.pathname !== '/advisor' && !isProfilePage && !isSettingsPage && (
           <button
             onClick={() => navigate('/advisor')}
-            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-2xl shadow-xs transition-all active:scale-95 cursor-pointer"
+            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-[#1E2E22] hover:bg-[#162319] text-[#F8F6F0] text-xs font-medium rounded-full shadow-xs transition-all active:scale-95 cursor-pointer"
           >
-            <Compass className="w-3.5 h-3.5 text-emerald-400" />
+            <Compass className="w-3.5 h-3.5 text-[#C5D8C7]" />
             <span>Check a Product</span>
           </button>
         )}
 
         {/* Notification Bell */}
-        {!isSettingsPage && (
+        {!isSettingsPage && !isProfilePage && (
           <div className="relative" ref={notifRef}>
             <button
               type="button"
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-2xl transition-colors cursor-pointer"
+              className="relative p-2 text-[#5A6359] hover:text-[#1A1D1A] hover:bg-[#EFECE5] rounded-full transition-colors cursor-pointer"
               aria-label="Notifications"
             >
               <Bell className="w-5 h-5" />
               {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 min-w-[14px] h-[14px] px-1 bg-emerald-500 text-white text-[9px] font-black rounded-full ring-2 ring-white flex items-center justify-center animate-pulse">
+                <span className="absolute top-1.5 right-1.5 min-w-[14px] h-[14px] px-1 bg-[#1E2E22] text-[#F8F6F0] text-[9px] font-bold rounded-full ring-2 ring-white flex items-center justify-center">
                   {unreadCount}
                 </span>
               )}
@@ -295,17 +321,15 @@ export const Header = () => {
           </div>
         )}
 
-        {/* Profile Page: Replace Avatar Image with 3 Lines Hamburger Menu Icon for Settings */}
+        {/* Profile Page: Circular Initial Badge S matching Image 2 */}
         {isProfilePage ? (
-          <button
-            type="button"
-            onClick={() => navigate('/settings')}
-            className="p-2 text-slate-800 hover:text-slate-950 hover:bg-slate-100 rounded-2xl transition-all cursor-pointer active:scale-90"
-            title="Settings & Activity"
-            aria-label="Settings"
+          <div
+            onClick={() => navigate('/settings?section=account')}
+            className="w-8 h-8 rounded-full bg-[#D6C7B2] text-[#1A1D1A] font-serif font-bold text-sm flex items-center justify-center cursor-pointer shadow-2xs hover:opacity-90 active:scale-95 transition-all select-none"
+            title="Edit Profile"
           >
-            <Menu className="w-6 h-6 stroke-[2.2]" />
-          </button>
+            {(user?.name?.[0] || user?.username?.[0] || 'S').toUpperCase()}
+          </div>
         ) : isSettingsPage ? null : (
           /* User Profile Avatar Link (on other pages) */
           <NavLink

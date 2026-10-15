@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Wallet,
   TrendingUp,
@@ -12,12 +13,14 @@ import {
   Tag,
   SlidersHorizontal,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  ChevronLeft
 } from 'lucide-react';
 import { budgetApi } from '../api/budgetApi';
 import { purchaseApi } from '../api/purchaseApi';
 import { Modal } from '../components/common/Modal';
 import { useWardrobe } from '../context/WardrobeContext';
+import { ProfileAvatarButton } from '../components/common/ProfileAvatarButton';
 
 const DEFAULT_BUDGET_DATA = {
   monthlyLimit: 10000,
@@ -32,7 +35,17 @@ const DEFAULT_BUDGET_DATA = {
 };
 
 export const BudgetPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { showToast } = useWardrobe();
+
+  const handleBack = () => {
+    if (location.state?.from) {
+      navigate(location.state.from);
+      return;
+    }
+    navigate('/dashboard');
+  };
 
   // Budget Data State
   const [budgetData, setBudgetData] = useState(() => {
@@ -125,6 +138,18 @@ export const BudgetPage = () => {
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       image: newPurchase.image || 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=400&q=80'
     });
+
+    // Record expense in backend budget ledger POST /api/v1/budget/expense
+    try {
+      await budgetApi.addExpense({
+        name: newPurchase.productName,
+        amount: itemPrice,
+        category: itemCategory,
+        purchaseId: created?.id || created?._id
+      });
+    } catch (expErr) {
+      console.warn('Backend addExpense error, proceeding locally:', expErr);
+    }
     setPurchases(prev => [created, ...prev]);
     setBudgetData(prev => {
       const updatedSpent = (prev.spentThisMonth || 0) + itemPrice;
@@ -216,16 +241,26 @@ export const BudgetPage = () => {
   const satisfactionRate = purchases.length > 0 ? Math.round((goodPurchasesCount / purchases.length) * 100) : 100;
 
   return (
-    <div className="space-y-4 sm:space-y-5 animate-fade-in max-w-5xl mx-auto pb-16">
-      {/* Clean Compact Header */}
+    <div className="space-y-4 sm:space-y-5 animate-fade-in max-w-5xl mx-auto pb-1">
+      {/* Clean Compact Header (Figma Wardrobe Economics) */}
       <div className="flex items-center justify-between gap-3 pt-1">
-        <div>
-          <h1 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
-            Shopping Budget
-          </h1>
-          <p className="text-xs text-slate-500">
-            Monthly limit & purchase quality tracking
-          </p>
+        <div className="flex items-start gap-2.5">
+          <button
+            type="button"
+            onClick={handleBack}
+            className="p-1 -ml-1 text-[#1A1D1A] hover:opacity-75 rounded-full active:scale-95 cursor-pointer mt-0.5"
+            aria-label="Back"
+          >
+            <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
+          </button>
+          <div>
+            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#1A1D1A] tracking-tight">
+              Wardrobe Economics
+            </h1>
+            <p className="text-xs text-[#8E968C] mt-0.5">
+              Monthly allowance & cost-per-wear investment tracker
+            </p>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -235,20 +270,22 @@ export const BudgetPage = () => {
               setNewLimit(monthlyLimit);
               setIsEditLimitModalOpen(true);
             }}
-            className="px-3 py-1.5 bg-white hover:bg-stone-50 border border-stone-200/90 text-stone-700 text-xs font-bold rounded-xl shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-1.5 bg-[#FAF8F5] hover:bg-[#EFECE5] border border-[#E5E0D6] text-[#1A1D1A] text-xs font-medium rounded-full shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
           >
-            <Edit2 className="w-3 h-3 text-stone-400" />
+            <Edit2 className="w-3 h-3 text-[#8E968C]" />
             <span>Adjust Cap</span>
           </button>
 
           <button
             type="button"
             onClick={() => setIsAddPurchaseModalOpen(true)}
-            className="px-3.5 py-1.5 bg-stone-900 hover:bg-black text-white text-xs font-bold rounded-xl shadow-2xs transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+            className="btn-pine text-xs py-1.5 px-4 cursor-pointer"
           >
-            <Plus className="w-3.5 h-3.5 text-white" />
+            <Plus className="w-3.5 h-3.5 text-[#C5D8C7]" />
             <span>Log Item</span>
           </button>
+
+          <ProfileAvatarButton />
         </div>
       </div>
 

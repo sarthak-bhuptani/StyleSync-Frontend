@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-[#F8FAFC] text-slate-900 font-sans min-h-screen;
+    @apply bg-[#F6F4EE] text-[#1A1D1A] font-sans min-h-screen;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-tap-highlight-color: transparent;
@@ -18,57 +18,103 @@
 }
 
 @layer components {
-  /* Emerald Luxe & Modern Clean Utilities */
+  /* Figma Editorial Cards & Surfaces */
+  .card-editorial {
+    background-color: #ffffff;
+    border-radius: 1.25rem;
+    border: 1px solid #E5E0D6;
+    box-shadow: 0 1px 3px 0 rgba(26, 29, 26, 0.04);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .card-editorial:hover {
+    box-shadow: 0 6px 20px -2px rgba(26, 29, 26, 0.07);
+    border-color: #D6CFBF;
+  }
+
+  .card-warm {
+    background-color: #EFECE5;
+    border-radius: 1.25rem;
+    border: 1px solid #E5E0D6;
+  }
+
+  /* Figma Pill Buttons */
+  .btn-pine {
+    background-color: #1E2E22;
+    color: #F8F6F0;
+    font-weight: 500;
+    border-radius: 9999px;
+    padding: 0.625rem 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+  }
+  .btn-pine:hover {
+    background-color: #162319;
+  }
+  .btn-pine:active {
+    transform: scale(0.98);
+  }
+
+  .btn-sand {
+    background-color: #EAE5DB;
+    color: #1A1D1A;
+    font-weight: 500;
+    border-radius: 9999px;
+    padding: 0.625rem 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    border: 1px solid #DDD5C8;
+  }
+  .btn-sand:hover {
+    background-color: #DDD5C8;
+  }
+  .btn-sand:active {
+    transform: scale(0.98);
+  }
+
+  .btn-outline-pine {
+    background-color: transparent;
+    color: #1E2E22;
+    font-weight: 500;
+    border-radius: 9999px;
+    padding: 0.625rem 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid #1E2E22;
+    transition: all 0.2s ease;
+  }
+  .btn-outline-pine:hover {
+    background-color: #E8EFE8;
+  }
+
+  .pill-chip {
+    border-radius: 9999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+
+  /* Legacy aliases for backwards compatibility */
   .bento-card {
     background-color: #ffffff;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-radius: 1.5rem;
-    border: 1px solid #E2E8F0;
-    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 1.25rem;
+    border: 1px solid #E5E0D6;
+    box-shadow: 0 1px 3px 0 rgba(26, 29, 26, 0.04);
   }
-
-  .bento-card:hover {
-    box-shadow: 0 8px 30px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
-    transform: translateY(-2px);
-    border-color: #CBD5E1;
-  }
-
-  .glass-panel {
-    background: rgba(255, 255, 255, 0.88);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(226, 232, 240, 0.8);
-  }
-
-  .glass-dark {
-    background: rgba(15, 23, 42, 0.90);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(51, 65, 85, 0.5);
-  }
-
   .btn-emerald {
-    background-color: #059669;
-    color: #ffffff;
-    font-weight: 600;
-    border-radius: 1rem;
-    transition: all 0.2s ease;
+    @apply btn-pine;
   }
-  .btn-emerald:hover {
-    background-color: #047857;
-  }
-
   .btn-obsidian {
-    background-color: #0F172A;
-    color: #ffffff;
-    font-weight: 600;
-    border-radius: 1rem;
-    transition: all 0.2s ease;
-  }
-  .btn-obsidian:hover {
-    background-color: #1E293B;
+    @apply btn-pine;
   }
 }
 
@@ -192,5 +238,19 @@
 .animate-toast-slide-down {
   animation: toast-slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+@keyframes toast-progress {
+  0% {
+    width: 100%;
+  }
+  100% {
+    width: 0%;
+  }
+}
+
+.animate-toast-progress {
+  animation: toast-progress 4s linear forwards;
+}
+
 
 

@@ -1,2 +1,2 @@
-export { FloatingStylistOrb as FloatingAIChatWidget, FloatingStylistOrb } from './FloatingStylistOrb';
-export { default } from './FloatingStylistOrb';
+export { FloatingStylistOrb, FloatingStylistOrb as FloatingAIChatWidget } from '../layout/FloatingStylistOrb';
+export { default } from '../layout/FloatingStylistOrb';

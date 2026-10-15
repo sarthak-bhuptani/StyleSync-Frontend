@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   UserCheck,
   ArrowLeft,
@@ -10,7 +10,7 @@ import {
   Check,
   Trash2,
   User,
-  Smile,
+  ScanFace,
   Palette,
   Ruler,
   TrendingUp,
@@ -25,7 +25,18 @@ import { Modal } from '../components/common/Modal';
 export const ProductResultPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { wardrobe, showToast, deleteAnalyzedProduct } = useWardrobe();
+
+  const handleBack = () => {
+    if (location.state?.from) {
+      navigate(location.state.from);
+    } else if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/advisor');
+    }
+  };
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
@@ -136,11 +147,11 @@ export const ProductResultPage = () => {
   const isSevereOverBudget = price > monthlyLimit * 1.5;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-5 animate-fade-in pb-16">
+    <div className="max-w-4xl mx-auto space-y-5 animate-fade-in pb-1">
       {/* Top Header Actions */}
       <div className="flex items-center justify-between flex-wrap gap-2.5">
         <button
-          onClick={() => navigate('/advisor')}
+          onClick={handleBack}
           className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -364,7 +375,7 @@ export const ProductResultPage = () => {
 
         <div className="grid grid-cols-3 gap-2 text-center text-xs">
           <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
-            <Smile className="w-3.5 h-3.5 text-slate-400 mx-auto mb-1" />
+            <ScanFace className="w-3.5 h-3.5 text-slate-400 mx-auto mb-1" />
             <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">Face Shape</span>
             <span className="text-xs font-bold text-slate-900 block mt-0.5">Oval / Angular</span>
             <span className="text-[10px] text-emerald-700 font-medium block mt-0.5">✓ Balanced</span>

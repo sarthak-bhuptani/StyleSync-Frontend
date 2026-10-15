@@ -1,211 +1,221 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Shirt,
-  Zap,
-  CloudSun,
-  Calendar,
+  ChevronLeft,
   Layers,
-  RefreshCw,
-  CheckCircle2,
-  Bookmark,
-  Plus,
-  Sliders,
-  ChevronDown,
-  ChevronUp
+  Share2,
+  Edit2,
+  Check,
+  Plus
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import { useWardrobe } from '../context/WardrobeContext';
 import { outfitApi } from '../api/outfitApi';
-import { OutfitCard } from '../components/outfit/OutfitCard';
 
 export const OutfitBuilderPage = () => {
+  const { user } = useAuth();
   const { wardrobe, showToast } = useWardrobe();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const [selectedOccasion, setSelectedOccasion] = useState('Office');
-  const [selectedWeather, setSelectedWeather] = useState('Mild / Indoor');
-  const [selectedStyle, setSelectedStyle] = useState('Smart Casual');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [showFiltersOnMobile, setShowFiltersOnMobile] = useState(true);
+  const handleBack = () => {
+    if (location.state?.from) {
+      navigate(location.state.from);
+    } else if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/profile');
+    }
+  };
 
-  const [outfits, setOutfits] = useState(() => {
-    const saved = localStorage.getItem('stylesync_outfits');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [savedLooks, setSavedLooks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
+  const initial = (user?.name?.trim()?.[0] || user?.username?.trim()?.[0] || 'S').toUpperCase();
+
+  const categories = ['All', 'Casual', 'Work', 'Travel'];
+
+  // Load real saved looks from API & localStorage
   useEffect(() => {
-    const loadOutfits = async () => {
+    const loadSavedLooks = async () => {
       try {
         const list = await outfitApi.getOutfits();
-        if (Array.isArray(list)) {
-          setOutfits(list);
+        if (Array.isArray(list) && list.length > 0) {
+          setSavedLooks(list);
+        } else {
+          setSavedLooks([]);
         }
       } catch (err) {
-        console.warn('Could not load outfits:', err);
+        console.warn('Error loading saved looks:', err);
+        setSavedLooks([]);
+      } finally {
+        setIsLoading(false);
       }
     };
-    loadOutfits();
-  }, []);
 
-  const occasions = ['Daily', 'Office', 'Date', 'Interview', 'Wedding', 'Party', 'Travel', 'College'];
-  const weathers = ['Mild / Indoor', 'Warm / Summer', 'Cool / Autumn', 'Cold / Layered'];
-  const styles = ['Smart Casual', 'Minimal', 'Streetwear', 'Formal', 'Classic', 'Sporty'];
+    loadSavedLooks();
+  }, [wardrobe]);
 
-  const handleGenerate = async () => {
-    setIsGenerating(true);
-    const newOutfit = await outfitApi.generateOutfit({
-      occasion: selectedOccasion,
-      weather: selectedWeather,
-      style: selectedStyle
+  // Filter looks based on selected category pill
+  const filteredLooks = useMemo(() => {
+    if (activeCategory === 'All') return savedLooks;
+    return savedLooks.filter((look) => {
+      const cat = (look.category || look.occasion || '').toLowerCase();
+      const target = activeCategory.toLowerCase();
+      if (target === 'work') return cat.includes('work') || cat.includes('office') || cat.includes('smart');
+      if (target === 'casual') return cat.includes('casual') || cat.includes('weekend') || cat.includes('daily');
+      if (target === 'travel') return cat.includes('travel') || cat.includes('trip');
+      return cat.includes(target);
     });
-    setOutfits(prev => [newOutfit, ...prev]);
-    setIsGenerating(false);
-    showToast(`Generated "${newOutfit.title}"!`, 'success');
+  }, [savedLooks, activeCategory]);
+
+  const handleShareLook = (e, look) => {
+    e.stopPropagation();
+    if (navigator.share) {
+      navigator.share({
+        title: `StyleSync Look: ${look.title}`,
+        text: `Check out my outfit: ${look.title} (${look.occasion})`,
+        url: window.location.href
+      }).catch(() => {});
+    } else {
+      navigator.clipboard?.writeText(`${look.title} - ${look.occasion} (${look.piecesCount || 3} pieces)`);
+      if (showToast) {
+        showToast('Look details copied to clipboard!', 'info');
+      }
+    }
+  };
+
+  const handleEditLook = (e, look) => {
+    e.stopPropagation();
+    navigate('/daily-stylist');
   };
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-fade-in max-w-5xl mx-auto pb-16">
-      {/* Header */}
-      <div>
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold mb-1.5 sm:mb-2 border border-emerald-200/60">
-          <Shirt className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Capsule Lookbook Studio</span>
-        </div>
-        <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Outfit Studio</h2>
-        <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-          Curate harmonious outfits tailored for every occasion from your {wardrobe.length} wardrobe pieces.
-        </p>
-      </div>
+    <div className="max-w-md mx-auto px-1 sm:px-2 animate-fade-in pb-1 text-[#1A1D1A]">
+      {/* Top Grab Bar matching Figma 18 */}
+      <div className="w-14 h-1 rounded-full bg-[#1A1D1A] mx-auto mb-3 mt-1" />
 
-      {/* Outfit Generator Control Panel */}
-      <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200/80 shadow-subtle space-y-4 sm:space-y-5">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">
-            Outfit Mood & Occasion
-          </h3>
+      {/* 1. Header: < My Looks [S] matching Figma 18 */}
+      <div className="flex items-start justify-between pb-2">
+        <div className="flex items-start gap-2.5">
           <button
             type="button"
-            onClick={() => setShowFiltersOnMobile(!showFiltersOnMobile)}
-            className="sm:hidden text-xs font-semibold text-slate-600 flex items-center gap-1 py-1 px-2.5 bg-slate-100 rounded-lg"
+            onClick={handleBack}
+            className="p-1 -ml-1 text-[#1A1D1A] hover:opacity-75 rounded-full active:scale-95 cursor-pointer mt-0.5"
+            aria-label="Back"
           >
-            <span>{showFiltersOnMobile ? 'Collapse' : 'Customize'}</span>
-            {showFiltersOnMobile ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
           </button>
-        </div>
-
-        {/* 1. Occasion Selector */}
-        <div>
-          <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-slate-400" />
-            <span>Select Occasion</span>
-          </label>
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-            {occasions.map((occ) => (
-              <button
-                key={occ}
-                type="button"
-                onClick={() => setSelectedOccasion(occ)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 ${
-                  selectedOccasion === occ
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100'
-                }`}
-              >
-                {occ}
-              </button>
-            ))}
+          <div>
+            <h1 className="font-serif font-bold text-2xl sm:text-3xl text-[#1A1D1A] tracking-tight">
+              My Looks
+            </h1>
+            <p className="text-xs text-[#717670] font-normal mt-0.5">
+              Your saved combinations.
+            </p>
           </div>
         </div>
 
-        {/* Weather & Style in 2-Col (Collapsible on mobile) */}
-        {showFiltersOnMobile && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1 animate-fade-in">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                <CloudSun className="w-3.5 h-3.5 text-slate-400" />
-                <span>Weather / Temperature</span>
-              </label>
-              <div className="flex flex-wrap gap-1.5">
-                {weathers.map((w) => (
-                  <button
-                    key={w}
-                    type="button"
-                    onClick={() => setSelectedWeather(w)}
-                    className={`px-2.5 py-1 rounded-xl text-xs font-medium transition-all ${
-                      selectedWeather === w
-                        ? 'bg-slate-900 text-white font-bold'
-                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
-                    }`}
-                  >
-                    {w}
-                  </button>
-                ))}
-              </div>
+        {/* Circular Initial Badge */}
+        <div
+          onClick={() => navigate('/profile')}
+          className="w-8 h-8 rounded-full bg-[#D6C7B2] text-[#1A1D1A] font-serif font-bold text-xs flex items-center justify-center cursor-pointer shadow-2xs hover:opacity-90 active:scale-95 transition-all select-none"
+          title="My Profile"
+        >
+          {initial}
+        </div>
+      </div>
+
+      {/* 2. Category Filter Pills matching Figma 18 */}
+      <div className="flex items-center gap-2 my-3 select-none">
+        {categories.map((cat) => {
+          const isActive = activeCategory === cat;
+          return (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setActiveCategory(cat)}
+              className={`h-8 px-4 rounded-full text-xs font-medium transition-all cursor-pointer shrink-0 ${
+                isActive
+                  ? 'bg-[#111827] text-white font-semibold shadow-2xs'
+                  : 'bg-white text-[#1A1D1A] border border-[#ECE8DF] hover:border-[#1A1D1A]/30 shadow-2xs'
+              }`}
+            >
+              {cat}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 3. Saved Look Cards List matching Figma 18 */}
+      <div className="space-y-3.5 my-3">
+        {filteredLooks.map((look) => (
+          <div
+            key={look.id}
+            onClick={() => navigate('/daily-stylist')}
+            className="bg-white rounded-3xl border border-[#ECE8DF] p-4 sm:p-5 shadow-2xs flex items-center gap-4 hover:border-[#1A1D1A]/30 transition-all cursor-pointer group"
+          >
+            {/* Garment Visual Container in Soft Cream matching Figma */}
+            <div className="w-16 h-24 rounded-2xl bg-[#FAF8F5] border border-[#ECE8DF]/60 flex items-center justify-center shrink-0 p-2 overflow-hidden">
+              {look.image ? (
+                <img
+                  src={look.image}
+                  alt={look.title}
+                  className="max-h-full max-w-full object-contain rounded-xl group-hover:scale-105 transition-transform"
+                />
+              ) : (
+                <Layers className="w-8 h-8 text-[#8E968C]" />
+              )}
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-slate-400" />
-                <span>Style Tone</span>
-              </label>
-              <div className="flex flex-wrap gap-1.5">
-                {styles.map((st) => (
-                  <button
-                    key={st}
-                    type="button"
-                    onClick={() => setSelectedStyle(st)}
-                    className={`px-2.5 py-1 rounded-xl text-xs font-medium transition-all ${
-                      selectedStyle === st
-                        ? 'bg-slate-900 text-white font-bold'
-                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
-                    }`}
-                  >
-                    {st}
-                  </button>
-                ))}
+            {/* Look Details */}
+            <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+              <div>
+                <h3 className="font-serif font-bold text-base sm:text-lg text-[#1A1D1A] truncate leading-tight">
+                  {look.title}
+                </h3>
+                <p className="text-xs text-[#717670] mt-0.5">
+                  {look.occasion || 'Smart casual'}
+                </p>
+                <p className="text-[11px] text-[#8E968C] mt-0.5">
+                  {look.piecesCount || 3} pieces · {look.temp || '24°C'}
+                </p>
+              </div>
+
+              {/* Action Links: Edit · Share */}
+              <div className="flex items-center gap-2 pt-2 text-xs font-semibold text-[#1A1D1A]">
+                <button
+                  type="button"
+                  onClick={(e) => handleEditLook(e, look)}
+                  className="hover:underline cursor-pointer active:scale-95"
+                >
+                  Edit
+                </button>
+                <span className="text-[#8E968C] select-none">·</span>
+                <button
+                  type="button"
+                  onClick={(e) => handleShareLook(e, look)}
+                  className="hover:underline cursor-pointer active:scale-95"
+                >
+                  Share
+                </button>
               </div>
             </div>
+          </div>
+        ))}
+
+        {filteredLooks.length === 0 && (
+          <div className="bg-white rounded-3xl border border-[#ECE8DF] p-8 text-center my-4 space-y-2">
+            <Layers className="w-8 h-8 text-[#8E968C] mx-auto" />
+            <h3 className="font-serif font-bold text-base text-[#1A1D1A]">
+              No saved looks in this category
+            </h3>
+            <p className="text-xs text-[#8E968C]">
+              Create and save looks in Outfit Lab to view them here.
+            </p>
           </div>
         )}
-
-        {/* Generate Button */}
-        <div className="pt-2">
-          <button
-            type="button"
-            disabled={isGenerating}
-            onClick={handleGenerate}
-            className="w-full py-3.5 px-6 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm rounded-xl shadow-subtle hover:shadow transition-all flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer"
-          >
-            {isGenerating ? (
-              <>
-                <RefreshCw className="w-4 h-4 animate-spin text-emerald-400" />
-                <span>Pairing wardrobe pieces & computing harmony...</span>
-              </>
-            ) : (
-              <>
-                <Zap className="w-4 h-4 text-emerald-400 fill-emerald-400" />
-                <span>Generate {selectedOccasion} Outfit ({selectedStyle})</span>
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Generated Ensembles List */}
-      <div className="space-y-4 sm:space-y-6">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm sm:text-base font-bold text-slate-900">Your Recommended Ensembles</h3>
-          <span className="text-xs text-slate-400 font-semibold">{outfits.length} Outfits Ready</span>
-        </div>
-
-        <div className="space-y-4 sm:space-y-6">
-          {outfits.map((outfit) => (
-            <OutfitCard
-              key={outfit.id}
-              outfit={outfit}
-              onTryAnother={handleGenerate}
-              onSelect={() => showToast(`Set "${outfit.title}" as today's worn outfit!`, 'success')}
-            />
-          ))}
-        </div>
       </div>
     </div>
   );

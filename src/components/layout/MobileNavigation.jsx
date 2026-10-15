@@ -12,17 +12,22 @@ import {
   ArrowLeftRight,
   X,
   PlusCircle,
-  Sparkles,
+  Palette,
   Settings,
   LogOut,
   ShoppingBag,
-  ChevronRight
+  ChevronRight,
+  Bookmark,
+  Sparkles
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useWardrobe } from '../../context/WardrobeContext';
 import { AddWardrobeItemModal } from '../wardrobe/AddWardrobeItemModal';
+import { SyncraModal } from '../common/SyncraModal';
+import { SyncraLogo } from '../common/BrandLogo';
 
 export const MobileNavigation = () => {
+  const [syncraModalOpen, setSyncraModalOpen] = useState(false);
   const [actionSheetOpen, setActionSheetOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [cameraModalOpen, setCameraModalOpen] = useState(false);
@@ -51,6 +56,9 @@ export const MobileNavigation = () => {
     setActionSheetOpen(false);
     setLogoutModalOpen(false);
     navigate(path);
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
   };
 
   const handleOpenSnap = () => {
@@ -95,104 +103,103 @@ export const MobileNavigation = () => {
 
   return (
     <>
-      {/* 5-Tab Bottom Bar with Center Action Button */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-3 py-1.5 flex items-center justify-around shadow-floating pb-[calc(env(safe-area-inset-bottom,0px)+0.35rem)]">
+      {/* 5-Tab Floating Bottom Bar matching reference image */}
+      <nav className="lg:hidden fixed bottom-2.5 left-3.5 right-3.5 max-w-md mx-auto z-40 bg-white/95 backdrop-blur-md border border-[#ECE8DF] rounded-3xl px-2 py-1.5 flex items-center justify-around shadow-sm">
         {/* Tab 1: Home */}
         <NavLink
           to="/dashboard"
           className={({ isActive }) =>
-            `flex-1 flex flex-col items-center justify-center py-0.5 text-[10px] font-bold transition-all relative ${
-              isActive ? 'text-slate-900 font-black' : 'text-slate-400 hover:text-slate-600'
+            `flex-1 flex flex-col items-center justify-center py-1 text-[10px] font-medium transition-all ${
+              isActive ? 'text-[#1E2E22]' : 'text-[#8E968C] hover:text-[#1A1D1A]'
             }`
           }
         >
           {({ isActive }) => (
             <>
-              <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-slate-100 text-slate-900 scale-105' : 'text-slate-400'}`}>
+              <div className={`px-3 py-1 rounded-full transition-all flex items-center justify-center ${isActive ? 'bg-[#E5E0D6] text-[#1E2E22]' : 'text-[#8E968C]'}`}>
                 <LayoutDashboard className="w-4 h-4" />
               </div>
-              <span className="mt-0.5 tracking-tight">Home</span>
-              {isActive && <span className="absolute -bottom-1 w-1 h-1 rounded-full bg-slate-900" />}
+              <span className={`text-[10px] mt-0.5 tracking-tight ${isActive ? 'font-bold text-[#1E2E22]' : 'font-medium'}`}>Home</span>
             </>
           )}
         </NavLink>
 
-        {/* Tab 2: Wear Today */}
-        <NavLink
-          to="/daily-stylist"
-          className={({ isActive }) =>
-            `flex-1 flex flex-col items-center justify-center py-0.5 text-[10px] font-bold transition-all relative ${
-              isActive ? 'text-slate-900 font-black' : 'text-slate-400 hover:text-slate-600'
-            }`
-          }
-        >
-          {({ isActive }) => (
-            <>
-              <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-slate-100 text-slate-900 scale-105' : 'text-slate-400'}`}>
-                <Sun className="w-4 h-4" />
-              </div>
-              <span className="mt-0.5 tracking-tight">Wear Today</span>
-              {isActive && <span className="absolute -bottom-1 w-1 h-1 rounded-full bg-slate-900" />}
-            </>
-          )}
-        </NavLink>
-
-        {/* Tab 3: CENTER ACTION BUTTON (Elevated Action Trigger) */}
-        <div className="flex-1 flex flex-col items-center justify-center -mt-5 relative z-10">
-          <button
-            type="button"
-            onClick={() => setActionSheetOpen(true)}
-            aria-label="Create / Add / Scan"
-            className="w-12 h-12 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white shadow-lg border-2 border-white flex items-center justify-center transition-all active:scale-90 cursor-pointer"
-          >
-            <Plus className="w-6 h-6 text-emerald-400 stroke-[2.5]" />
-          </button>
-          <span className="text-[10px] font-extrabold text-slate-800 mt-1 tracking-tight">
-            Add / Scan
-          </span>
-        </div>
-
-        {/* Tab 4: Wardrobe */}
+        {/* Tab 2: Wardrobe */}
         <NavLink
           to="/wardrobe"
           className={({ isActive }) =>
-            `flex-1 flex flex-col items-center justify-center py-0.5 text-[10px] font-bold transition-all relative ${
-              isActive ? 'text-slate-900 font-black' : 'text-slate-400 hover:text-slate-600'
+            `flex-1 flex flex-col items-center justify-center py-1 text-[10px] font-medium transition-all ${
+              isActive ? 'text-[#1E2E22]' : 'text-[#8E968C] hover:text-[#1A1D1A]'
             }`
           }
         >
           {({ isActive }) => (
             <>
-              <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-slate-100 text-slate-900 scale-105' : 'text-slate-400'}`}>
+              <div className={`px-3 py-1 rounded-full transition-all flex items-center justify-center ${isActive ? 'bg-[#E5E0D6] text-[#1E2E22]' : 'text-[#8E968C]'}`}>
                 <Layers className="w-4 h-4" />
               </div>
-              <span className="mt-0.5 tracking-tight">Wardrobe</span>
-              {isActive && <span className="absolute -bottom-1 w-1 h-1 rounded-full bg-slate-900" />}
+              <span className={`text-[10px] mt-0.5 tracking-tight ${isActive ? 'font-bold text-[#1E2E22]' : 'font-medium'}`}>Wardrobe</span>
             </>
           )}
         </NavLink>
 
-        {/* Tab 5: Account (Tap -> /profile, Press & Hold / Continue Press -> Logout Option) */}
-        <button
-          type="button"
-          onClick={handleAccountClick}
-          onMouseDown={startPress}
-          onMouseUp={cancelPress}
-          onMouseLeave={cancelPress}
-          onTouchStart={startPress}
-          onTouchEnd={cancelPress}
-          onTouchMove={cancelPress}
-          title="Tap for Profile, Hold for Logout"
-          className={`flex-1 flex flex-col items-center justify-center py-0.5 text-[10px] font-bold transition-all relative cursor-pointer select-none ${
-            isAccountActive ? 'text-slate-900 font-black' : 'text-slate-400 hover:text-slate-600'
-          }`}
+        {/* Tab 3: Raised Circular Syncra AI Stylist Button with Bespoke Monogram */}
+        <NavLink
+          to="/assistant"
+          className="flex-1 flex flex-col items-center justify-center relative -top-3 cursor-pointer group"
+          title="Open Syncra AI Assistant"
         >
-          <div className={`p-1.5 rounded-xl transition-all ${isAccountActive ? 'bg-slate-100 text-slate-900 scale-105' : 'text-slate-400'}`}>
-            <User className="w-4 h-4" />
-          </div>
-          <span className="mt-0.5 tracking-tight">Account</span>
-          {isAccountActive && <span className="absolute -bottom-1 w-1 h-1 rounded-full bg-slate-900" />}
-        </button>
+          {({ isActive }) => (
+            <>
+              <div className={`w-12 h-12 rounded-full bg-gradient-to-tr from-[#1E2E22] via-[#2F4535] to-[#4A5D44] text-white flex items-center justify-center shadow-lg border-2 border-white active:scale-95 hover:scale-105 transition-all ${isActive ? 'ring-2 ring-[#1E2E22]' : ''}`}>
+                <SyncraLogo className="w-6 h-6" />
+              </div>
+              <span className={`text-[10px] mt-0.5 tracking-tight ${isActive ? 'font-bold text-[#1E2E22]' : 'font-medium text-[#8E968C]'}`}>Syncra</span>
+            </>
+          )}
+        </NavLink>
+
+        {/* Tab 4: Collections matching reference image */}
+        <NavLink
+          to="/collections"
+          className={({ isActive }) =>
+            `flex-1 flex flex-col items-center justify-center py-1 text-[10px] font-medium transition-all ${
+              isActive ? 'text-[#1E2E22]' : 'text-[#8E968C] hover:text-[#1A1D1A]'
+            }`
+          }
+        >
+          {({ isActive }) => (
+            <>
+              <div className={`px-3 py-1 rounded-full transition-all flex items-center justify-center ${isActive ? 'bg-[#E5E0D6] text-[#1E2E22]' : 'text-[#8E968C]'}`}>
+                <Bookmark className="w-4 h-4" />
+              </div>
+              <span className={`text-[10px] mt-0.5 tracking-tight ${isActive ? 'font-bold text-[#1E2E22]' : 'font-medium'}`}>Collections</span>
+            </>
+          )}
+        </NavLink>
+
+        {/* Tab 5: Shop matching reference image */}
+        <NavLink
+          to="/advisor"
+          className={() => {
+            const isShopActive = ['/advisor', '/wardrobe-gaps'].some(p => location.pathname.startsWith(p));
+            return `flex-1 flex flex-col items-center justify-center py-1 text-[10px] font-medium transition-all ${
+              isShopActive ? 'text-[#1E2E22]' : 'text-[#8E968C] hover:text-[#1A1D1A]'
+            }`;
+          }}
+        >
+          {() => {
+            const isShopActive = ['/advisor', '/wardrobe-gaps'].some(p => location.pathname.startsWith(p));
+            return (
+              <>
+                <div className={`px-3 py-1 rounded-full transition-all flex items-center justify-center ${isShopActive ? 'bg-[#E5E0D6] text-[#1E2E22]' : 'text-[#8E968C]'}`}>
+                  <ShoppingBag className="w-4 h-4" />
+                </div>
+                <span className={`text-[10px] mt-0.5 tracking-tight ${isShopActive ? 'font-bold text-[#1E2E22]' : 'font-medium'}`}>Shop</span>
+              </>
+            );
+          }}
+        </NavLink>
       </nav>
 
       {/* QUICK LOGOUT POPUP (Triggered ONLY on continue/long press) */}
@@ -424,7 +431,7 @@ export const MobileNavigation = () => {
                   className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition-all flex items-center gap-2.5 text-left active:scale-[0.98] cursor-pointer"
                 >
                   <div className="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Palette className="w-3.5 h-3.5" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-slate-900 truncate">Color Palette</p>
@@ -445,6 +452,12 @@ export const MobileNavigation = () => {
           onAdd={addWardrobeItem}
         />
       )}
+
+      {/* Syncra AI Stylist Modal */}
+      <SyncraModal
+        isOpen={syncraModalOpen}
+        onClose={() => setSyncraModalOpen(false)}
+      />
     </>
   );
 };

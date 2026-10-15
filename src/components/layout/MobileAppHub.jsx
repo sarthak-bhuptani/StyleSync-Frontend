@@ -15,9 +15,9 @@ import {
   Sun,
   PlusCircle,
   Compass,
-  Sparkles,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  Bookmark
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useWardrobe } from '../../context/WardrobeContext';
@@ -96,6 +96,14 @@ export const MobileAppHub = ({ isOpen, onClose }) => {
       subtitle: `${wardrobe.length} Pieces Verified`,
       icon: Layers,
       color: 'bg-sky-500/15 text-sky-600'
+    },
+    {
+      to: '/collections',
+      title: 'My Collections',
+      subtitle: 'Organize Wardrobe & Outfits',
+      icon: Bookmark,
+      color: 'bg-amber-600/15 text-amber-700',
+      badge: 'New'
     },
     {
       to: '/outfits',

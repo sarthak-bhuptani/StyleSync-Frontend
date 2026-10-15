@@ -38,6 +38,17 @@ const getStoredUserBudget = () => {
 };
 
 export const productApi = {
+  // Parse & scrape product metadata from any shopping link
+  parseProductUrl: async (url) => {
+    try {
+      const response = await apiClient.post('/products/parse-url', { url });
+      return response.data?.data || response.data;
+    } catch (err) {
+      const message = err.response?.data?.message || err.message || 'Could not fetch product details from URL';
+      return { success: false, error: message };
+    }
+  },
+
   getAllProducts: async () => {
     try {
       const response = await apiClient.get('/products');

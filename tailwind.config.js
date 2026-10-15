@@ -7,6 +7,44 @@ export default {
   theme: {
     extend: {
       colors: {
+        canvas: {
+          DEFAULT: '#F6F4EE',
+          card: '#FFFFFF',
+          warm: '#EFECE5',
+          border: '#E5E0D6',
+          dark: '#141714',
+        },
+        pine: {
+          50: '#F2F6F3',
+          100: '#E2ECE3',
+          200: '#C5D8C7',
+          300: '#9DBDA0',
+          400: '#6E9873',
+          500: '#3A5C3F',
+          600: '#2A442E',
+          700: '#1E2E22', // Primary Figma pine
+          800: '#162319',
+          900: '#0F1811',
+          DEFAULT: '#1E2E22',
+        },
+        sand: {
+          50: '#FAF8F5',
+          100: '#F3EFE8',
+          200: '#EAE5DB',
+          300: '#DDD5C8',
+          400: '#CCC2B0',
+          DEFAULT: '#EAE5DB',
+        },
+        terracotta: {
+          DEFAULT: '#C86D51',
+          light: '#F8ECE7',
+          dark: '#A6533A',
+        },
+        ink: {
+          primary: '#1A1D1A',
+          muted: '#687066',
+          subtle: '#8F978D',
+        },
         brand: {
           50: '#ecfdf5',
           100: '#d1fae5',
@@ -34,24 +72,25 @@ export default {
           950: '#060f1e', // Login Card Midnight
         },
         buy: {
-          DEFAULT: '#10b981',
-          light: '#ecfdf5',
-          dark: '#047857',
+          DEFAULT: '#1E2E22',
+          light: '#E2ECE3',
+          dark: '#162319',
         },
         maybe: {
-          DEFAULT: '#f59e0b',
-          light: '#fffbeb',
-          dark: '#b45309',
+          DEFAULT: '#C86D51',
+          light: '#F8ECE7',
+          dark: '#A6533A',
         },
         skip: {
-          DEFAULT: '#ef4444',
-          light: '#fef2f2',
-          dark: '#b91c1c',
+          DEFAULT: '#9E3A3A',
+          light: '#FDF1F1',
+          dark: '#7D2626',
         }
       },
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'Outfit', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['Plus Jakarta Sans', 'Outfit', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'Inter', 'Outfit', 'system-ui', 'sans-serif'],
+        serif: ['Newsreader', 'Georgia', 'serif'],
+        display: ['Newsreader', 'Plus Jakarta Sans', 'serif'],
       },
       boxShadow: {
         'subtle': '0 1px 3px 0 rgba(28, 25, 23, 0.04), 0 1px 2px -1px rgba(28, 25, 23, 0.04)',

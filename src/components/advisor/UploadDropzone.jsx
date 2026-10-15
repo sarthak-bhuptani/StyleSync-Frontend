@@ -163,18 +163,18 @@ export const UploadDropzone = ({ onProductReady, initialProduct = null }) => {
       />
 
       {/* Main Studio Card */}
-      <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200/80 shadow-subtle">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E5E0D6] shadow-xs">
         {!imagePreview ? (
           <div className="space-y-5">
             {/* Mode Switcher Tabs */}
-            <div className="flex bg-slate-100 p-1 rounded-2xl max-w-xs mx-auto">
+            <div className="flex bg-[#FAF8F5] p-1 rounded-full border border-[#E5E0D6] max-w-xs mx-auto">
               <button
                 type="button"
                 onClick={() => setUploadMode('photo')}
-                className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`flex-1 py-1.5 px-3 rounded-full text-xs font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   uploadMode === 'photo'
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-500 hover:text-slate-800'
+                    ? 'bg-[#1E2E22] text-[#F8F6F0] shadow-xs'
+                    : 'text-[#5A6359] hover:text-[#1A1D1A]'
                 }`}
               >
                 <Camera className="w-3.5 h-3.5" />
@@ -184,14 +184,14 @@ export const UploadDropzone = ({ onProductReady, initialProduct = null }) => {
               <button
                 type="button"
                 onClick={() => setUploadMode('url')}
-                className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`flex-1 py-1.5 px-3 rounded-full text-xs font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   uploadMode === 'url'
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-500 hover:text-slate-800'
+                    ? 'bg-[#1E2E22] text-[#F8F6F0] shadow-xs'
+                    : 'text-[#5A6359] hover:text-[#1A1D1A]'
                 }`}
               >
                 <Link className="w-3.5 h-3.5" />
-                <span>Store Link</span>
+                <span>Product URL</span>
               </button>
             </div>
 
@@ -203,25 +203,25 @@ export const UploadDropzone = ({ onProductReady, initialProduct = null }) => {
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
                 onClick={() => galleryInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-2xl p-6 sm:p-8 text-center cursor-pointer transition-all ${
+                className={`border-2 border-dashed rounded-2xl p-8 sm:p-10 text-center cursor-pointer transition-all ${
                   dragActive
-                    ? 'border-slate-900 bg-slate-50 scale-[1.01]'
-                    : 'border-slate-200 hover:border-slate-400 bg-slate-50/50 hover:bg-slate-50'
+                    ? 'border-[#1E2E22] bg-[#FAF8F5]'
+                    : 'border-[#E5E0D6] hover:border-[#1E2E22]/40 bg-[#FAF8F5]/60 hover:bg-[#FAF8F5]'
                 }`}
               >
-                <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-slate-700 flex items-center justify-center mx-auto mb-3 shadow-2xs">
-                  <Camera className="w-6 h-6 text-slate-800" />
+                <div className="w-12 h-12 rounded-full bg-white border border-[#E5E0D6] text-[#1E2E22] flex items-center justify-center mx-auto mb-3 shadow-xs">
+                  <Camera className="w-6 h-6 text-[#1E2E22]" />
                 </div>
 
-                <h3 className="text-sm sm:text-base font-extrabold text-slate-900 mb-1">
+                <h3 className="font-serif text-base sm:text-lg font-normal text-[#1A1D1A] mb-1">
                   Upload piece or take photo
                 </h3>
-                <p className="text-xs text-slate-500 mb-4 leading-relaxed max-w-xs mx-auto">
-                  Drag & drop screenshot or tap to choose from your photos
+                <p className="text-xs text-[#8E968C] mb-4 leading-relaxed max-w-xs mx-auto">
+                  Drag & drop screenshot or tap to choose from your gallery
                 </p>
 
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold shadow-xs hover:bg-slate-800 transition-colors">
-                  <UploadCloud className="w-4 h-4 text-emerald-400" />
+                <div className="btn-pine text-xs py-2 px-5 inline-flex items-center gap-2">
+                  <UploadCloud className="w-4 h-4 text-[#C5D8C7]" />
                   <span>Choose Image</span>
                 </div>
               </div>
@@ -229,13 +229,13 @@ export const UploadDropzone = ({ onProductReady, initialProduct = null }) => {
 
             {/* Mode 2: Store URL Parser */}
             {uploadMode === 'url' && (
-              <form onSubmit={handleUrlSubmit} className="space-y-3 p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80">
+              <form onSubmit={handleUrlSubmit} className="space-y-3.5 p-5 sm:p-6 rounded-2xl bg-[#FAF8F5] border border-[#E5E0D6]">
                 <div className="text-left">
-                  <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-                    <Globe className="w-3.5 h-3.5 text-slate-500" />
+                  <label className="block text-xs font-medium text-[#1A1D1A] mb-1 flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-[#8E968C]" />
                     <span>Paste Product URL</span>
                   </label>
-                  <p className="text-[11px] text-slate-400 mb-2">Supports links from Zara, Myntra, ASOS, Nike, Uniqlo, or direct image links.</p>
+                  <p className="text-[11px] text-[#8E968C] mb-2">Supports links from Amazon, Zara, Myntra, ASOS, Nike, Uniqlo, etc.</p>
                   
                   <div className="relative">
                     <input
@@ -417,9 +417,9 @@ export const UploadDropzone = ({ onProductReady, initialProduct = null }) => {
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  className="w-full mt-2 py-3 px-5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                  className="w-full mt-3 btn-pine py-3.5 px-6 rounded-full text-sm font-medium cursor-pointer"
                 >
-                  <Compass className="w-4 h-4 text-emerald-400" />
+                  <Compass className="w-4 h-4 text-[#C5D8C7]" />
                   <span>Get Stylist Assessment</span>
                 </button>
               </div>

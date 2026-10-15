@@ -1,313 +1,368 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  ShoppingBag,
-  Layers,
-  Check,
-  Tag,
+  ChevronLeft,
   ArrowRight,
-  Plus,
-  Compass,
+  Layers,
+  Shirt,
+  Scissors,
   Sparkles,
-  RefreshCw,
-  SlidersHorizontal,
-  ExternalLink
+  RefreshCw
 } from 'lucide-react';
 import { useWardrobe } from '../context/WardrobeContext';
 import { useAuth } from '../context/AuthContext';
 import { recommendationApi } from '../api/recommendationApi';
+import { ProfileAvatarButton } from '../components/common/ProfileAvatarButton';
+
+const DEFAULT_GAP_IMAGES = {
+  Tops: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=400&q=80',
+  Bottoms: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=400&q=80',
+  Outerwear: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=400&q=80',
+  Shoes: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=400&q=80',
+  Accessories: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80'
+};
+
+const FALLBACK_OPPORTUNITIES = [
+  {
+    id: 'opp_1',
+    title: 'Everyday White Shirt',
+    category: 'Tops',
+    unlockText: '+12 outfits',
+    unlockCount: 12,
+    priority: 'HIGH',
+    image: DEFAULT_GAP_IMAGES.Tops,
+    searchQuery: 'white casual button down shirt'
+  },
+  {
+    id: 'opp_2',
+    title: 'Black Trousers',
+    category: 'Bottoms',
+    unlockText: '+9 outfits',
+    unlockCount: 9,
+    priority: 'HIGH',
+    image: DEFAULT_GAP_IMAGES.Bottoms,
+    searchQuery: 'classic black tailored trousers'
+  },
+  {
+    id: 'opp_3',
+    title: 'Lightweight Blazer',
+    category: 'Outerwear',
+    unlockText: '+7 outfits',
+    unlockCount: 7,
+    priority: 'MEDIUM',
+    image: DEFAULT_GAP_IMAGES.Outerwear,
+    searchQuery: 'unstructured lightweight blazer'
+  }
+];
 
 export const WardrobeGapPage = () => {
-  const { wardrobe, addWardrobeItem, showToast } = useWardrobe();
+  const { wardrobe } = useWardrobe();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [isLoadingAI, setIsLoadingAI] = useState(false);
-  const [wardrobeGaps, setWardrobeGaps] = useState(() => {
+  const [aiGaps, setAiGaps] = useState([]);
+  const [loadingGaps, setLoadingGaps] = useState(false);
+  const [isAiGenerated, setIsAiGenerated] = useState(false);
+
+  const fetchLiveGaps = async () => {
+    setLoadingGaps(true);
     try {
-      const cached = localStorage.getItem('stylesync_ai_gaps_cache');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      // 1. Try backend recommendation endpoint
+      const res = await recommendationApi.getWardrobeGaps();
+      const gapsList = Array.isArray(res) ? res : res?.gaps || res?.data?.gaps || res?.data || [];
+
+      if (Array.isArray(gapsList) && gapsList.length > 0) {
+        const formatted = gapsList.map((g, idx) => ({
+          id: g.id || `gap_${idx}`,
+          title: g.title || g.name || 'Essential Staple',
+          category: g.category || 'Tops',
+          unlockText: `+${g.unlocksOutfitsCount || g.multiplier?.match(/\d+/)?.[0] || (12 - idx * 2)} outfits`,
+          unlockCount: Number(g.unlocksOutfitsCount || g.multiplier?.match(/\d+/)?.[0] || (12 - idx * 2)),
+          priority: (g.priority || (idx === 0 ? 'HIGH' : 'MEDIUM')).toUpperCase(),
+          image: g.image || (g.curatedPicks?.[0]?.image) || DEFAULT_GAP_IMAGES[g.category] || DEFAULT_GAP_IMAGES.Tops,
+          searchQuery: g.title || g.name,
+          reason: g.reason
+        }));
+        setAiGaps(formatted);
+        setIsAiGenerated(true);
+        return;
       }
-    } catch {}
-    return [];
-  });
-  const [lastAnalyzedCount, setLastAnalyzedCount] = useState(null);
 
-  // Category counts computed from user's live closet
-  const counts = useMemo(() => {
-    return {
-      tops: wardrobe.filter(i => ['Tops', 'Top', 'Shirt', 'T-shirt'].includes(i.category) || i.name?.toLowerCase().includes('shirt') || i.name?.toLowerCase().includes('tee')).length,
-      bottoms: wardrobe.filter(i => ['Bottoms', 'Bottom', 'Pants', 'Jeans', 'Trousers', 'Shorts'].includes(i.category) || i.name?.toLowerCase().includes('jean') || i.name?.toLowerCase().includes('pant')).length,
-      shoes: wardrobe.filter(i => ['Shoes', 'Footwear', 'Sneakers', 'Boots'].includes(i.category) || i.name?.toLowerCase().includes('shoe') || i.name?.toLowerCase().includes('sneaker')).length,
-      layers: wardrobe.filter(i => ['Outerwear', 'Jacket', 'Coat', 'Blazer'].includes(i.category) || i.name?.toLowerCase().includes('jacket') || i.name?.toLowerCase().includes('blazer')).length,
-    };
-  }, [wardrobe]);
-
-  // Load / run AI gap analysis
-  const runAIGapAnalysis = async (forceRefresh = false) => {
-    if (wardrobe.length === 0) return;
-    setIsLoadingAI(true);
-    try {
-      const results = await recommendationApi.analyzeWardrobeGapsWithAI(wardrobe, user);
-      if (Array.isArray(results) && results.length > 0) {
-        setWardrobeGaps(results);
-        setLastAnalyzedCount(wardrobe.length);
-        try {
-          localStorage.setItem('stylesync_ai_gaps_cache', JSON.stringify(results));
-        } catch {}
-        if (forceRefresh) {
-          showToast('Syncra AI analyzed your wardrobe and updated your foundation gaps!', 'success');
+      // 2. Fallback to Gemini dynamic gap analysis if backend had empty list
+      if (Array.isArray(wardrobe) && wardrobe.length > 0) {
+        const aiResults = await recommendationApi.analyzeWardrobeGapsWithAI(wardrobe, user);
+        if (Array.isArray(aiResults) && aiResults.length > 0) {
+          const formatted = aiResults.map((g, idx) => ({
+            id: g.id || `ai_gap_${idx}`,
+            title: g.title,
+            category: g.category || 'Wardrobe Essential',
+            unlockText: g.multiplier || `+${10 - idx * 2} outfits`,
+            unlockCount: parseInt(g.multiplier?.match(/\d+/)?.[0] || (10 - idx * 2), 10),
+            priority: idx === 0 ? 'HIGH' : 'MEDIUM',
+            image: g.image || DEFAULT_GAP_IMAGES[g.category] || DEFAULT_GAP_IMAGES.Tops,
+            searchQuery: g.title,
+            reason: g.reason
+          }));
+          setAiGaps(formatted);
+          setIsAiGenerated(true);
         }
       }
     } catch (err) {
-      console.warn('AI analysis error:', err);
+      console.warn('Could not load AI wardrobe gaps:', err);
     } finally {
-      setIsLoadingAI(false);
+      setLoadingGaps(false);
     }
   };
 
   useEffect(() => {
-    if (wardrobe.length > 0) {
-      runAIGapAnalysis();
-    }
-  }, [wardrobe.length]);
+    fetchLiveGaps();
+  }, [wardrobe]);
 
-  const handleSimulateAddToWardrobe = (pick, gap) => {
-    addWardrobeItem({
-      name: pick.name,
-      category: gap.category.includes('Footwear') ? 'Shoes' : gap.category.includes('Bottoms') ? 'Bottoms' : gap.category.includes('Layer') ? 'Outerwear' : 'Tops',
-      brand: pick.brand,
-      price: pick.price,
-      image: pick.image,
-      color: 'Neutral',
-      style: 'Foundation Essential'
-    });
-    showToast(`Added ${pick.name} to your wardrobe!`, 'success');
+  const handleBack = () => {
+    if (location.state?.from) {
+      navigate(location.state.from);
+      return;
+    }
+    navigate('/dashboard');
   };
 
-  const handleAnalyzeWithAdvisor = (pick) => {
+  // Category counts computed strictly from user's live closet
+  const counts = useMemo(() => {
+    const list = Array.isArray(wardrobe) ? wardrobe : [];
+    return {
+      tops: list.filter(i => ['tops', 'top', 'shirt', 't-shirt', 'tshirt', 'polo'].some(c => (i.category || '').toLowerCase().includes(c))).length,
+      bottoms: list.filter(i => ['bottoms', 'bottom', 'pants', 'pant', 'jeans', 'trouser', 'trousers', 'shorts'].some(c => (i.category || '').toLowerCase().includes(c))).length,
+      shoes: list.filter(i => ['shoes', 'shoe', 'footwear', 'sneakers', 'boots'].some(c => (i.category || '').toLowerCase().includes(c))).length,
+      layers: list.filter(i => ['outerwear', 'jacket', 'coat', 'blazer', 'overshirt'].some(c => (i.category || '').toLowerCase().includes(c))).length,
+    };
+  }, [wardrobe]);
+
+  // Derive completeness percentage dynamically from real closet foundation
+  const completeness = useMemo(() => {
+    if (!wardrobe || wardrobe.length === 0) return 42;
+    let score = 40;
+    if (counts.tops >= 2) score += 15;
+    else if (counts.tops >= 1) score += 8;
+
+    if (counts.bottoms >= 2) score += 15;
+    else if (counts.bottoms >= 1) score += 8;
+
+    if (counts.shoes >= 1) score += 12;
+    if (counts.layers >= 1) score += 10;
+
+    return Math.min(95, score);
+  }, [wardrobe, counts]);
+
+  const [activeCategory, setActiveCategory] = useState('All');
+
+  // Dynamic AI opportunities with fallback to standard capsule foundation
+  const opportunities = useMemo(() => {
+    return aiGaps.length > 0 ? aiGaps : FALLBACK_OPPORTUNITIES;
+  }, [aiGaps]);
+
+  const filteredOpportunities = useMemo(() => {
+    if (activeCategory === 'All') return opportunities;
+    return opportunities.filter((opp) =>
+      (opp.category || '').toLowerCase().includes(activeCategory.toLowerCase())
+    );
+  }, [opportunities, activeCategory]);
+
+  const totalUnlockedOutfits = opportunities.reduce((acc, curr) => acc + curr.unlockCount, 0);
+
+  const initial = (user?.name?.trim()?.[0] || user?.username?.trim()?.[0] || 'S').toUpperCase();
+
+  const handleSeePicks = (item) => {
     navigate('/advisor', {
       state: {
-        initialProduct: {
-          name: pick.name,
-          brand: pick.brand,
-          price: pick.price,
-          category: 'Clothing',
-          image: pick.image
-        }
+        from: '/wardrobe-gaps',
+        suggestedTitle: item.title,
+        suggestedCategory: item.category
       }
     });
   };
 
+  const CATEGORIES = ['All', 'Tops', 'Bottoms', 'Shoes', 'Outerwear'];
+
   return (
-    <div className="space-y-4 sm:space-y-5 animate-fade-in max-w-5xl mx-auto pb-16">
-      {/* Editorial Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
+    <div className="w-full max-w-3xl mx-auto px-1 sm:px-3 animate-fade-in pb-2 text-[#1A1D1A]">
+      {/* Top Grab Bar matching Figma Frame 08 */}
+      <div className="w-14 h-1 rounded-full bg-[#1A1D1A] mx-auto mb-3 mt-1" />
+
+      {/* 1. Header: < What to Buy Next [S] */}
+      <div className="flex items-start justify-between pb-1">
+        <div className="flex items-start gap-2.5">
+          <button
+            type="button"
+            onClick={handleBack}
+            className="p-1 -ml-1 text-[#1A1D1A] hover:opacity-75 rounded-full active:scale-95 cursor-pointer mt-0.5"
+            aria-label="Back"
+          >
+            <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
+          </button>
+          <div>
+            <h1 className="font-serif font-bold text-2xl sm:text-3xl text-[#1A1D1A] tracking-tight">
               What to Buy Next
             </h1>
-            <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 font-bold text-[10px] rounded-full border border-emerald-200 flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-emerald-500" />
-              <span>AI-Generated</span>
-            </span>
+            <p className="text-xs text-[#717670] font-normal mt-0.5">
+              Small additions that unlock more outfits.
+            </p>
           </div>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Syncra analyzes your {wardrobe.length} registered pieces to find foundation gaps that maximize combinations.
-          </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => runAIGapAnalysis(true)}
-            disabled={isLoadingAI}
-            className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 disabled:opacity-50"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 text-emerald-600 ${isLoadingAI ? 'animate-spin' : ''}`} />
-            <span>{isLoadingAI ? 'Analyzing...' : 'Re-scan with AI'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => navigate('/wardrobe')}
-            className="px-3 py-1.5 bg-[#091224] hover:bg-[#121F3A] text-white text-xs font-bold rounded-xl shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
-          >
-            <span>Wardrobe ({wardrobe.length})</span>
-            <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
-          </button>
-        </div>
+        {/* Unified Profile Avatar Button */}
+        <ProfileAvatarButton />
       </div>
 
-      {/* Closet Balance Card */}
-      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-subtle space-y-3">
-        <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
-          <h3 className="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-wider">
-            Closet Foundation Balance
-          </h3>
-          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
-            {wardrobeGaps.length} AI Recommendations
+      {/* 2. Wardrobe Completeness Score Card */}
+      <div className="bg-white rounded-3xl border border-[#ECE8DF] p-4 sm:p-6 shadow-2xs my-3 flex items-center gap-4 sm:gap-6">
+        <div className="flex flex-col items-center justify-center bg-[#FAF8F5] border border-[#ECE8DF] rounded-2xl w-20 h-20 sm:w-24 sm:h-24 shrink-0 shadow-2xs">
+          <span className="font-serif font-bold text-3xl sm:text-4xl text-[#1E2E22] tracking-tight">
+            {completeness}%
+          </span>
+          <span className="text-[10px] font-bold text-[#8E968C] uppercase tracking-wider -mt-0.5">
+            Score
           </span>
         </div>
 
-        {/* 4 Category Counters */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70">
-            <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Tops</span>
-            <span className="text-base sm:text-lg font-black text-slate-900 leading-tight">{counts.tops}</span>
-            <span className="text-[10px] text-slate-500 font-medium block mt-0.5">
-              {counts.tops >= 4 ? 'Stocked' : 'Needs Basics'}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <h2 className="font-bold text-xs sm:text-sm text-[#1A1D1A] uppercase tracking-wider">
+              Wardrobe Completeness
+            </h2>
+            <span className="bg-[#E7ECE3] text-[#3D7A5A] text-[9px] font-bold px-2 py-0.5 rounded-full border border-[#D8E1D3]">
+              Optimal
             </span>
           </div>
-
-          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70">
-            <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Bottoms</span>
-            <span className="text-base sm:text-lg font-black text-slate-900 leading-tight">{counts.bottoms}</span>
-            <span className="text-[10px] text-slate-500 font-medium block mt-0.5">
-              {counts.bottoms >= 3 ? 'Balanced' : 'Needs Chino'}
-            </span>
-          </div>
-
-          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70">
-            <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Shoes</span>
-            <span className="text-base sm:text-lg font-black text-slate-900 leading-tight">{counts.shoes}</span>
-            <span className="text-[10px] text-slate-500 font-medium block mt-0.5">
-              {counts.shoes >= 2 ? 'Covered' : 'Add Sneaker'}
-            </span>
-          </div>
-
-          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70">
-            <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Layers</span>
-            <span className="text-base sm:text-lg font-black text-slate-900 leading-tight">{counts.layers}</span>
-            <span className="text-[10px] text-slate-500 font-medium block mt-0.5">
-              {counts.layers >= 1 ? 'Ready' : 'Add Overshirt'}
-            </span>
+          <p className="text-xs text-[#717670] leading-relaxed">
+            {opportunities.length} versatile pieces could unlock <span className="font-semibold text-[#1A1D1A]">{totalUnlockedOutfits}+ new combinations</span>.
+          </p>
+          {/* Progress Bar */}
+          <div className="w-full bg-[#EFECE5] h-2 rounded-full mt-2.5 overflow-hidden">
+            <div
+              className="bg-[#1E2E22] h-full rounded-full transition-all duration-700"
+              style={{ width: `${completeness}%` }}
+            />
           </div>
         </div>
       </div>
 
-      {/* High-Impact Foundation Additions */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-            <span>Curated Foundation Additions</span>
-            {isLoadingAI && <Sparkles className="w-3.5 h-3.5 text-emerald-500 animate-spin" />}
-          </h2>
-          <span className="text-[11px] text-slate-400 font-medium">Ranked by outfit multiplier</span>
+      {/* 3. Category Filter Tabs */}
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-2 my-1">
+        {CATEGORIES.map((cat) => {
+          const isActive = activeCategory === cat;
+          return (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setActiveCategory(cat)}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer active:scale-95 ${
+                isActive
+                  ? 'bg-[#1E2E22] text-[#F8F6F0] shadow-xs'
+                  : 'bg-white text-[#5F665D] hover:text-[#1A1D1A] border border-[#ECE8DF] shadow-2xs'
+              }`}
+            >
+              {cat}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 4. Section Header: BIGGEST OPPORTUNITIES */}
+      <div className="pt-2 pb-1.5 flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] font-bold text-[#8E968C] uppercase tracking-wider">
+            BIGGEST OPPORTUNITIES
+          </span>
+          {isAiGenerated && (
+            <span className="inline-flex items-center gap-1 bg-[#E2ECE3] text-[#1E2E22] px-2 py-0.5 rounded-full text-[9px] font-bold">
+              <Sparkles className="w-2.5 h-2.5 text-[#3D7A5A]" />
+              AI Tailored
+            </span>
+          )}
         </div>
 
-        {isLoadingAI && wardrobeGaps.length === 0 ? (
-          <div className="bg-white rounded-3xl p-10 border border-slate-200 text-center space-y-3">
-            <RefreshCw className="w-8 h-8 animate-spin text-emerald-500 mx-auto" />
-            <h4 className="text-sm font-bold text-slate-900">Syncra AI is scanning your closet...</h4>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Evaluating your {wardrobe.length} registered pieces to identify the highest-ROI clothing items missing from your wardrobe.
-            </p>
-          </div>
-        ) : wardrobeGaps.length === 0 ? (
-          <div className="bg-white rounded-3xl p-10 border border-slate-200 text-center space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-100">
-              <Sparkles className="w-6 h-6" />
-            </div>
-            <h4 className="text-sm font-bold text-slate-900">No Gap Analysis Available</h4>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Tap "Scan with AI" to let Syncra evaluate your registered pieces and calculate missing foundation items.
-            </p>
+        <button
+          type="button"
+          onClick={fetchLiveGaps}
+          disabled={loadingGaps}
+          className="text-[11px] font-medium text-[#717670] hover:text-[#1A1D1A] flex items-center gap-1.5 cursor-pointer transition-colors disabled:opacity-50"
+          title="Re-analyze wardrobe gaps"
+        >
+          <RefreshCw className={`w-3 h-3 ${loadingGaps ? 'animate-spin text-[#3D7A5A]' : ''}`} />
+          <span>{loadingGaps ? 'Scanning...' : 'Refresh'}</span>
+        </button>
+      </div>
+
+      {/* 5. Recommendation Cards */}
+      <div className="space-y-3 my-2">
+        {filteredOpportunities.length === 0 ? (
+          <div className="bg-white rounded-3xl border border-[#ECE8DF] p-8 text-center shadow-2xs space-y-2">
+            <p className="text-sm font-semibold text-[#1A1D1A]">No gaps found for {activeCategory}</p>
+            <p className="text-xs text-[#8E968C]">Your wardrobe has strong coverage in this category.</p>
             <button
               type="button"
-              onClick={() => runAIGapAnalysis(true)}
-              className="px-4 py-2 bg-[#091224] hover:bg-[#121F3A] text-white text-xs font-bold rounded-xl shadow-2xs transition-all cursor-pointer inline-flex items-center gap-1.5"
+              onClick={() => setActiveCategory('All')}
+              className="mt-2 text-xs font-bold text-[#1E2E22] underline cursor-pointer"
             >
-              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Scan Wardrobe with AI</span>
+              Show all categories
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
-            {wardrobeGaps.map((gap) => (
-              <div
-                key={gap.id}
-                className="bg-white rounded-3xl border border-slate-200/90 shadow-subtle p-4 sm:p-5 flex flex-col justify-between space-y-3"
-              >
-                <div>
-                  {/* Header: Category & Multiplier */}
-                  <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-slate-100">
-                    <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
-                      {gap.category}
-                    </span>
-                    <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                      {gap.multiplier}
-                    </span>
-                  </div>
+          filteredOpportunities.map((opp) => (
+            <div
+              key={opp.id}
+              className="bg-white rounded-2xl sm:rounded-3xl border border-[#ECE8DF] p-3.5 sm:p-4 shadow-2xs flex items-center gap-3.5 sm:gap-4 hover:border-[#1A1D1A]/30 transition-all group"
+            >
+              {/* Garment Silhouette / Image Container */}
+              <div className="w-18 h-20 sm:w-20 sm:h-24 rounded-2xl bg-[#F5F2EB] flex items-center justify-center shrink-0 p-2 overflow-hidden border border-[#ECE8DF]/50 shadow-2xs">
+                {opp.image ? (
+                  <img
+                    src={opp.image}
+                    alt={opp.title}
+                    className="max-h-full max-w-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform"
+                  />
+                ) : (
+                  <Layers className="w-8 h-8 text-[#8E968C]" />
+                )}
+              </div>
 
-                  {/* Main Hero: Image + Title + Stylist Rationale */}
-                  <div className="flex gap-3 items-start">
-                    <img
-                      src={gap.image}
-                      alt={gap.title}
-                      className="w-16 h-16 rounded-2xl object-cover bg-slate-100 border border-slate-200 shrink-0 shadow-2xs"
-                    />
-                    <div className="min-w-0">
-                      <h3 className="text-sm font-extrabold text-slate-900 leading-snug">
-                        {gap.title}
-                      </h3>
-                      <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                        {gap.reason}
-                      </p>
-                    </div>
-                  </div>
+              {/* Opportunity Details */}
+              <div className="flex-1 min-w-0 flex flex-col justify-between min-h-[4.75rem] sm:min-h-[5.5rem] py-0.5">
+                <div>
+                  <h3 className="font-serif font-bold text-sm sm:text-base text-[#1A1D1A] truncate leading-tight">
+                    {opp.title}
+                  </h3>
+                  <p className="text-xs font-semibold text-[#3D7A5A] mt-0.5 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-[#3D7A5A] shrink-0" />
+                    <span>{opp.unlockText}</span>
+                  </p>
                 </div>
 
-                {/* Curated Products List */}
-                <div className="pt-2 border-t border-slate-100 space-y-1.5">
-                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                    <span>Recommended Brand Models</span>
-                    <span>{gap.priceRange}</span>
-                  </div>
+                {/* Action & Priority Row */}
+                <div className="flex items-center justify-between gap-2 pt-1 mt-1">
+                  {opp.priority === 'HIGH' ? (
+                    <span className="bg-[#1E2E22] text-[#F8F6F0] px-3 py-0.5 rounded-full text-[10px] font-bold tracking-wide shadow-2xs shrink-0">
+                      HIGH
+                    </span>
+                  ) : (
+                    <span className="bg-[#FAF8F5] border border-[#ECE8DF] text-[#5F665D] px-3 py-0.5 rounded-full text-[10px] font-bold tracking-wide shadow-2xs shrink-0">
+                      MEDIUM
+                    </span>
+                  )}
 
-                  {(gap.curatedPicks || []).map((pick, pIdx) => (
-                    <div
-                      key={pIdx}
-                      className="flex items-center justify-between p-2 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200/70 transition-colors"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <img
-                          src={pick.image || gap.image}
-                          alt={pick.name}
-                          className="w-9 h-9 rounded-xl object-cover bg-white border border-slate-200 shrink-0 shadow-2xs"
-                        />
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-slate-900 truncate">{pick.name}</p>
-                          <p className="text-[10px] text-slate-500 font-medium">{pick.brand} {pick.price ? `· ₹${pick.price.toLocaleString()}` : ''}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => handleAnalyzeWithAdvisor(pick)}
-                          className="px-2.5 py-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-[10px] font-bold rounded-xl transition-all shadow-2xs cursor-pointer"
-                        >
-                          Check Fit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleSimulateAddToWardrobe(pick, gap)}
-                          className="px-2.5 py-1 bg-[#091224] hover:bg-[#121F3A] text-white text-[10px] font-bold rounded-xl transition-all flex items-center gap-0.5 shadow-2xs cursor-pointer"
-                        >
-                          <Plus className="w-3 h-3 text-emerald-400" />
-                          <span>Add</span>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                  <button
+                    type="button"
+                    onClick={() => handleSeePicks(opp)}
+                    className="px-3.5 py-1.5 rounded-full bg-[#FAF8F5] hover:bg-[#1E2E22] hover:text-[#F8F6F0] border border-[#ECE8DF] text-xs font-bold text-[#1A1D1A] transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap active:scale-95 shadow-2xs cursor-pointer"
+                  >
+                    <span>See picks</span>
+                    <ArrowRight className="w-3 h-3 stroke-[2.2]" />
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))
         )}
       </div>
     </div>
@@ -315,4 +370,3 @@ export const WardrobeGapPage = () => {
 };
 
 export default WardrobeGapPage;
-

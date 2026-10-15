@@ -91,12 +91,16 @@ export const WardrobeProvider = ({ children }) => {
     };
   }, []);
 
-  const showToast = (message, type = 'success') => {
+  const clearToast = useCallback(() => {
+    setToastMessage(null);
+  }, []);
+
+  const showToast = useCallback((message, type = 'success') => {
     setToastMessage({ message, type, id: Date.now() });
     setTimeout(() => {
       setToastMessage(null);
     }, 4000);
-  };
+  }, []);
 
   const addWardrobeItem = async (item) => {
     const newItem = await wardrobeApi.addItem(item);
@@ -142,6 +146,7 @@ export const WardrobeProvider = ({ children }) => {
         isLoading,
         toastMessage,
         showToast,
+        clearToast,
         refreshWardrobe,
         addWardrobeItem,
         updateWardrobeItem,

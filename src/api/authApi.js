@@ -184,24 +184,17 @@ export const authApi = {
   },
 
   logout: async () => {
-    try {
-      const refreshToken = localStorage.getItem('stylesync_refresh_token');
-      // Attempt backend logout notification if endpoint exists
-      await apiClient.post('/auth/logout', { refreshToken, refresh_token: refreshToken }).catch(() => {});
-    } catch {
-      // Ignore network errors during logout
-    } finally {
-      localStorage.removeItem('stylesync_token');
-      localStorage.removeItem('stylesync_refresh_token');
-      localStorage.removeItem('stylesync_user');
-      localStorage.removeItem('stylesync_wardrobe');
-      localStorage.removeItem('stylesync_analyzed_products');
-      localStorage.removeItem('stylesync_purchases');
-      localStorage.removeItem('stylesync_outfits');
-      localStorage.removeItem('stylesync_budget');
-      localStorage.removeItem('stylesync_notifications');
-      localStorage.removeItem('buywise_token');
-    }
+    // JWT authentication is stateless; cleanly purge all session tokens and cache
+    localStorage.removeItem('stylesync_token');
+    localStorage.removeItem('stylesync_refresh_token');
+    localStorage.removeItem('stylesync_user');
+    localStorage.removeItem('stylesync_wardrobe');
+    localStorage.removeItem('stylesync_analyzed_products');
+    localStorage.removeItem('stylesync_purchases');
+    localStorage.removeItem('stylesync_outfits');
+    localStorage.removeItem('stylesync_budget');
+    localStorage.removeItem('stylesync_notifications');
+    localStorage.removeItem('buywise_token');
     return { success: true };
   },
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, X, Smartphone, Share, PlusSquare, Sparkles } from 'lucide-react';
+import { Download, X, Smartphone, Share, PlusSquare } from 'lucide-react';
 
 export const InstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -123,7 +123,7 @@ export const InstallPrompt = () => {
           <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl text-slate-900 animate-slide-up-mobile">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="text-sm font-bold flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-emerald-600" />
+                <Smartphone className="w-4 h-4 text-emerald-600" />
                 <span>Add to iPhone Home Screen</span>
               </h3>
               <button
